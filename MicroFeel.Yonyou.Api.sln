@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroFeel.Yonyou.Api", "MicroFeel.Yonyou.Api\MicroFeel.Yonyou.Api.csproj", "{6E99D68F-1C15-433A-9348-C785B6B80EA9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroFeel.Yongyou.Api.Test", "MicroFeel.Yongyou.Api.Test\MicroFeel.Yongyou.Api.Test.csproj", "{698645E0-22E6-4221-B332-52BCA391F6D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroFeel.Yongyou.Api.Test", "MicroFeel.Yonyou.Api.Test\MicroFeel.Yonyou.Api.Test.csproj", "{698645E0-22E6-4221-B332-52BCA391F6D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
