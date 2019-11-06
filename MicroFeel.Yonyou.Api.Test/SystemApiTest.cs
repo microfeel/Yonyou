@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace MicroFeel.Yongyou.Api.Test
 {
     [TestClass]
-    public class TokenTest
+    public class SystemApiTest
     {
         string appkey = "opa625543cbcf9f5f7a";
         string appSecret = "eb321812c12840c1bf83c60f28692f72";
