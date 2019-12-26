@@ -13,9 +13,5 @@ namespace MicroFeel.Yonyou.Api
         [JsonPropertyName("id")]
         public int Id { get; set; } = 1;
 
-        public override string ToString()
-        {
-            return base.ToString() + "&id=" + Id;
-        }
     }
 }

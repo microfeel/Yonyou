@@ -9,10 +9,10 @@ namespace MicroFeel.Yongyou.Api.Test
     [TestClass]
     public class SystemApiTest
     {
-        string appkey = "opaddd40e399ef4e98a";
-        string appSecret = "ee5e0ee78c5942ef91686b61d2b76239";
-        string from_account = "microfeel";
-        string to_account = "test_microfeel";
+        string appkey = "opa625543cbcf9f5f7a";
+        string appSecret = "eb321812c12840c1bf83c60f28692f72";
+        string from_account = "menxin";
+        string to_account = "test_menxin";
         string base_url = "https://api.yonyouup.com/";
 
         [TestMethod]
@@ -43,16 +43,6 @@ namespace MicroFeel.Yongyou.Api.Test
             var os = await api.Get_OrderStatusAsync();
             Assert.IsNotNull(os);
             System.Console.WriteLine($"OrderStatus is :{os}");
-        }
-
-        [TestMethod]
-        public async Task ConnectDbAsync()
-        {
-            var api = new SystemApi();
-            api.Init(base_url, appkey, appSecret, from_account, to_account);
-            var db = await api.Get_DatasourceAsync();
-            Assert.IsNotNull(db);
-            System.Console.WriteLine($"DBSource is :{db}");
         }
     }
 }
