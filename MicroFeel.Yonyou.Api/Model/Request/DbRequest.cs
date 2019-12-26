@@ -22,5 +22,10 @@ namespace MicroFeel.Yonyou.Api
         /// </summary>
         [JsonPropertyName("rows_per_page")]
         public int Rows_per_page { get; set; } = 20;
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}&ds_sequence={Ds_sequence}&page_index={Page_index}&rows_per_page={Rows_per_page}";
+        }
     }
 }
