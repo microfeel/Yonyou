@@ -1,12 +1,10 @@
-﻿using MicroFeel.Finance.Interfaces;
-using MicroFeel.Finance.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace MicroFeel.Yonyou.Api.Service
 {
-    public class SystemApi : Api, IPlatFormService
+    public class SystemApi : Api
     {
         public SystemApi() : base("system") { }
 
@@ -36,7 +34,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取应用订单状态
         /// </summary>
         /// <returns>订单状态</returns>
-        public async Task<Finance.Models.OrderStatus> Get_OrderStatusAsync()
+        public async Task<OrderStatus> Get_OrderStatusAsync()
         {
             pathprefix = "api";
             var req = await GetRequestTypeAsync<CallerRequest>();
@@ -44,7 +42,7 @@ namespace MicroFeel.Yonyou.Api.Service
             pathprefix = "system";
             if (orderStatusResult.Errcode == "0")
             {
-                return orderStatusResult.OrderStatus.To<Finance.Models.OrderStatus>();
+                return orderStatusResult.OrderStatus;
             }
             else
             {
@@ -56,27 +54,22 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取数据源配置
         /// </summary>
         /// <returns>数据源配置</returns>
-        public async Task<Finance.Models.Datasource> Get_DatasourceAsync()
+        public async Task<Datasource> Get_DatasourceAsync()
         {
             var req = await GetRequestTypeAsync<DsRequest>();
             var result = await CallAsync<DsRequest, DsResult>(req);
-            return result.Datasource.To<Finance.Models.Datasource>((m) => m.SystemInfo = result.Datasource.U8.To<SystemInfo>());
+            return result.Datasource;
         }
 
         /// <summary>
         /// 批量获取数据源配置
         /// </summary>
         /// <returns>数据源配置</returns>
-        public async Task<IEnumerable<Finance.Models.Datasource>> Batch_get_DatasourceAsync()
+        public async Task<IEnumerable<Datasource>> Batch_get_DatasourceAsync()
         {
             var req = await GetRequestTypeAsync<DsListRequest>();
             var dataSourceResult = await CallAsync<DsListRequest, DsListResult>(req);
-            return dataSourceResult.Datasources.Select(t => t.To<Finance.Models.Datasource>((m) => m.SystemInfo = t.U8.To<SystemInfo>()));
-        }
-
-        public void Dispose()
-        {
-            this.Dispose();
-        }
+            return dataSourceResult.Datasources;
+        } 
     }
 }
