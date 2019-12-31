@@ -20,4 +20,10 @@
     <ProjectReference Include="..\MicroFeel.Yonyou.Api\MicroFeel.Yonyou.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="MicroFeel.Finance">
+      <HintPath>..\..\Finance\bin\Debug\netstandard2.0\MicroFeel.Finance.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
