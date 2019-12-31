@@ -1,5 +1,4 @@
-﻿using MicroFeel.Finance.Models;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace MicroFeel.Yonyou.Api
 {
