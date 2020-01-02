@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
+using MicroFeel.Yonyou.Api.Model.Request;
+using MicroFeel.Yonyou.Api.Model.Result;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -53,7 +56,7 @@ namespace MicroFeel.Yonyou.Api
         /// <returns>结果对象</returns>
         internal async Task<ResultType> CallAsync<UrlParamType, ResultType>(UrlParamType urlParameter, string postData = "", [CallerMemberName] string membername = "")
             where UrlParamType : ApiRequest
-            where ResultType : ApiResult
+            where ResultType : IApiResult
         {
             _logger.LogInformation($"MemberName:{membername}");
             membername = membername.ToLower().Replace("async", "");
@@ -183,5 +186,116 @@ namespace MicroFeel.Yonyou.Api
         /// 请求的基地址
         /// </summary>
         protected string BaseUrl { get; private set; }
+
+        /// <summary>
+        /// 获取单个
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="req"></param>
+        /// <param name="id"></param>
+        /// <param name="dsSequence"></param>
+        /// <param name="callername"></param>
+        /// <returns></returns>
+        public async Task<TResult> GetSync<TResult>(int id, int dsSequence = 1, [CallerMemberName] string callername = "")
+            where TResult : IApiResult
+        {
+            pathprefix = "api";
+            var req = new SingleRequest()
+            {
+                AppKey = _appKey,
+                FromAccount = _fromAccount,
+                ToAccount = _toAccount,
+                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                DsSequence = dsSequence,
+                Id = id
+            };
+            var result = await CallAsync<SingleRequest, TResult>(req, "", callername);
+            if (result.Errcode == "0")
+            {
+                return result;
+            }
+            else
+            {
+                throw new ApiException(result.Errmsg);
+            }
+        }
+
+        /// <summary>
+        /// 获取单个
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="req"></param>
+        /// <param name="id"></param>
+        /// <param name="dsSequence"></param>
+        /// <param name="callername"></param>
+        /// <returns></returns>
+        public async Task<TResult> GetSync<TRequest, TResult>(TRequest req, int dsSequence = 1, [CallerMemberName] string callername = "")
+             where TRequest : ApiRequest
+            where TResult : IApiResult
+        {
+            pathprefix = "api";
+            var result = await CallAsync<TRequest, TResult>(req, "", callername);
+            if (result.Errcode == "0")
+            {
+                return result;
+            }
+            else
+            {
+                throw new ApiException(result.Errmsg);
+            }
+        }
+
+
+        /// <summary>
+        /// 获取批量
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="req"></param>
+        /// <param name="dsSequence"></param>
+        /// <param name="callername"></param>
+        /// <returns></returns>
+        public async Task<List<TData>> GetsSync<TRequest, TResult, TData>(TRequest req, int dsSequence = 1, [CallerMemberName] string callername = "")
+         where TRequest : ApiRequest
+            where TResult : DbListResult<TData>
+        {
+            pathprefix = "api";
+
+            var result = await CallAsync<TRequest, TResult>(req, "", callername);
+            if (result.Errcode == "0")
+            {
+                return result.List;
+            }
+            else
+            {
+                throw new ApiException($"({result.Errcode}){result.Errmsg}");
+            }
+        }
+
+        public async Task<List<TData>> GetsSync<TResult, TData>(int dsSequence = 1, [CallerMemberName] string callername = "")
+           where TResult : DbListResult<TData>
+        {
+            pathprefix = "api";
+            var req = new DbRequest()
+            {
+                AppKey = _appKey,
+                FromAccount = _fromAccount,
+                ToAccount = _toAccount,
+                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                Ds_sequence = dsSequence,
+            };
+            var result = await CallAsync<DbRequest, TResult>(req, "", callername);
+            if (result.Errcode == "0")
+            {
+                return result.List;
+            }
+            else
+            {
+                throw new ApiException($"({result.Errcode}){result.Errmsg}");
+            }
+        }
+
     }
 }

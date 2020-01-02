@@ -1,4 +1,11 @@
-﻿namespace MicroFeel.Yonyou.Api
+﻿using MicroFeel.Yonyou.Api.Model.Data;
+using MicroFeel.Yonyou.Api.Model.Request;
+using MicroFeel.Yonyou.Api.Model.Result;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+
+namespace MicroFeel.Yonyou.Api
 {
     /// <summary>
     /// 基础档案 API  88
@@ -41,7 +48,10 @@
         /// 人员  获取单个人员信息 
         /// </summary> 
         /// <return></return>
-        public object get_person() { return null; }
+        public async Task<PersonResult> Get_PersonAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<PersonResult>(id, dsSequence);
+        }
         /// <summary>
         /// 修改一个人员  
         /// </summary> 
@@ -51,7 +61,10 @@
         /// 批量获取人员信息    
         /// </summary> 
         /// <return></return>
-        public object batch_get_person() { return null; }
+        public async Task<List<Person>> Batch_Get_PersonAsync(int dsSequence = 1)
+        {
+            return await GetsSync<PersonListResult, Person>(dsSequence);
+        }
         /// <summary>
         /// 添加一个新人员 
         /// </summary> 
@@ -71,7 +84,7 @@
         /// 仓库  获取单个仓库信息 
         /// </summary> 
         /// <return></return>
-        public object get_warehouse() { return null; }
+        public object Get_Warehouse() { return null; }
         /// <summary>
         /// 批量获取仓库信息    
         /// </summary> 
@@ -477,6 +490,5 @@
         /// </summary> 
         /// <return></return>
         public object batch_get_fitemcategory() { return null; }
-
     }
 }

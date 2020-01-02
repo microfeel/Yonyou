@@ -17,5 +17,9 @@ namespace MicroFeel.Yonyou.Api
         /// </summary>
         [JsonPropertyName("sequence_end")]
         public int SequenceEnd { get; set; } = 100;
+        public override string ToString()
+        {
+            return base.ToString();
+        }
     }
 }

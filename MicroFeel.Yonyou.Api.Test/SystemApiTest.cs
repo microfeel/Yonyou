@@ -2,19 +2,15 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using MicroFeel.Yonyou.Api;
 using MicroFeel.Yonyou.Api.Service;
+using MicroFeel.Yonyou.Api.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MicroFeel.Yongyou.Api.Test
 {
     [TestClass]
-    public class SystemApiTest
+    public class SystemApiTest:ApiTest
     {
-        string appkey = "opaddd40e399ef4e98a";
-        string appSecret = "ee5e0ee78c5942ef91686b61d2b76239";
-        string from_account = "microfeel";
-        string to_account = "test_microfeel";
-        string base_url = "https://api.yonyouup.com/";
-
+        
         [TestMethod]
         public async Task GetTokenAsync()
         {
@@ -50,7 +46,7 @@ namespace MicroFeel.Yongyou.Api.Test
         {
             var api = new SystemApi();
             api.Init(base_url, appkey, appSecret, from_account, to_account);
-            var db = await api.Get_DatasourceAsync();
+            var db = await api.Batch_get_DatasourceAsync();
             Assert.IsNotNull(db);
             System.Console.WriteLine($"DBSource is :{db}");
         }

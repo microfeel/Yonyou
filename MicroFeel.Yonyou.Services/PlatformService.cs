@@ -1,6 +1,6 @@
-﻿using MicroFeel.Finance.Interfaces;
+﻿using MicroFeel.Finance;
+using MicroFeel.Finance.Interfaces;
 using MicroFeel.Finance.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +9,7 @@ namespace MicroFeel.Yonyou.Services
 {
     public class PlatformService : IPlatformService
     {
-        private MicroFeel.Yonyou.Api.Service.SystemApi systemApi;
+        private  Api.Service.SystemApi systemApi;
 
         public PlatformService()
         {

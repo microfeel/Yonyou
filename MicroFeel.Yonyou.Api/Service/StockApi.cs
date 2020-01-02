@@ -1,6 +1,13 @@
-﻿using System;
+﻿using MicroFeel.Yonyou.Api.Model.Post;
+using MicroFeel.Yonyou.Api.Model.Request;
+using MicroFeel.Yonyou.Api.Model.Result;
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace MicroFeel.Yonyou.Api.Service
 {
@@ -16,7 +23,10 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 产成品入库单 获取产成品入库单列表  
         /// </summary> 
         /// <return></return>
-        public object batch_get_productinlist() { return null; }
+        public async Task<List<Bill>> Batch_Get_ProductinlistAsync(int dsSequence = 1)
+        {
+            return await Get_StocksSync(dsSequence);
+        }
         /// <summary>
         /// 审核一张产成品入库单  
         /// </summary> 
@@ -31,17 +41,30 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个产成品入库单  
         /// </summary> 
         /// <return></return>
-        public object get_productin() { return null; }
+        public async Task<BillResult> Get_ProductinAsync(int id, int dsSequence = 1)
+        {
+            return await Get_StockSync(id, dsSequence);
+        }
+
         /// <summary>
         /// 新增一张产成品入库单  
-        /// </summary> 
-        /// <return></return>
-        public object add_productin() { return null; }
+        /// </summary>
+        /// <param name="bill">单据信息</param>
+        /// <param name="dsSequence">数据库序列 默认值1</param>
+        /// <param name="sync">是否同步 默认true</param>
+        /// <returns>BillResult</returns>
+        public async Task<DbResult> Add_ProductinAsync(Bill bill, int dsSequence = 1, bool sync = true)
+        {
+            return await Add_StockSync(bill, dsSequence, sync);
+        }
         /// <summary>
         /// 其他入库单   批量获取其他入库信息 
         /// </summary> 
         /// <return></return>
-        public object batch_get_otherinlist() { return null; }
+        public async Task<List<Bill>> Batch_Get_OtherinlistAsync(int dsSequence = 1)
+        {
+            return await Get_StocksSync(dsSequence);
+        }
         /// <summary>
         /// 审核一张其他入库单   
         /// </summary> 
@@ -82,11 +105,18 @@ namespace MicroFeel.Yonyou.Api.Service
         /// </summary> 
         /// <return></return>
         public object audit_otherin() { return null; }
+
         /// <summary>
-        /// 新增一张其他入库单   
-        /// </summary> 
-        /// <return></return>
-        public object add_otherin() { return null; }
+        /// 新增一张其他入库单    
+        /// </summary>
+        /// <param name="bill">单据信息</param>
+        /// <param name="dsSequence">数据库序列 默认值1</param>
+        /// <param name="sync">是否同步 默认true</param>
+        /// <returns>BillResult</returns>
+        public async Task<DbResult> Add_OtherinSync(Bill bill, int dsSequence = 1, bool sync = true)
+        {
+            return await Add_StockSync(bill, dsSequence, sync);
+        }
         /// <summary>
         /// 弃审其他入库单（工作流） 
         /// </summary> 
@@ -298,5 +328,73 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public object get_saleout() { return null; }
 
+        private async Task<DbResult> Add_StockSync(Bill bill, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+        {
+            pathprefix = "api";
+            var req = new BillRequest
+            {
+                AppKey = _appKey,
+                FromAccount = _fromAccount,
+                ToAccount = _toAccount,
+                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                TradeId = await TradeidManager.GetTradeidAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                DsSequence = dsSequence,
+                Sync = true ? 1 : 0
+            };
+            var result = await CallAsync<BillRequest, DbResult>(req, JsonSerializer.Serialize(bill), callername);
+            if (result.Errcode == "0")
+            {
+                return result;
+            }
+            else
+            {
+                throw new ApiException(result.Errmsg);
+            }
+        }
+
+        private async Task<BillResult> Get_StockSync(int id, int dsSequence = 1, [CallerMemberName] string callername = "")
+        {
+            pathprefix = "api";
+            var req = new SingleRequest()
+            {
+                AppKey = _appKey,
+                FromAccount = _fromAccount,
+                ToAccount = _toAccount,
+                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                DsSequence = dsSequence,
+                Id = id
+            };
+            var result = await CallAsync<SingleRequest, BillResult>(req, "", callername);
+            if (result.Errcode == "0")
+            {
+                return result;
+            }
+            else
+            {
+                throw new ApiException(result.Errmsg);
+            }
+        }
+
+        private async Task<List<Bill>> Get_StocksSync(int dsSequence = 1, [CallerMemberName] string callername = "")
+        {
+            pathprefix = "api";
+            var req = new DbRequest()
+            {
+                AppKey = _appKey,
+                FromAccount = _fromAccount,
+                ToAccount = _toAccount,
+                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                Ds_sequence = dsSequence,
+            };
+            var result = await CallAsync<DbRequest, BillListResult>(req, "", callername);
+            if (result.Errcode == "0")
+            {
+                return result.List;
+            }
+            else
+            {
+                throw new ApiException($"({result.Errcode}){result.Errmsg}");
+            }
+        }
     }
 }

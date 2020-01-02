@@ -2,7 +2,14 @@
 
 namespace MicroFeel.Yonyou.Api
 {
-    public class ApiResult
+    public interface IApiResult
+    {
+        [JsonPropertyName("errcode")]
+        string Errcode { get; set; }
+        [JsonPropertyName("errmsg")]
+        string Errmsg { get; set; }
+    }
+    public class ApiResult : IApiResult
     {
         [JsonPropertyName("errcode")]
         public string Errcode { get; set; }

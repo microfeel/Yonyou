@@ -28,4 +28,20 @@ namespace MicroFeel.Yonyou.Api
             return $"{base.ToString()}&ds_sequence={Ds_sequence}&page_index={Page_index}&rows_per_page={Rows_per_page}";
         }
     }
+
+
+    public class SingleRequest : CallerRequest
+    {
+        [JsonPropertyName("ds_sequence")]
+        public int DsSequence { get; set; }
+        /// <summary>
+        /// 单据ID
+        /// </summary>
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+        public override string ToString()
+        {
+            return $"{base.ToString()} &ds_sequence={DsSequence}&id={Id}";
+        }
+    }
 }
