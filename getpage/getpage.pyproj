@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4233a4e3-995d-47f0-a847-b5fa0343f9fe}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>GetPageContents.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="GetPageContents.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="node_modules\axo\index.js" />
+    <Content Include="node_modules\axo\test.js" />
+    <Content Include="node_modules\eventemitter3\index.js" />
+    <Content Include="node_modules\eventemitter3\umd\eventemitter3.js" />
+    <Content Include="node_modules\eventemitter3\umd\eventemitter3.min.js" />
+    <Content Include="node_modules\extendible\example\index.js" />
+    <Content Include="node_modules\extendible\index.js" />
+    <Content Include="node_modules\extendible\test.js" />
+    <Content Include="node_modules\failure\index.js" />
+    <Content Include="node_modules\failure\test.js" />
+    <Content Include="node_modules\hang\index.js" />
+    <Content Include="node_modules\hang\test.js" />
+    <Content Include="node_modules\loads\index.js" />
+    <Content Include="node_modules\node-http-xhr\lib\browser.js" />
+    <Content Include="node_modules\node-http-xhr\lib\index.js" />
+    <Content Include="node_modules\node-http-xhr\lib\node-event-target.js" />
+    <Content Include="node_modules\node-http-xhr\lib\node-xhr-event-target.js" />
+    <Content Include="node_modules\one-time\index.js" />
+    <Content Include="node_modules\one-time\test.js" />
+    <Content Include="node_modules\requests\index.js" />
+    <Content Include="node_modules\requests\requested.js" />
+    <Content Include="node_modules\requests\test\development.js" />
+    <Content Include="node_modules\requests\test\index.html" />
+    <Content Include="node_modules\requests\test\index.js" />
+    <Content Include="node_modules\requests\test\large.js" />
+    <Content Include="node_modules\requests\test\requested.js" />
+    <Content Include="node_modules\requests\test\requests.browser.js" />
+    <Content Include="node_modules\requests\test\requests.test.js" />
+    <Content Include="node_modules\requests\test\static.js" />
+    <Content Include="node_modules\xhr-response\index.js" />
+    <Content Include="node_modules\xhr-response\test.js" />
+    <Content Include="node_modules\xhr-send\index.js" />
+    <Content Include="node_modules\xhr-send\test.js" />
+    <Content Include="node_modules\xhr-status\index.js" />
+    <Content Include="node_modules\xhr-status\test.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="node_modules\" />
+    <Folder Include="node_modules\axo" />
+    <Folder Include="node_modules\eventemitter3" />
+    <Folder Include="node_modules\eventemitter3\umd" />
+    <Folder Include="node_modules\extendible" />
+    <Folder Include="node_modules\extendible\example" />
+    <Folder Include="node_modules\failure" />
+    <Folder Include="node_modules\hang" />
+    <Folder Include="node_modules\loads" />
+    <Folder Include="node_modules\node-http-xhr\" />
+    <Folder Include="node_modules\node-http-xhr\lib" />
+    <Folder Include="node_modules\one-time" />
+    <Folder Include="node_modules\requests" />
+    <Folder Include="node_modules\requests\test" />
+    <Folder Include="node_modules\xhr-response" />
+    <Folder Include="node_modules\xhr-send" />
+    <Folder Include="node_modules\xhr-status" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.8-32" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="env\">
+      <Id>env</Id>
+      <Version>3.7</Version>
+      <Description>env (Python 3.7 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>
