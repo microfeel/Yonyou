@@ -74,22 +74,34 @@ namespace MicroFeel.Yonyou.Api
         /// 人员类别    获取单个人员类别 
         /// </summary> 
         /// <return></return>
-        public object get_persontype() { return null; }
+        public async Task<PersontypeResult> Get_PersontypeAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<PersontypeResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取人员类别    
         /// </summary> 
         /// <return></return>
-        public object batch_get_persontype() { return null; }
+        public async Task<List<Persontype>> Batch_Get_PersontypeAsync(int dsSequence = 1)
+        {
+            return await GetsSync<PersontypeListResult, Persontype>(dsSequence);
+        }
         /// <summary>
         /// 仓库  获取单个仓库信息 
         /// </summary> 
         /// <return></return>
-        public object Get_Warehouse() { return null; }
+        public async Task<WarehouseResult> Get_WarehouseAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<WarehouseResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取仓库信息    
         /// </summary> 
         /// <return></return>
-        public object batch_get_warehouse() { return null; }
+        public async Task<List<Warehouse>> Batch_Get_WarehouseAsync(int dsSequence = 1)
+        {
+            return await GetsSync<WarehouseListResult, Warehouse>(dsSequence);
+        }
         /// <summary>
         /// 新增一个仓库  
         /// </summary> 
@@ -99,12 +111,18 @@ namespace MicroFeel.Yonyou.Api
         /// 会计期间    批量获取会计期间 
         /// </summary> 
         /// <return></return>
-        public object batch_get_period() { return null; }
+        public async Task<List<Period>> Batch_Get_PeriodAsync(int dsSequence = 1)
+        {
+            return await GetsSync<PeriodListResult, Period>(dsSequence);
+        }
         /// <summary>
         /// 供应商 获取单个供应商信息 
         /// </summary> 
         /// <return></return>
-        public object get_vendor() { return null; }
+        public async Task<VendorResult> Get_VendorAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<VendorResult>(id, dsSequence);
+        }
         /// <summary>
         /// 修改一个供应商 
         /// </summary> 
@@ -114,7 +132,10 @@ namespace MicroFeel.Yonyou.Api
         /// 批量获取供应商信息   
         /// </summary> 
         /// <return></return>
-        public object batch_get_vendor() { return null; }
+        public async Task<List<Vendor>> Batch_Get_VendorAsync(int dsSequence = 1)
+        {
+            return await GetsSync<VendorListResult, Vendor>(dsSequence);
+        }
         /// <summary>
         /// 添加一个新供应商    
         /// </summary> 
@@ -124,12 +145,18 @@ namespace MicroFeel.Yonyou.Api
         /// 供应商分类   获取单个供应商分类信息 
         /// </summary> 
         /// <return></return>
-        public object get_vendorclass() { return null; }
+        public async Task<VendorclassResult> Get_VendorclassAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<VendorclassResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取供应商分类信息 
         /// </summary> 
         /// <return></return>
-        public object batch_get_vendorclass() { return null; }
+        public async Task<List<Vendorclass>> Batch_Get_VendorclassAsync(int dsSequence = 1)
+        {
+            return await GetsSync<VendorclassListResult, Vendorclass>(dsSequence);
+        }
         /// <summary>
         /// 添加一个新供应商分类  
         /// </summary> 
@@ -139,42 +166,68 @@ namespace MicroFeel.Yonyou.Api
         /// 供应商银行   获取单个供应商银行信息 
         /// </summary> 
         /// <return></return>
-        public object get_vendor_bank() { return null; }
+        public async Task<VendorbankResult> Get_VendorbankAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<VendorbankResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取供应商银行信息 
         /// </summary> 
         /// <return></return>
-        public object batch_get_vendor_bank() { return null; }
+        public async Task<List<Vendorbank>> Batch_Get_VendorbankAsync(int dsSequence = 1)
+        {
+            return await GetsSync<VendorbankListResult, Vendorbank>(dsSequence);
+        }
         /// <summary>
         /// 凭证类别    获取单个凭证类别 
         /// </summary> 
         /// <return></return>
-        public object get_dsign() { return null; }
+        public async Task<DsignResult> Get_DsignAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<DsignResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取凭证类别    
         /// </summary> 
         /// <return></return>
-        public object batch_get_dsign() { return null; }
+        public async Task<List<Dsign>> Batch_Get_Dsign(int dsSequence = 1)
+        {
+            return await GetsSync<DsignListResult, Dsign>(dsSequence);
+        }
         /// <summary>
         /// 地区分类    获取单个地区分类 
         /// </summary> 
         /// <return></return>
-        public object get_districtclass() { return null; }
+        public async Task<DistrictclassResult> Get_DistrictclassAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<DistrictclassResult>(id, dsSequence);
+        }
+
         /// <summary>
         /// 批量获取地区分类    
         /// </summary> 
         /// <return></return>
-        public object batch_get_districtclass() { return null; }
+        public async Task<List<Districtclass>> Batch_Get_DistrictclassAsync(int dsSequence = 1)
+        {
+            return await GetsSync<DistrictclassListResult, Districtclass>(dsSequence);
+        }
         /// <summary>
         /// 存货分类    获取单个存货分类信息 
         /// </summary> 
         /// <return></return>
-        public object get_inventoryclass() { return null; }
+        public async Task<InventoryclassResult> Get_InventoryclassAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<InventoryclassResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取存货分类信息  
         /// </summary> 
         /// <return></return>
-        public object batch_get_inventoryclass() { return null; }
+        public async Task<List<Inventoryclass>> Batch_Get_InventoryclassAsync(int dsSequence = 1)
+        {
+            return await GetsSync<InventoryclassListResult, Inventoryclass>(dsSequence);
+        }
+
         /// <summary>
         /// 新增一张存货分类    
         /// </summary> 
@@ -184,7 +237,10 @@ namespace MicroFeel.Yonyou.Api
         /// 存货档案    获取单个存货信息 
         /// </summary> 
         /// <return></return>
-        public object get_inventory() { return null; }
+        public async Task<InventoryResult> Get_InventoryAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<InventoryResult>(id, dsSequence);
+        }
         /// <summary>
         /// 修改一个新存货 
         /// </summary> 
@@ -194,7 +250,10 @@ namespace MicroFeel.Yonyou.Api
         /// 批量获取存货信息    
         /// </summary> 
         /// <return></return>
-        public object batch_get_inventory() { return null; }
+        public async Task<List<Inventory>> Batch_Get_InventoryAsync(int dsSequence = 1)
+        {
+            return await GetsSync<InventoryListResult, Inventory>(dsSequence);
+        }
         /// <summary>
         /// 添加一个新存货 
         /// </summary> 
@@ -204,7 +263,10 @@ namespace MicroFeel.Yonyou.Api
         /// 客户  获取单个客户信息 
         /// </summary> 
         /// <return></return>
-        public object get_customer() { return null; }
+        public async Task<CustomerResult> Get_CustomerAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<CustomerResult>(id, dsSequence);
+        }
         /// <summary>
         /// 修改一个客户  
         /// </summary> 
@@ -214,7 +276,10 @@ namespace MicroFeel.Yonyou.Api
         /// 批量获取客户信息    
         /// </summary> 
         /// <return></return>
-        public object batch_get_customer() { return null; }
+        public async Task<List<Customer>> Batch_Get_CustomerAsync(int dsSequence = 1)
+        {
+            return await GetsSync<CustomerListResult, Customer>(dsSequence);
+        }
         /// <summary>
         /// 添加一个新客户 
         /// </summary> 
@@ -224,12 +289,18 @@ namespace MicroFeel.Yonyou.Api
         /// 客户分类    获取单个客户分类 
         /// </summary> 
         /// <return></return>
-        public object get_customerclass() { return null; }
+        public async Task<CustomerclassResult> Get_CustomerclassAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<CustomerclassResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取客户分类    
         /// </summary> 
         /// <return></return>
-        public object batch_get_customerclass() { return null; }
+        public async Task<List<Customerclass>> Batch_Get_CustomerclassAsync(int dsSequence = 1)
+        {
+            return await GetsSync<CustomerclassListResult, Customerclass>(dsSequence);
+        }
         /// <summary>
         /// 添加一个新客户分类   
         /// </summary> 
@@ -239,72 +310,114 @@ namespace MicroFeel.Yonyou.Api
         /// 客户地址    获取单个客户地址 
         /// </summary> 
         /// <return></return>
-        public object get_customeraddress() { return null; }
+        public async Task<CustomeraddressResult> Get_CustomeraddressAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<CustomeraddressResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取客户地址    
         /// </summary> 
         /// <return></return>
-        public object batch_get_customeraddress() { return null; }
+        public async Task<List<Customeraddress>> Batch_Get_CustomeraddressAsync(int dsSequence = 1)
+        {
+            return await GetsSync<CustomeraddressListResult, Customeraddress>(dsSequence);
+        }
         /// <summary>
         /// 客户联系人   获取单个客户联系人 
         /// </summary> 
         /// <return></return>
-        public object get_customercontacts() { return null; }
+        public async Task<CustomercontactsResult> Get_CustomercontactsAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<CustomercontactsResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取客户联系人   
         /// </summary> 
         /// <return></return>
-        public object batch_get_customercontacts() { return null; }
+        public async Task<List<Customercontacts>> Batch_Get_CustomercontactsAsync(int dsSequence = 1)
+        {
+            return await GetsSync<CustomercontactsListResult, Customercontacts>(dsSequence);
+        }
         /// <summary>
         /// 客户银行    获取单个客户银行信息 
         /// </summary> 
         /// <return></return>
-        public object get_customer_bank() { return null; }
+        public async Task<Customer_BankResult> Get_Customer_BankAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<Customer_BankResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取客户银行信息  
         /// </summary> 
         /// <return></return>
-        public object batch_get_customer_bank() { return null; }
+        public async Task<List<Customer_Bank>> Batch_Get_Customer_BankAsync(int dsSequence = 1)
+        {
+            return await GetsSync<Customer_BankListResult, Customer_Bank>(dsSequence);
+        }
         /// <summary>
         /// 币种  获取单个币种 
         /// </summary> 
         /// <return></return>
-        public object get_currency() { return null; }
+        public async Task<CurrencyResult> Get_CurrencyAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<CurrencyResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取币种  
         /// </summary> 
         /// <return></return>
-        public object batch_get_currency() { return null; }
+        public async Task<List<Currency>> Batch_Get_CurrencyAsync(int dsSequence = 1)
+        {
+            return await GetsSync<CurrencyListResult, Currency>(dsSequence);
+        }
         /// <summary>
         /// 常用摘要    获取单个常用摘要 
         /// </summary> 
         /// <return></return>
-        public object get_digest() { return null; }
+        public async Task<DigestResult> Get_DigestAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<DigestResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取常用摘要    
         /// </summary> 
         /// <return></return>
-        public object batch_get_digest() { return null; }
+        public async Task<List<Digest>> Batch_Get_DigestAsync(int dsSequence = 1)
+        {
+            return await GetsSync<DigestListResult, Digest>(dsSequence);
+        }
         /// <summary>
         /// 收发类别    获取单个收发类别 
         /// </summary> 
         /// <return></return>
-        public object get_receivesendtype() { return null; }
+        public async Task<ReceivesendtypeResult> Get_ReceivesendtypeAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<ReceivesendtypeResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取收发类别    
         /// </summary> 
         /// <return></return>
-        public object batch_get_receivesendtype() { return null; }
+        public async Task<List<Receivesendtype>> Batch_Get_ReceivesendtypeAsync(int dsSequence = 1)
+        {
+            return await GetsSync<ReceivesendtypeListResult, Receivesendtype>(dsSequence);
+        }
         /// <summary>
         /// 本单位开户银行 获取一个本单位开户银行 
         /// </summary> 
         /// <return></return>
-        public object get_accountingbank() { return null; }
+        public async Task<AccountingbankResult> Get_AccountingbankAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<AccountingbankResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取本单位开户银行 
         /// </summary> 
         /// <return></return>
-        public object batch_get_accountingbank() { return null; }
+        public async Task<List<Accountingbank>> Batch_Get_AccountingbankAsync(int dsSequence = 1)
+        {
+            return await GetsSync<AccountingbankListResult, Accountingbank>(dsSequence);
+        }
         /// <summary>
         /// 新增一个本单位开户银行 
         /// </summary> 
@@ -314,122 +427,196 @@ namespace MicroFeel.Yonyou.Api
         /// 现金流量项目  获取单个现金流量项目 
         /// </summary> 
         /// <return></return>
-        public object get_cashflowitem() { return null; }
+        public async Task<CashflowitemResult> Get_CashflowitemAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<CashflowitemResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取现金流量项目  
         /// </summary> 
         /// <return></return>
-        public object batch_get_cashflowitem() { return null; }
+        public async Task<List<Cashflowitem>> Batch_Get_CashflowitemAsync(int dsSequence = 1)
+        {
+            return await GetsSync<CashflowitemListResult, Cashflowitem>(dsSequence);
+        }
         /// <summary>
         /// 科目  获取单个科目信息 
         /// </summary> 
         /// <return></return>
-        public object get_code() { return null; }
+        public async Task<CodeResult> Get_CodeAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<CodeResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取科目信息    
         /// </summary> 
         /// <return></return>
-        public object batch_get_code() { return null; }
+        public async Task<List<Code>> Batch_Get_CodeAsync(int dsSequence = 1)
+        {
+            return await GetsSync<CodeListResult, Code>(dsSequence);
+        }
         /// <summary>
         /// 结算方式    获取单个结算方式 
         /// </summary> 
         /// <return></return>
-        public object get_settlestyle() { return null; }
+        public async Task<SettlestyleResult> Get_SettlestyleAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<SettlestyleResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取结算方式    
         /// </summary> 
         /// <return></return>
-        public object batch_get_settlestyle() { return null; }
+        public async Task<List<Settlestyle>> Batch_Get_SettlestyleAsync(int dsSequence = 1)
+        {
+            return await GetsSync<SettlestyleListResult, Settlestyle>(dsSequence);
+        }
         /// <summary>
         /// 编码方案    获取单个编码方案 
         /// </summary> 
         /// <return></return>
-        public object get_codescheme() { return null; }
+        public async Task<CodeschemeResult> Get_CodeschemeAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<CodeschemeResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取编码方案    
         /// </summary> 
         /// <return></return>
-        public object batch_get_codescheme() { return null; }
+        public async Task<List<Codescheme>> Batch_Get_CodeschemeAsync(int dsSequence = 1)
+        {
+            return await GetsSync<CodeschemeListResult, Codescheme>(dsSequence);
+        }
         /// <summary>
         /// 职位档案    获取单个职位档案 
         /// </summary> 
         /// <return></return>
-        public object get_job() { return null; }
+        public async Task<JobResult> Get_JobAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<JobResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取职位档案    
         /// </summary> 
         /// <return></return>
-        public object batch_get_job() { return null; }
+        public async Task<List<Job>> Batch_Get_JobAsync(int dsSequence = 1)
+        {
+            return await GetsSync<JobListResult, Job>(dsSequence);
+        }
         /// <summary>
         /// 职务档案    获取单个职务档案 
         /// </summary> 
         /// <return></return>
-        public object get_duty() { return null; }
+        public async Task<DutyResult> Get_DutyAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<DutyResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取职务档案    
         /// </summary> 
         /// <return></return>
-        public object batch_get_duty() { return null; }
+        public async Task<List<Duty>> Batch_Get_DutyAsync(int dsSequence = 1)
+        {
+            return await GetsSync<DutyListResult, Duty>(dsSequence);
+        }
         /// <summary>
         /// 职务类别    获取单个职务类别 
         /// </summary> 
         /// <return></return>
-        public object get_dutytype() { return null; }
+        public async Task<DutytypeResult> Get_DutytypeAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<DutytypeResult>(id, dsSequence);
+        }
+
         /// <summary>
         /// 批量获取职务类别    
         /// </summary> 
         /// <return></return>
-        public object batch_get_dutytype() { return null; }
+        public async Task<List<Dutytype>> Batch_Get_DutytypeAsync(int dsSequence = 1)
+        {
+            return await GetsSync<DutytypeListResult, Dutytype>(dsSequence);
+        }
         /// <summary>
         /// 自定义项档案  批量获取自定义项档案 
         /// </summary> 
         /// <return></return>
-        public object batch_get_define() { return null; }
+        public async Task<List<Define>> Batch_Get_DefineAsync(int dsSequence = 1)
+        {
+            return await GetsSync<DefineListResult, Define>(dsSequence);
+        }
         /// <summary>
         /// 自由项 获取单个自由项信息 
         /// </summary> 
         /// <return></return>
-        public object get_freearch() { return null; }
+        public async Task<FreearchResult> Get_FreearchAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<FreearchResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取自由项信息   
         /// </summary> 
         /// <return></return>
-        public object batch_get_freearch() { return null; }
+        public async Task<List<Freearch>> Batch_Get_FreearchAsync(int dsSequence = 1)
+        {
+            return await GetsSync<FreearchListResult, Freearch>(dsSequence);
+        }
         /// <summary>
         /// 计量单位    获取单个计量单位信息 
         /// </summary> 
         /// <return></return>
-        public object get_unit() { return null; }
+        public async Task<UnitResult> Get_UnitAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<UnitResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取计量单位信息  
         /// </summary> 
         /// <return></return>
-        public object batch_get_unit() { return null; }
+        public async Task<List<Unit>> Batch_Get_UnitAsync(int dsSequence = 1)
+        {
+            return await GetsSync<UnitListResult, Unit>(dsSequence);
+        }
+
         /// <summary>
         /// 费用项目    获取单个费用项目 
         /// </summary> 
         /// <return></return>
-        public object get_expenseitem() { return null; }
+        public async Task<ExpenseitemResult> Get_ExpenseitemAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<ExpenseitemResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取费用项目    
         /// </summary> 
         /// <return></return>
-        public object batch_get_expenseitem() { return null; }
+        public async Task<List<Expenseitem>> Batch_Get_ExpenseitemAsync(int dsSequence = 1)
+        {
+            return await GetsSync<ExpenseitemListResult, Expenseitem>(dsSequence);
+        }
         /// <summary>
         /// 费用项目分类  获取单个费用项目分类 
         /// </summary> 
         /// <return></return>
-        public object get_expitemclass() { return null; }
+        public async Task<ExpitemclassResult> Get_ExpitemclassAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<ExpitemclassResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取费用项目分类  
         /// </summary> 
         /// <return></return>
-        public object batch_get_expitemclass() { return null; }
+        public async Task<List<Expitemclass>> Batch_Get_ExpitemclassAsync(int dsSequence = 1)
+        {
+            return await GetsSync<ExpitemclassListResult, Expitemclass>(dsSequence);
+        }
         /// <summary>
         /// 部门  获取单个部门信息 
         /// </summary> 
         /// <return></return>
-        public object get_department() { return null; }
+        public async Task<DepartmentResult> Get_DepartmentAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<DepartmentResult>(id, dsSequence);
+        }
         /// <summary>
         /// 修改一个部门  
         /// </summary> 
@@ -439,7 +626,10 @@ namespace MicroFeel.Yonyou.Api
         /// 批量获取部门信息    
         /// </summary> 
         /// <return></return>
-        public object batch_get_department() { return null; }
+        public async Task<List<Department>> Batch_Get_DepartmentAsync(int dsSequence = 1)
+        {
+            return await GetsSync<DepartmentListResult, Department>(dsSequence);
+        }
         /// <summary>
         /// 添加一个新部门 
         /// </summary> 
@@ -449,27 +639,42 @@ namespace MicroFeel.Yonyou.Api
         /// 银行  获取单个银行信息 
         /// </summary> 
         /// <return></return>
-        public object get_bank() { return null; }
+        public async Task<BankResult> Get_BankAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<BankResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取银行信息    
         /// </summary> 
-        /// <return></return>
-        public object batch_get_bank() { return null; }
+        /// <return></return>Settlestyle
+        public async Task<List<Bank>> Batch_Get_BankAsync(int dsSequence = 1)
+        {
+            return await GetsSync<BankListResult, Bank>(dsSequence);
+        }
         /// <summary>
         /// 销售类型    获取单个销售类型 
         /// </summary> 
         /// <return></return>
-        public object get_saletype() { return null; }
+        public async Task<SaletypeResult> Get_SaletypeAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<SaletypeResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取销售类型    
         /// </summary> 
         /// <return></return>
-        public object batch_get_saletype() { return null; }
+        public async Task<List<Saletype>> Batch_Get_SaletypeAsync(int dsSequence = 1)
+        {
+            return await GetsSync<SaletypeListResult, Saletype>(dsSequence);
+        }
         /// <summary>
         /// 项目  批量获取项目信息 
         /// </summary> 
         /// <return></return>
-        public object batch_get_fitem() { return null; }
+        public async Task<List<Fitem>> Batch_Get_FitemAsync(int dsSequence = 1)
+        {
+            return await GetsSync<FitemListResult, Fitem>(dsSequence);
+        }
         /// <summary>
         /// 添加一个新项目 
         /// </summary> 
@@ -479,16 +684,25 @@ namespace MicroFeel.Yonyou.Api
         /// 项目分类    批量获取项目分类 
         /// </summary> 
         /// <return></return>
-        public object batch_get_fitemclass() { return null; }
+        public async Task<List<Fitemclass>> Batch_Get_FitemclassAsync(int dsSequence = 1)
+        {
+            return await GetsSync<FitemclassListResult, Fitemclass>(dsSequence);
+        }
         /// <summary>
         /// 项目大类    获取单个项目大类 
         /// </summary> 
         /// <return></return>
-        public object get_fitemcategory() { return null; }
+        public async Task<FitemcategoryResult> Get_FitemcategoryAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<FitemcategoryResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取项目大类    
         /// </summary> 
         /// <return></return>
-        public object batch_get_fitemcategory() { return null; }
+        public async Task<List<Fitemcategory>> Batch_Get_FitemcategoryAsync(int dsSequence = 1)
+        {
+            return await GetsSync<FitemcategoryListResult, Fitemcategory>(dsSequence);
+        }
     }
 }
