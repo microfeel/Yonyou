@@ -1,5 +1,6 @@
 ﻿using MicroFeel.Finance;
 using MicroFeel.Finance.Models;
+using MicroFeel.Yonyou.Api.Service;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,7 @@ namespace MicroFeel.Yonyou.Services
 {
     public class YongYouService : IFinanceService
     {
+        StockApi stockApi = new StockApi();
         public Customer AddCustomer(Customer customer)
         {
             throw new NotImplementedException();
@@ -44,10 +46,6 @@ namespace MicroFeel.Yonyou.Services
             throw new NotImplementedException();
         }
 
-        public bool AddStock(Stock stock)
-        {
-            throw new NotImplementedException();
-        }
 
         public Supplier AddSupplier(Supplier supplier)
         {
@@ -114,6 +112,39 @@ namespace MicroFeel.Yonyou.Services
             throw new NotImplementedException();
         }
 
+        #region Stock
+
+        public bool Materialout(Materialout materialout)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool OtherIn(Otherin otherin)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool OtherOut(Otherout otherout)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ProductIn(Productin productin)
+        {
+            var result = stockApi.Add_ProductinAsync(productin.To<Api.Productin>()).Result;
+            return result.Errcode == "0";
+        }
+
+        public bool PurchaseIn(Purchasein purchasein)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Saleout(Saleout saleout)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<string> TokenAsync()
         {
             throw new NotImplementedException();
@@ -123,5 +154,11 @@ namespace MicroFeel.Yonyou.Services
         {
             throw new NotImplementedException();
         }
+
+        public bool Transvouch(Transvouch transvouch)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }

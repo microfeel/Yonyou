@@ -77,15 +77,16 @@ html = requests.get("http://open.yonyouup.com/apiCenter/index")
 
 etree_html = etree.HTML(html.text)
 
-apiurls = etree_html.xpath('//*[@id="allapi"]/div[2]/table/tbody/tr/td/a/@href')
+apiurls = etree_html.xpath('//*[@id="allapi"]/div/table/tbody/tr/td/a/@href')
 
 for url in apiurls:
+    if url.endswith("get") or url.endswith("_add"): continue;
     fullurl = "http://open.yonyouup.com/apiCenter/" + url
     classname = url.replace('/','').title()
     filecontent = AddCSHeader(classname)
     html = requests.get(fullurl)
     body = etree.HTML(html.text)
-    trelements = body.xpath('.//*[@id="bodyContent"]/table[last()]/tr')
+    trelements = body.xpath('.//*[@id="bodyContent"]/table[4]/tr')
     
     plist.clear()
     subclassList.clear()
@@ -120,7 +121,7 @@ for url in apiurls:
     print(filecontent)
 
     #保存到文件
-    csfile = open('d:\\results\\'+classname+'.cs', 'wt',encoding="utf-8")
+    csfile = open('d:\\results\\other\\'+classname+'.cs', 'wt',encoding="utf-8")
     csfile.write(filecontent)
     csfile.close()
 

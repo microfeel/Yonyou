@@ -1,5 +1,4 @@
-﻿using MicroFeel.Yonyou.Api.Model.Post;
-using MicroFeel.Yonyou.Api.Model.Request;
+﻿using MicroFeel.Yonyou.Api.Model.Request;
 using MicroFeel.Yonyou.Api.Model.Result;
 using System;
 using System.Collections.Generic;
@@ -23,9 +22,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 产成品入库单 获取产成品入库单列表  
         /// </summary> 
         /// <return></return>
-        public async Task<List<Bill>> Batch_Get_ProductinlistAsync(int dsSequence = 1)
+        public async Task<List<Productin>> Batch_Get_ProductinlistAsync(int dsSequence = 1)
         {
-            return await Get_StocksSync(dsSequence);
+            return await GetsSync<ProductinListResult, Productin>(dsSequence);
         }
         /// <summary>
         /// 审核一张产成品入库单  
@@ -41,9 +40,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个产成品入库单  
         /// </summary> 
         /// <return></return>
-        public async Task<BillResult> Get_ProductinAsync(int id, int dsSequence = 1)
+        public async Task<ProductinResult> Get_ProductinAsync(int id, int dsSequence = 1)
         {
-            return await Get_StockSync(id, dsSequence);
+            return await GetSync<ProductinResult>(id, dsSequence);
         }
 
         /// <summary>
@@ -53,17 +52,17 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <param name="dsSequence">数据库序列 默认值1</param>
         /// <param name="sync">是否同步 默认true</param>
         /// <returns>BillResult</returns>
-        public async Task<DbResult> Add_ProductinAsync(Bill bill, int dsSequence = 1, bool sync = true)
+        public async Task<DbResult> Add_ProductinAsync(Productin productin, int dsSequence = 1, bool sync = true)
         {
-            return await Add_StockSync(bill, dsSequence, sync);
+            return await AddStockSync(productin, dsSequence, sync);
         }
         /// <summary>
         /// 其他入库单   批量获取其他入库信息 
         /// </summary> 
         /// <return></return>
-        public async Task<List<Bill>> Batch_Get_OtherinlistAsync(int dsSequence = 1)
+        public async Task<List<Otherin>> Batch_Get_OtherinlistAsync(int dsSequence = 1)
         {
-            return await Get_StocksSync(dsSequence);
+            return await GetsSync<OtherinListResult, Otherin>(dsSequence);
         }
         /// <summary>
         /// 审核一张其他入库单   
@@ -89,7 +88,10 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个其他入库信息  
         /// </summary> 
         /// <return></return>
-        public object get_otherin() { return null; }
+        public async Task<OtherinResult> Get_OtherinAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<OtherinResult>(id, dsSequence);
+        }
         /// <summary>
         /// 获取其他入库单是否启用工作流  
         /// </summary> 
@@ -113,9 +115,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <param name="dsSequence">数据库序列 默认值1</param>
         /// <param name="sync">是否同步 默认true</param>
         /// <returns>BillResult</returns>
-        public async Task<DbResult> Add_OtherinSync(Bill bill, int dsSequence = 1, bool sync = true)
+        public async Task<DbResult> Add_OtherinSync(Otherin otherin, int dsSequence = 1, bool sync = true)
         {
-            return await Add_StockSync(bill, dsSequence, sync);
+            return await AddStockSync(otherin, dsSequence, sync);
         }
         /// <summary>
         /// 弃审其他入库单（工作流） 
@@ -126,7 +128,10 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 其他出库单   获取其他出库单列表信息 
         /// </summary> 
         /// <return></return>
-        public object batch_get_otheroutlist() { return null; }
+        public async Task<List<Otherout>> Batch_Get_OtheroutlistAsync(int dsSequence = 1)
+        {
+            return await GetsSync<OtheroutListResult, Otherout>(dsSequence);
+        }
         /// <summary>
         /// 审核一张其他出库单   
         /// </summary> 
@@ -151,7 +156,10 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单张其他出库单   
         /// </summary> 
         /// <return></return>
-        public object get_otherout() { return null; }
+        public async Task<OtheroutResult> get_otheroutAsync(int id, int dsSequence = 1)
+        {
+            return await GetSync<OtheroutResult>(id, dsSequence);
+        }
         /// <summary>
         /// 获取其他出库单是否启用工作流  
         /// </summary> 
@@ -328,10 +336,22 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public object get_saleout() { return null; }
 
-        private async Task<DbResult> Add_StockSync(Bill bill, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+        /// <summary>
+        /// 添加出入库
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <typeparam name="TData"></typeparam>
+        /// <param name="req"></param>
+        /// <param name="data"></param>
+        /// <param name="dsSequence"></param>
+        /// <param name="sync"></param>
+        /// <param name="callername"></param>
+        /// <returns></returns>
+        private async Task<DbResult> AddStockSync<TData>(TData data, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
         {
             pathprefix = "api";
-            var req = new BillRequest
+            var req = new StockRequest
             {
                 AppKey = _appKey,
                 FromAccount = _fromAccount,
@@ -341,60 +361,45 @@ namespace MicroFeel.Yonyou.Api.Service
                 DsSequence = dsSequence,
                 Sync = true ? 1 : 0
             };
-            var result = await CallAsync<BillRequest, DbResult>(req, JsonSerializer.Serialize(bill), callername);
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new DateTimeConverter());
+            var json = JsonSerializer.Serialize(data, options);
+            var result = await CallAsync<StockRequest, DbResult>(req, json, callername);
             if (result.Errcode == "0")
             {
                 return result;
-            }
-            else
-            {
-                throw new ApiException(result.Errmsg);
-            }
-        }
-
-        private async Task<BillResult> Get_StockSync(int id, int dsSequence = 1, [CallerMemberName] string callername = "")
-        {
-            pathprefix = "api";
-            var req = new SingleRequest()
-            {
-                AppKey = _appKey,
-                FromAccount = _fromAccount,
-                ToAccount = _toAccount,
-                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
-                DsSequence = dsSequence,
-                Id = id
-            };
-            var result = await CallAsync<SingleRequest, BillResult>(req, "", callername);
-            if (result.Errcode == "0")
-            {
-                return result;
-            }
-            else
-            {
-                throw new ApiException(result.Errmsg);
-            }
-        }
-
-        private async Task<List<Bill>> Get_StocksSync(int dsSequence = 1, [CallerMemberName] string callername = "")
-        {
-            pathprefix = "api";
-            var req = new DbRequest()
-            {
-                AppKey = _appKey,
-                FromAccount = _fromAccount,
-                ToAccount = _toAccount,
-                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
-                Ds_sequence = dsSequence,
-            };
-            var result = await CallAsync<DbRequest, BillListResult>(req, "", callername);
-            if (result.Errcode == "0")
-            {
-                return result.List;
             }
             else
             {
                 throw new ApiException($"({result.Errcode}){result.Errmsg}");
             }
+        }
+
+
+    }
+    public class DateTimeConverter : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return DateTime.Parse(reader.GetString());
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString("yyyy-MM-dd HH:mm:ss"));
+        }
+    }
+
+    public class DateTimeNullableConverter : JsonConverter<DateTime?>
+    {
+        public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return string.IsNullOrEmpty(reader.GetString()) ? default(DateTime?) : DateTime.Parse(reader.GetString());
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value?.ToString("yyyy-MM-dd HH:mm:ss"));
         }
     }
 }
