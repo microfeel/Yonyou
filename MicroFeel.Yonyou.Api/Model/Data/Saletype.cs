@@ -1,0 +1,1 @@
+using System;using System.Collections.Generic;using System.Text.Json.Serialization;namespace MicroFeel.Yonyou.Api{	public class Saletype	{		///<Summary>		///销售类型编码		///</Summary>		[JsonPropertyName("code")]		public string Code { get;set; }		///<Summary>		///销售类型名称		///</Summary>		[JsonPropertyName("name")]		public string Name { get;set; }	}}

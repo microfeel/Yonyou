@@ -1,0 +1,1 @@
+using System;using System.Collections.Generic;using System.Text.Json.Serialization;namespace MicroFeel.Yonyou.Api{	public class Bank	{		///<Summary>		///银行编号		///</Summary>		[JsonPropertyName("code")]		public string Code { get;set; }		///<Summary>		///银行名称		///</Summary>		[JsonPropertyName("name")]		public string Name { get;set; }	}}
