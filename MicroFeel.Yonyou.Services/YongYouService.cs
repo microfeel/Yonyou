@@ -1,12 +1,13 @@
-﻿using MicroFeel.Finance.Interfaces;
+﻿using MicroFeel.Finance;
 using MicroFeel.Finance.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MicroFeel.Yonyou.Services
 {
-    public class BasicService : IBasicService
+    public class YongYouService : IFinanceService
     {
         public Customer AddCustomer(Customer customer)
         {
@@ -43,12 +44,42 @@ namespace MicroFeel.Yonyou.Services
             throw new NotImplementedException();
         }
 
+        public bool AddStock(Stock stock)
+        {
+            throw new NotImplementedException();
+        }
+
         public Supplier AddSupplier(Supplier supplier)
         {
             throw new NotImplementedException();
         }
 
+        public Voucher AddVoucher(IList<VoucherParmEntry> voucherParams, string explanation, string reference, string preparer, int groupID, DateTime date, DateTime transDate, string objectName = "", string parameter = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        public Voucher AddVoucher(VoucherInfo voucherInfo)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<Account> GetAccount()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Datasource>> GetBatchDatasourceAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<OrderStatus> GetOrderStatusAsync()
         {
             throw new NotImplementedException();
         }
@@ -63,7 +94,32 @@ namespace MicroFeel.Yonyou.Services
             throw new NotImplementedException();
         }
 
+        public IList<VoucherTemplate> GetVoucherTemplate(IEnumerable<string> tempTypeNames)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<VoucherTemplate> GetVoucherTemplate()
+        {
+            throw new NotImplementedException();
+        }
+
         public List<Store> GetWorkShops(string brand)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Datasource> Get_DatasourceAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> TokenAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> TradeidAsync()
         {
             throw new NotImplementedException();
         }
