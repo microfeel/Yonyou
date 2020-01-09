@@ -268,7 +268,7 @@ namespace MicroFeel.Yonyou.Api
         ///失效日期
         ///</Summary>
         [JsonPropertyName("validdate")]
-        public DateTime Validdate { get; set; }
+        public DateTime? Validdate { get; set; }
 
         ///<Summary>
         ///自由项1

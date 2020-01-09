@@ -156,7 +156,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单张其他出库单   
         /// </summary> 
         /// <return></return>
-        public async Task<OtheroutResult> get_otheroutAsync(string id, int dsSequence = 1)
+        public async Task<OtheroutResult> Get_OtheroutAsync(string id, int dsSequence = 1)
         {
             return await GetSync<OtheroutResult>(id, dsSequence);
         }
@@ -305,11 +305,16 @@ namespace MicroFeel.Yonyou.Api.Service
         /// </summary> 
         /// <return></return>
         public object get_purchasein() { return null; }
+
         /// <summary>
         /// 新增一张采购入库单   
         /// </summary> 
         /// <return></return>
-        public object add_purchasein() { return null; }
+        public async Task<DbResult> Add_PurchaseinAsync(Purchasein purchasein, int dsSequence = 1, bool sync = true)
+        {
+            return await AddStockSync(purchasein, dsSequence, sync);
+        }
+
         /// <summary>
         /// 销售出库单   批量获取销售出库单列表(包含子表)   
         /// </summary> 
