@@ -40,7 +40,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个产成品入库单  
         /// </summary> 
         /// <return></return>
-        public async Task<ProductinResult> Get_ProductinAsync(int id, int dsSequence = 1)
+        public async Task<ProductinResult> Get_ProductinAsync(string id, int dsSequence = 1)
         {
             return await GetSync<ProductinResult>(id, dsSequence);
         }
@@ -88,7 +88,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个其他入库信息  
         /// </summary> 
         /// <return></return>
-        public async Task<OtherinResult> Get_OtherinAsync(int id, int dsSequence = 1)
+        public async Task<OtherinResult> Get_OtherinAsync(string id, int dsSequence = 1)
         {
             return await GetSync<OtherinResult>(id, dsSequence);
         }
@@ -156,7 +156,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单张其他出库单   
         /// </summary> 
         /// <return></return>
-        public async Task<OtheroutResult> get_otheroutAsync(int id, int dsSequence = 1)
+        public async Task<OtheroutResult> get_otheroutAsync(string id, int dsSequence = 1)
         {
             return await GetSync<OtheroutResult>(id, dsSequence);
         }

@@ -6,12 +6,14 @@ using System.Text.Json.Serialization;
 
 namespace MicroFeel.Yonyou.Api.Model.Result
 {
-    public class BudgetcaliberResult : Budgetcaliber, IApiResult
+    public class BudgetcaliberResult : IApiResult
     {
         [JsonPropertyName("errcode")]
         public string Errcode { get; set; }
         [JsonPropertyName("errmsg")]
         public string Errmsg { get; set; }
+        [JsonPropertyName("budgetcaliber")]
+        public Budgetcaliber Budgetcaliber { get; set; }
     }
     public class BudgetcaliberListResult : DbListResult<Budgetcaliber>
     {
