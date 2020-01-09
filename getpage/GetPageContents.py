@@ -21,7 +21,7 @@ class Subclass(object):
         self.properties.append(Property(name,typename,comment))
 
     def GenCode(self,tab):
-        code = tab+'public class '+self.name.title() +tab+'{'
+        code = tab+'public class '+self.name +tab+'{'
 
         for p in self.properties:
             code += tab+'\t'+AddProperty(p.name,p.typename,p.comment,'\r\t\t\t')
@@ -57,7 +57,7 @@ def AddProperty(name,type,comment,tab ='\r\t\t'):
     comm = tab +"///<Summary>"
     comm += tab+"///" + comment
     comm += tab+"///</Summary>"
-    attr = tab+'[JsonPropertyName("' + name + '")]'
+    attr = tab+'[JsonPropertyName("' + name.lower() + '")]'
     if type == None:
         type='string'
     if type=='number':
@@ -77,12 +77,13 @@ html = requests.get("http://open.yonyouup.com/apiCenter/index")
 
 etree_html = etree.HTML(html.text)
 
-apiurls = etree_html.xpath('//*[@id="allapi"]/div/table/tbody/tr/td/a/@href')
+apiurls = etree_html.xpath('//*[@id="allapi"]/div[7]/table/tbody/tr/td/a/@href')
 
 for url in apiurls:
-    if url.endswith("get") or url.endswith("_add"): continue;
-    fullurl = "http://open.yonyouup.com/apiCenter/" + url
-    classname = url.replace('/','').title()
+    if not url.endswith("_add"): continue;
+    # url ="saleout_get";
+    fullurl="http://open.yonyouup.com/apiCenter/"+ url;
+    classname = url.replace('/','').replace("_add","").title()
     filecontent = AddCSHeader(classname)
     html = requests.get(fullurl)
     body = etree.HTML(html.text)
@@ -104,9 +105,9 @@ for url in apiurls:
         typestr = tds[1].text
         last= len(tds)-1
         #生成内类
-        if len(tds)==4 and tds[2]!= None and tds[2].text != None and tds[2].text != '\xa0':
-            namestr = tds[2].text
-            typestr = 'IList<'+namestr.title()+'>'
+        if len(tds)>=4 and tds[2]!= None and tds[2].text != None and tds[2].text != '\xa0':
+            namestr = url.replace('/','').replace('_get','').title()+tds[2].text.title()
+            typestr = 'IList<'+namestr+'>'
             sc=GetSubclass(namestr)
             sc.AddProperty(tds[0].text, tds[1].text,tds[last].text);
 
@@ -121,7 +122,7 @@ for url in apiurls:
     print(filecontent)
 
     #保存到文件
-    csfile = open('d:\\results\\other\\'+classname+'.cs', 'wt',encoding="utf-8")
+    csfile = open('d:\\results\\model\\'+classname+'.cs', 'wt',encoding="utf-8")
     csfile.write(filecontent)
     csfile.close()
 

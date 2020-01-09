@@ -363,7 +363,7 @@ namespace MicroFeel.Yonyou.Api.Service
             };
             var options = new JsonSerializerOptions();
             options.Converters.Add(new DateTimeConverter());
-            var json = JsonSerializer.Serialize(data, options);
+            var json = "{\"" + typeof(TData).Name.ToLower() + "\":" + JsonSerializer.Serialize(data, options) + "}";
             var result = await CallAsync<StockRequest, DbResult>(req, json, callername);
             if (result.Errcode == "0")
             {
@@ -386,7 +386,7 @@ namespace MicroFeel.Yonyou.Api.Service
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value.ToString("yyyy-MM-dd HH:mm:ss"));
+            writer.WriteStringValue(value.ToString("yyyy-MM-dd"));
         }
     }
 
@@ -399,7 +399,7 @@ namespace MicroFeel.Yonyou.Api.Service
 
         public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value?.ToString("yyyy-MM-dd HH:mm:ss"));
+            writer.WriteStringValue(value?.ToString("yyyy-MM-dd"));
         }
     }
 }

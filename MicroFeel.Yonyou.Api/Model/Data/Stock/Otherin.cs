@@ -1,314 +1,370 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MicroFeel.Yonyou.Api
 {
-    /// <summary>
-    /// 其他出库单
-    /// </summary>
     public class Otherin
     {
-        /// <summary>
-        /// 单据编号
-        /// </summary>
+        ///<Summary>
+        ///单据编号
+        ///</Summary>
+        [JsonPropertyName("code")]
         public string Code { get; set; }
-        ///<summary>
+        ///<Summary>
         ///制单日期
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("date")]
         public DateTime Date { get; set; }
-        ///<summary>
+        ///<Summary>
         ///制单人名称
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("maker")]
         public string Maker { get; set; }
-        ///<summary>
+        ///<Summary>
         ///仓库编码
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("warehousecode")]
         public string Warehousecode { get; set; }
-        ///<summary>
+        ///<Summary>
         ///仓库名称
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("warehousename")]
         public string Warehousename { get; set; }
-        ///<summary>
+        ///<Summary>
         ///备注
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("memory")]
         public string Memory { get; set; }
-        ///<summary>
+        ///<Summary>
         ///收发类型编码
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("receivecode")]
         public string Receivecode { get; set; }
-        ///<summary>
+        ///<Summary>
         ///收发类型
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("receivename")]
         public string Receivename { get; set; }
-        ///<summary>
+        ///<Summary>
         ///部门编码
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("departmentcode")]
         public string Departmentcode { get; set; }
-        ///<summary>
+        ///<Summary>
         ///部门名称
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("departmentname")]
         public string Departmentname { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项1
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define1")]
         public string Define1 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项2
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define2")]
         public string Define2 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项3
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define3")]
         public string Define3 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项4
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define4")]
         public DateTime Define4 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项5
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define5")]
         public float Define5 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项6
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define6")]
         public DateTime Define6 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项7
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define7")]
         public float Define7 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项8
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define8")]
         public string Define8 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项9
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define9")]
         public string Define9 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项10
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define10")]
         public string Define10 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项11
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define11")]
         public string Define11 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项12
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define12")]
         public string Define12 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项13
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define13")]
         public string Define13 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项14
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define14")]
         public string Define14 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项15
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define15")]
         public float Define15 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///单据头自定义项16
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define16")]
         public float Define16 { get; set; }
-        ///<summary>
+        ///<Summary>
         ///存货编码
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("entry")]
         public IList<OtherinEntry> Otherinentry { get; set; }
-
     }
 
-    /// <summary>
-    /// 其他出库单明细
-    /// </summary>
     public class OtherinEntry
     {
-
-        ///<summary>
+        ///<Summary>
         ///存货编码
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("inventorycode")]
         public string Inventorycode { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///存货
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("inventoryname")]
         public string Inventoryname { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///规格型号
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("inventorystd")]
         public string Inventorystd { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///数量
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("quantity")]
         public float Quantity { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单价
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("price")]
         public float Price { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///金额
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("cost")]
         public float Cost { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///主计量单位名称
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("cmassunitname")]
         public string Cmassunitname { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///批号
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("serial")]
         public string Serial { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///生产日期
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("makedate")]
         public DateTime Makedate { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///失效日期
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("validdate")]
         public DateTime Validdate { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项1
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free1")]
         public string Free1 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项2
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free2")]
         public string Free2 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项3
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free3")]
         public string Free3 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项4
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free4")]
         public string Free4 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项5
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free5")]
         public string Free5 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项6
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free6")]
         public string Free6 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项7
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free7")]
         public string Free7 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项8
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free8")]
         public string Free8 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项9
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free9")]
         public string Free9 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///自由项10
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("free10")]
         public string Free10 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项1
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define22")]
         public string Define22 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项2
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define23")]
         public string Define23 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项3
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define24")]
         public string Define24 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项4
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define25")]
         public string Define25 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项5
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define26")]
         public float Define26 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项6
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define27")]
         public float Define27 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项7
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define28")]
         public string Define28 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项8
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define29")]
         public string Define29 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项9
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define30")]
         public string Define30 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项10
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define31")]
         public string Define31 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项11
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define32")]
         public string Define32 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项12
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define33")]
         public string Define33 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项13
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define34")]
         public float Define34 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项14
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define35")]
         public float Define35 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项15
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define36")]
         public DateTime Define36 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///单据体自定义项16
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("define37")]
         public DateTime Define37 { get; set; }
 
-        ///<summary>
+        ///<Summary>
         ///行号
-        ///</summary>
+        ///</Summary>
+        [JsonPropertyName("rowno")]
         public float Rowno { get; set; }
-
     }
 }
