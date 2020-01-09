@@ -41,7 +41,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个产成品入库单  
         /// </summary> 
         /// <return></return>
-        public async Task<BillResult> Get_ProductinAsync(int id, int dsSequence = 1)
+        public async Task<BillResult> Get_ProductinAsync(string id, int dsSequence = 1)
         {
             return await Get_StockSync(id, dsSequence);
         }
@@ -352,7 +352,7 @@ namespace MicroFeel.Yonyou.Api.Service
             }
         }
 
-        private async Task<BillResult> Get_StockSync(int id, int dsSequence = 1, [CallerMemberName] string callername = "")
+        private async Task<BillResult> Get_StockSync(string id, int dsSequence = 1, [CallerMemberName] string callername = "")
         {
             pathprefix = "api";
             var req = new SingleRequest()

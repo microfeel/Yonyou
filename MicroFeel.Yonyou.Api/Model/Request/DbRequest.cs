@@ -38,10 +38,10 @@ namespace MicroFeel.Yonyou.Api
         /// 单据ID
         /// </summary>
         [JsonPropertyName("id")]
-        public int Id { get; set; }
+        public string Id { get; set; }
         public override string ToString()
         {
-            return $"{base.ToString()} &ds_sequence={DsSequence}&id={Id}";
+            return $"{base.ToString()}&ds_sequence={DsSequence}&id={Id}";
         }
     }
 }

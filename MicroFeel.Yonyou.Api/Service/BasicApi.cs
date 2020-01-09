@@ -18,37 +18,72 @@ namespace MicroFeel.Yonyou.Api
         /// U8帐套 获取单个U8帐套信息  
         /// </summary> 
         /// <return></return>
-        public object get_account() { return null; }
+        public async Task<AccountResult> Get_AccountAsync(string id, int dsSequence = 1)
+        {
+            return await GetSync<AccountResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取U8帐套信息  
         /// </summary> 
         /// <return></return>
-        public object batch_get_account() { return null; }
+        public async Task<List<Account>> Batch_Get_AccountAsync(int dsSequence = 1)
+        {
+            return await GetsSync<AccountListResult, Account>(dsSequence);
+        }
+        /// <summary>
+        /// 首付款协议档案    获取单个首付款协议档案
+        /// </summary>
+        /// <returns></returns>
+        public async Task<AgreementResult> Get_AgreementAsync(string id, int dsSequence = 1)
+        {
+            return await GetSync<AgreementResult>(id, dsSequence);
+        }
+        /// <summary>
+        /// 批量获取首付款协议档案
+        /// </summary>
+        /// <param name="dsSequence"></param>
+        /// <returns></returns>
+        public async Task<List<Agreement>> Batch_Get_AgreementAsync(int dsSequence = 1)
+        {
+            return await GetsSync<AgreementListResult, Agreement>(dsSequence);
+        }
         /// <summary>
         /// 交易分类    获取单个交易分类信息 
         /// </summary> 
-        /// <return></return>
-        public object get_payunitclass() { return null; }
+        /// <return></return>        
+        public async Task<PayunitclassResult> Get_PayunitclassAsync(string id, int dsSequence = 1)
+        {
+            return await GetSync<PayunitclassResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取交易分类信息  
         /// </summary> 
         /// <return></return>
-        public object batch_get_payunitclass() { return null; }
+        public async Task<List<Payunitclass>> Batch_Get_PayunitclassAsync(int dsSequence = 1)
+        {
+            return await GetsSync<PayunitclassListResult, Payunitclass>(dsSequence);
+        }
         /// <summary>
         /// 交易单位    获取单个交易单位信息 
         /// </summary> 
         /// <return></return>
-        public object get_payunit() { return null; }
+        public async Task<PayunitResult> Get_PayunitAsync(string id, int dsSequence = 1)
+        {
+            return await GetSync<PayunitResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取交易单位信息  
         /// </summary> 
         /// <return></return>
-        public object batch_get_payunit() { return null; }
+        public async Task<List<Payunit>> Batch_Get_PayunitAsync(int dsSequence = 1)
+        {
+            return await GetsSync<PayunitListResult, Payunit>(dsSequence);
+        }
         /// <summary>
         /// 人员  获取单个人员信息 
         /// </summary> 
         /// <return></return>
-        public async Task<PersonResult> Get_PersonAsync(int id, int dsSequence = 1)
+        public async Task<PersonResult> Get_PersonAsync(string id, int dsSequence = 1)
         {
             return await GetSync<PersonResult>(id, dsSequence);
         }
@@ -74,7 +109,7 @@ namespace MicroFeel.Yonyou.Api
         /// 人员类别    获取单个人员类别 
         /// </summary> 
         /// <return></return>
-        public async Task<PersontypeResult> Get_PersontypeAsync(int id, int dsSequence = 1)
+        public async Task<PersontypeResult> Get_PersontypeAsync(string id, int dsSequence = 1)
         {
             return await GetSync<PersontypeResult>(id, dsSequence);
         }
@@ -90,7 +125,7 @@ namespace MicroFeel.Yonyou.Api
         /// 仓库  获取单个仓库信息 
         /// </summary> 
         /// <return></return>
-        public async Task<WarehouseResult> Get_WarehouseAsync(int id, int dsSequence = 1)
+        public async Task<WarehouseResult> Get_WarehouseAsync(string id, int dsSequence = 1)
         {
             return await GetSync<WarehouseResult>(id, dsSequence);
         }
@@ -119,7 +154,7 @@ namespace MicroFeel.Yonyou.Api
         /// 供应商 获取单个供应商信息 
         /// </summary> 
         /// <return></return>
-        public async Task<VendorResult> Get_VendorAsync(int id, int dsSequence = 1)
+        public async Task<VendorResult> Get_VendorAsync(string id, int dsSequence = 1)
         {
             return await GetSync<VendorResult>(id, dsSequence);
         }
@@ -145,7 +180,7 @@ namespace MicroFeel.Yonyou.Api
         /// 供应商分类   获取单个供应商分类信息 
         /// </summary> 
         /// <return></return>
-        public async Task<VendorclassResult> Get_VendorclassAsync(int id, int dsSequence = 1)
+        public async Task<VendorclassResult> Get_VendorclassAsync(string id, int dsSequence = 1)
         {
             return await GetSync<VendorclassResult>(id, dsSequence);
         }
@@ -166,7 +201,7 @@ namespace MicroFeel.Yonyou.Api
         /// 供应商银行   获取单个供应商银行信息 
         /// </summary> 
         /// <return></return>
-        public async Task<VendorbankResult> Get_VendorbankAsync(int id, int dsSequence = 1)
+        public async Task<VendorbankResult> Get_Vendor_BankAsync(string id, int dsSequence = 1)
         {
             return await GetSync<VendorbankResult>(id, dsSequence);
         }
@@ -174,7 +209,7 @@ namespace MicroFeel.Yonyou.Api
         /// 批量获取供应商银行信息 
         /// </summary> 
         /// <return></return>
-        public async Task<List<Vendorbank>> Batch_Get_VendorbankAsync(int dsSequence = 1)
+        public async Task<List<Vendorbank>> Batch_Get_Vendor_BankAsync(int dsSequence = 1)
         {
             return await GetsSync<VendorbankListResult, Vendorbank>(dsSequence);
         }
@@ -182,7 +217,7 @@ namespace MicroFeel.Yonyou.Api
         /// 凭证类别    获取单个凭证类别 
         /// </summary> 
         /// <return></return>
-        public async Task<DsignResult> Get_DsignAsync(int id, int dsSequence = 1)
+        public async Task<DsignResult> Get_DsignAsync(string id, int dsSequence = 1)
         {
             return await GetSync<DsignResult>(id, dsSequence);
         }
@@ -190,7 +225,7 @@ namespace MicroFeel.Yonyou.Api
         /// 批量获取凭证类别    
         /// </summary> 
         /// <return></return>
-        public async Task<List<Dsign>> Batch_Get_Dsign(int dsSequence = 1)
+        public async Task<List<Dsign>> Batch_Get_DsignAsync(int dsSequence = 1)
         {
             return await GetsSync<DsignListResult, Dsign>(dsSequence);
         }
@@ -198,7 +233,7 @@ namespace MicroFeel.Yonyou.Api
         /// 地区分类    获取单个地区分类 
         /// </summary> 
         /// <return></return>
-        public async Task<DistrictclassResult> Get_DistrictclassAsync(int id, int dsSequence = 1)
+        public async Task<DistrictclassResult> Get_DistrictclassAsync(string id, int dsSequence = 1)
         {
             return await GetSync<DistrictclassResult>(id, dsSequence);
         }
@@ -215,7 +250,7 @@ namespace MicroFeel.Yonyou.Api
         /// 存货分类    获取单个存货分类信息 
         /// </summary> 
         /// <return></return>
-        public async Task<InventoryclassResult> Get_InventoryclassAsync(int id, int dsSequence = 1)
+        public async Task<InventoryclassResult> Get_InventoryclassAsync(string id, int dsSequence = 1)
         {
             return await GetSync<InventoryclassResult>(id, dsSequence);
         }
@@ -237,7 +272,7 @@ namespace MicroFeel.Yonyou.Api
         /// 存货档案    获取单个存货信息 
         /// </summary> 
         /// <return></return>
-        public async Task<InventoryResult> Get_InventoryAsync(int id, int dsSequence = 1)
+        public async Task<InventoryResult> Get_InventoryAsync(string id, int dsSequence = 1)
         {
             return await GetSync<InventoryResult>(id, dsSequence);
         }
@@ -263,7 +298,7 @@ namespace MicroFeel.Yonyou.Api
         /// 客户  获取单个客户信息 
         /// </summary> 
         /// <return></return>
-        public async Task<CustomerResult> Get_CustomerAsync(int id, int dsSequence = 1)
+        public async Task<CustomerResult> Get_CustomerAsync(string id, int dsSequence = 1)
         {
             return await GetSync<CustomerResult>(id, dsSequence);
         }
@@ -289,7 +324,7 @@ namespace MicroFeel.Yonyou.Api
         /// 客户分类    获取单个客户分类 
         /// </summary> 
         /// <return></return>
-        public async Task<CustomerclassResult> Get_CustomerclassAsync(int id, int dsSequence = 1)
+        public async Task<CustomerclassResult> Get_CustomerclassAsync(string id, int dsSequence = 1)
         {
             return await GetSync<CustomerclassResult>(id, dsSequence);
         }
@@ -310,7 +345,7 @@ namespace MicroFeel.Yonyou.Api
         /// 客户地址    获取单个客户地址 
         /// </summary> 
         /// <return></return>
-        public async Task<CustomeraddressResult> Get_CustomeraddressAsync(int id, int dsSequence = 1)
+        public async Task<CustomeraddressResult> Get_CustomeraddressAsync(string id, int dsSequence = 1)
         {
             return await GetSync<CustomeraddressResult>(id, dsSequence);
         }
@@ -326,7 +361,7 @@ namespace MicroFeel.Yonyou.Api
         /// 客户联系人   获取单个客户联系人 
         /// </summary> 
         /// <return></return>
-        public async Task<CustomercontactsResult> Get_CustomercontactsAsync(int id, int dsSequence = 1)
+        public async Task<CustomercontactsResult> Get_CustomercontactsAsync(string id, int dsSequence = 1)
         {
             return await GetSync<CustomercontactsResult>(id, dsSequence);
         }
@@ -342,7 +377,7 @@ namespace MicroFeel.Yonyou.Api
         /// 客户银行    获取单个客户银行信息 
         /// </summary> 
         /// <return></return>
-        public async Task<Customer_BankResult> Get_Customer_BankAsync(int id, int dsSequence = 1)
+        public async Task<Customer_BankResult> Get_Customer_BankAsync(string id, int dsSequence = 1)
         {
             return await GetSync<Customer_BankResult>(id, dsSequence);
         }
@@ -358,7 +393,7 @@ namespace MicroFeel.Yonyou.Api
         /// 币种  获取单个币种 
         /// </summary> 
         /// <return></return>
-        public async Task<CurrencyResult> Get_CurrencyAsync(int id, int dsSequence = 1)
+        public async Task<CurrencyResult> Get_CurrencyAsync(string id, int dsSequence = 1)
         {
             return await GetSync<CurrencyResult>(id, dsSequence);
         }
@@ -374,7 +409,7 @@ namespace MicroFeel.Yonyou.Api
         /// 常用摘要    获取单个常用摘要 
         /// </summary> 
         /// <return></return>
-        public async Task<DigestResult> Get_DigestAsync(int id, int dsSequence = 1)
+        public async Task<DigestResult> Get_DigestAsync(string id, int dsSequence = 1)
         {
             return await GetSync<DigestResult>(id, dsSequence);
         }
@@ -390,7 +425,7 @@ namespace MicroFeel.Yonyou.Api
         /// 收发类别    获取单个收发类别 
         /// </summary> 
         /// <return></return>
-        public async Task<ReceivesendtypeResult> Get_ReceivesendtypeAsync(int id, int dsSequence = 1)
+        public async Task<ReceivesendtypeResult> Get_ReceivesendtypeAsync(string id, int dsSequence = 1)
         {
             return await GetSync<ReceivesendtypeResult>(id, dsSequence);
         }
@@ -406,7 +441,7 @@ namespace MicroFeel.Yonyou.Api
         /// 本单位开户银行 获取一个本单位开户银行 
         /// </summary> 
         /// <return></return>
-        public async Task<AccountingbankResult> Get_AccountingbankAsync(int id, int dsSequence = 1)
+        public async Task<AccountingbankResult> Get_AccountingbankAsync(string id, int dsSequence = 1)
         {
             return await GetSync<AccountingbankResult>(id, dsSequence);
         }
@@ -427,7 +462,7 @@ namespace MicroFeel.Yonyou.Api
         /// 现金流量项目  获取单个现金流量项目 
         /// </summary> 
         /// <return></return>
-        public async Task<CashflowitemResult> Get_CashflowitemAsync(int id, int dsSequence = 1)
+        public async Task<CashflowitemResult> Get_CashflowitemAsync(string id, int dsSequence = 1)
         {
             return await GetSync<CashflowitemResult>(id, dsSequence);
         }
@@ -443,7 +478,7 @@ namespace MicroFeel.Yonyou.Api
         /// 科目  获取单个科目信息 
         /// </summary> 
         /// <return></return>
-        public async Task<CodeResult> Get_CodeAsync(int id, int dsSequence = 1)
+        public async Task<CodeResult> Get_CodeAsync(string id, int dsSequence = 1)
         {
             return await GetSync<CodeResult>(id, dsSequence);
         }
@@ -459,7 +494,7 @@ namespace MicroFeel.Yonyou.Api
         /// 结算方式    获取单个结算方式 
         /// </summary> 
         /// <return></return>
-        public async Task<SettlestyleResult> Get_SettlestyleAsync(int id, int dsSequence = 1)
+        public async Task<SettlestyleResult> Get_SettlestyleAsync(string id, int dsSequence = 1)
         {
             return await GetSync<SettlestyleResult>(id, dsSequence);
         }
@@ -475,7 +510,7 @@ namespace MicroFeel.Yonyou.Api
         /// 编码方案    获取单个编码方案 
         /// </summary> 
         /// <return></return>
-        public async Task<CodeschemeResult> Get_CodeschemeAsync(int id, int dsSequence = 1)
+        public async Task<CodeschemeResult> Get_CodeschemeAsync(string id, int dsSequence = 1)
         {
             return await GetSync<CodeschemeResult>(id, dsSequence);
         }
@@ -491,7 +526,7 @@ namespace MicroFeel.Yonyou.Api
         /// 职位档案    获取单个职位档案 
         /// </summary> 
         /// <return></return>
-        public async Task<JobResult> Get_JobAsync(int id, int dsSequence = 1)
+        public async Task<JobResult> Get_JobAsync(string id, int dsSequence = 1)
         {
             return await GetSync<JobResult>(id, dsSequence);
         }
@@ -507,7 +542,7 @@ namespace MicroFeel.Yonyou.Api
         /// 职务档案    获取单个职务档案 
         /// </summary> 
         /// <return></return>
-        public async Task<DutyResult> Get_DutyAsync(int id, int dsSequence = 1)
+        public async Task<DutyResult> Get_DutyAsync(string id, int dsSequence = 1)
         {
             return await GetSync<DutyResult>(id, dsSequence);
         }
@@ -523,7 +558,7 @@ namespace MicroFeel.Yonyou.Api
         /// 职务类别    获取单个职务类别 
         /// </summary> 
         /// <return></return>
-        public async Task<DutytypeResult> Get_DutytypeAsync(int id, int dsSequence = 1)
+        public async Task<DutytypeResult> Get_DutytypeAsync(string id, int dsSequence = 1)
         {
             return await GetSync<DutytypeResult>(id, dsSequence);
         }
@@ -548,7 +583,7 @@ namespace MicroFeel.Yonyou.Api
         /// 自由项 获取单个自由项信息 
         /// </summary> 
         /// <return></return>
-        public async Task<FreearchResult> Get_FreearchAsync(int id, int dsSequence = 1)
+        public async Task<FreearchResult> Get_FreearchAsync(string id, int dsSequence = 1)
         {
             return await GetSync<FreearchResult>(id, dsSequence);
         }
@@ -564,7 +599,7 @@ namespace MicroFeel.Yonyou.Api
         /// 计量单位    获取单个计量单位信息 
         /// </summary> 
         /// <return></return>
-        public async Task<UnitResult> Get_UnitAsync(int id, int dsSequence = 1)
+        public async Task<UnitResult> Get_UnitAsync(string id, int dsSequence = 1)
         {
             return await GetSync<UnitResult>(id, dsSequence);
         }
@@ -581,7 +616,7 @@ namespace MicroFeel.Yonyou.Api
         /// 费用项目    获取单个费用项目 
         /// </summary> 
         /// <return></return>
-        public async Task<ExpenseitemResult> Get_ExpenseitemAsync(int id, int dsSequence = 1)
+        public async Task<ExpenseitemResult> Get_ExpenseitemAsync(string id, int dsSequence = 1)
         {
             return await GetSync<ExpenseitemResult>(id, dsSequence);
         }
@@ -597,7 +632,7 @@ namespace MicroFeel.Yonyou.Api
         /// 费用项目分类  获取单个费用项目分类 
         /// </summary> 
         /// <return></return>
-        public async Task<ExpitemclassResult> Get_ExpitemclassAsync(int id, int dsSequence = 1)
+        public async Task<ExpitemclassResult> Get_ExpitemclassAsync(string id, int dsSequence = 1)
         {
             return await GetSync<ExpitemclassResult>(id, dsSequence);
         }
@@ -613,7 +648,7 @@ namespace MicroFeel.Yonyou.Api
         /// 部门  获取单个部门信息 
         /// </summary> 
         /// <return></return>
-        public async Task<DepartmentResult> Get_DepartmentAsync(int id, int dsSequence = 1)
+        public async Task<DepartmentResult> Get_DepartmentAsync(string id, int dsSequence = 1)
         {
             return await GetSync<DepartmentResult>(id, dsSequence);
         }
@@ -639,7 +674,7 @@ namespace MicroFeel.Yonyou.Api
         /// 银行  获取单个银行信息 
         /// </summary> 
         /// <return></return>
-        public async Task<BankResult> Get_BankAsync(int id, int dsSequence = 1)
+        public async Task<BankResult> Get_BankAsync(string id, int dsSequence = 1)
         {
             return await GetSync<BankResult>(id, dsSequence);
         }
@@ -655,7 +690,7 @@ namespace MicroFeel.Yonyou.Api
         /// 销售类型    获取单个销售类型 
         /// </summary> 
         /// <return></return>
-        public async Task<SaletypeResult> Get_SaletypeAsync(int id, int dsSequence = 1)
+        public async Task<SaletypeResult> Get_SaletypeAsync(string id, int dsSequence = 1)
         {
             return await GetSync<SaletypeResult>(id, dsSequence);
         }
@@ -692,7 +727,7 @@ namespace MicroFeel.Yonyou.Api
         /// 项目大类    获取单个项目大类 
         /// </summary> 
         /// <return></return>
-        public async Task<FitemcategoryResult> Get_FitemcategoryAsync(int id, int dsSequence = 1)
+        public async Task<FitemcategoryResult> Get_FitemcategoryAsync(string id, int dsSequence = 1)
         {
             return await GetSync<FitemcategoryResult>(id, dsSequence);
         }
@@ -703,6 +738,40 @@ namespace MicroFeel.Yonyou.Api
         public async Task<List<Fitemcategory>> Batch_Get_FitemcategoryAsync(int dsSequence = 1)
         {
             return await GetsSync<FitemcategoryListResult, Fitemcategory>(dsSequence);
+        }
+
+        /// <summary>
+        /// 汇率    获取单个汇率
+        /// </summary>        
+        /// <returns></returns>
+        public async Task<ExchangerateResult> Get_ExchangerateAsync(string id, int dsSequence = 1)
+        {
+            return await GetSync<ExchangerateResult>(id, dsSequence);
+        }
+        /// <summary>
+        /// 批量获取汇率
+        /// </summary>        
+        /// <returns></returns>
+        public async Task<List<Exchangerate>> Batch_Get_ExchangerateAsync(int dsSequence = 1)
+        {
+            return await GetsSync<ExchangerateListResult, Exchangerate>(dsSequence);
+        }
+
+        /// <summary>
+        /// 预算口径    获取单个预算口径
+        /// </summary>        
+        /// <returns></returns>
+        public async Task<BudgetcaliberResult> Get_BudgetcaliberAsync(string id, int dsSequence = 1)
+        {
+            return await GetSync<BudgetcaliberResult>(id, dsSequence);
+        }
+        /// <summary>
+        /// 批量获取预算口径
+        /// </summary>        
+        /// <returns></returns>
+        public async Task<List<Budgetcaliber>> Batch_Get_BudgetcaliberAsync(int dsSequence = 1)
+        {
+            return await GetsSync<BudgetcaliberListResult, Budgetcaliber>(dsSequence);
         }
     }
 }

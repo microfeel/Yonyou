@@ -197,7 +197,7 @@ namespace MicroFeel.Yonyou.Api
         /// <param name="dsSequence"></param>
         /// <param name="callername"></param>
         /// <returns></returns>
-        public async Task<TResult> GetSync<TResult>(int id, int dsSequence = 1, [CallerMemberName] string callername = "")
+        public async Task<TResult> GetSync<TResult>(string id, int dsSequence = 1, [CallerMemberName] string callername = "")
             where TResult : IApiResult
         {
             pathprefix = "api";

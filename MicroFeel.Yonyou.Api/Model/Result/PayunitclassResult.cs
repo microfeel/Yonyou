@@ -6,19 +6,19 @@ using System.Text.Json.Serialization;
 
 namespace MicroFeel.Yonyou.Api.Model.Result
 {
-    public class CodeResult : IApiResult
+    public class PayunitclassResult : IApiResult
     {
         [JsonPropertyName("errcode")]
         public string Errcode { get; set; }
         [JsonPropertyName("errmsg")]
         public string Errmsg { get; set; }
-        [JsonPropertyName("code")]
-        public Code Code { get; set; }
+        [JsonPropertyName("payunitclass")]
+        public Payunitclass Payunitclass { get; set; }
     }
-    public class CodeListResult : DbListResult<Code>
+    public class PayunitclassListResult : DbListResult<Payunitclass>
     {
-        [JsonPropertyName("code")]
-        public override List<Code> List { get; set; }
+        [JsonPropertyName("payunitclass")]
+        public override List<Payunitclass> List { get; set; }
     }
 }
 
