@@ -52,5 +52,20 @@ namespace MicroFeel.Yonyou.Services
         {
             throw new NotImplementedException();
         }
+
+        public List<Store> GetPlaces(string storecode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<Store> GetStores(string brand)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<Store> GetWorkShops(string brand)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -68,10 +69,8 @@ namespace MicroFeel.Yonyou.Api
                 method = membername.Substring(0, index);
             }
             var resourceid = membername.Substring(index + 1);
-            //特殊处理对token和trade
-            method = string.IsNullOrWhiteSpace(method) ? "" : "/" + method;
 
-            var Url = $"{BaseUrl}{pathprefix}/{resourceid}{method}{urlParameter}";
+            var Url = $"{BaseUrl}{pathprefix}/{resourceid}{(string.IsNullOrWhiteSpace(method) ? "" : "/" + method)}{urlParameter}";
             _logger.LogInformation($"{resourceid}/{method} UrlParam is :{Url}");
 
             HttpResponseMessage response;
@@ -94,7 +93,9 @@ namespace MicroFeel.Yonyou.Api
                             _logger.LogError($"{nameof(postData)} 不能为空");
                             throw new ArgumentNullException(nameof(postData));
                         }
-                        response = await httpClient.PostAsync(Url, new StringContent(postData));
+                        var content = new StringContent(postData);
+                        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                        response = await httpClient.PostAsync(Url, content);
                         break;
                     case "get":
                     case "batch_get":
@@ -217,7 +218,7 @@ namespace MicroFeel.Yonyou.Api
             }
             else
             {
-                throw new ApiException(result.Errmsg);
+                throw new ApiException($"({result.Errcode}){result.Errmsg}");
             }
         }
 
@@ -243,7 +244,7 @@ namespace MicroFeel.Yonyou.Api
             }
             else
             {
-                throw new ApiException(result.Errmsg);
+                throw new ApiException($"({result.Errcode}){result.Errmsg}");
             }
         }
 
@@ -290,6 +291,34 @@ namespace MicroFeel.Yonyou.Api
             if (result.Errcode == "0")
             {
                 return result.List;
+            }
+            else
+            {
+                throw new ApiException($"({result.Errcode}){result.Errmsg}");
+            }
+        }
+
+        /// <summary>
+        /// 添加
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <typeparam name="TData"></typeparam>
+        /// <param name="req"></param>
+        /// <param name="data"></param>
+        /// <param name="dsSequence"></param>
+        /// <param name="sync"></param>
+        /// <param name="callername"></param>
+        /// <returns></returns>
+        private async Task<TResult> AddSync<TRequest, TResult, TData>(TRequest req, TData data, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+         where TRequest : ApiRequest
+         where TResult : IApiResult
+        {
+            pathprefix = "api";
+            var result = await CallAsync<TRequest, TResult>(req, JsonSerializer.Serialize(data), callername);
+            if (result.Errcode == "0")
+            {
+                return result;
             }
             else
             {
