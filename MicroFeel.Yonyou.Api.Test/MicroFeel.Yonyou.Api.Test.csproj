@@ -9,21 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MicroFeel.Finance" Version="2.0.0-bate0108.1530" />
     <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.10.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
     <PackageReference Include="coverlet.collector" Version="1.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MicroFeel.Yonyou.Api\MicroFeel.Yonyou.Api.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="MicroFeel.Finance">
-      <HintPath>..\..\Finance\bin\Debug\netstandard2.0\MicroFeel.Finance.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
