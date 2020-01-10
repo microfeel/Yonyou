@@ -4,9 +4,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using MicroFeel.Yonyou.Api.Model.Request;
 using MicroFeel.Yonyou.Api.Model.Result;
+using MicroFeel.Yonyou.Api.Service;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -111,7 +113,7 @@ namespace MicroFeel.Yonyou.Api
                 {
                     response.EnsureSuccessStatusCode();
                     string resultString = await response.Content.ReadAsStringAsync();
-                    _logger.LogInformation($"Call completed .ResultString is :{resultString}");
+                    _logger.LogInformation($"Call completed .ResultString is :{resultString}"); 
                     return JsonSerializer.Deserialize<ResultType>(resultString);
                 }
                 catch (Exception e)
@@ -302,20 +304,19 @@ namespace MicroFeel.Yonyou.Api
         /// 添加
         /// </summary>
         /// <typeparam name="TRequest"></typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <typeparam name="TData"></typeparam>
+        /// <typeparam name="TResult"></typeparam> 
         /// <param name="req"></param>
         /// <param name="data"></param>
         /// <param name="dsSequence"></param>
         /// <param name="sync"></param>
         /// <param name="callername"></param>
         /// <returns></returns>
-        private async Task<TResult> AddSync<TRequest, TResult, TData>(TRequest req, TData data, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+        public async Task<TResult> AddSync<TRequest, TResult>(TRequest req, string data, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
          where TRequest : ApiRequest
          where TResult : IApiResult
         {
             pathprefix = "api";
-            var result = await CallAsync<TRequest, TResult>(req, JsonSerializer.Serialize(data), callername);
+            var result = await CallAsync<TRequest, TResult>(req, data, callername);
             if (result.Errcode == "0")
             {
                 return result;
@@ -326,5 +327,59 @@ namespace MicroFeel.Yonyou.Api
             }
         }
 
+        /// <summary>
+        /// 添加出入库
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <typeparam name="TData"></typeparam>
+        /// <param name="req"></param>
+        /// <param name="data"></param>
+        /// <param name="dsSequence"></param>
+        /// <param name="sync"></param>
+        /// <param name="callername"></param>
+        /// <returns></returns>
+        public async Task<DbResult> AddSync<TData>(TData data, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+        {
+            var req = new BuinessRequest
+            {
+                AppKey = _appKey,
+                FromAccount = _fromAccount,
+                ToAccount = _toAccount,
+                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                TradeId = await TradeidManager.GetTradeidAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                DsSequence = dsSequence,
+                Sync = true ? 1 : 0
+            };
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new DateTimeConverter());
+            var json = "{\"" + typeof(TData).Name.ToLower() + "\":" + JsonSerializer.Serialize(data, options) + "}";
+            return await AddSync<BuinessRequest, DbResult>(req, json, dsSequence, sync, callername);
+        } 
+    }
+    public class DateTimeConverter : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return DateTime.Parse(reader.GetString());
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString("yyyy-MM-dd"));
+        }
+    }
+
+    public class DateTimeNullableConverter : JsonConverter<DateTime?>
+    {
+        public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return string.IsNullOrEmpty(reader.GetString()) ? default(DateTime?) : DateTime.Parse(reader.GetString());
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value?.ToString("yyyy-MM-dd"));
+        }
     }
 }

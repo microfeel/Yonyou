@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace MicroFeel.Yonyou.Api.Model.Request
 {
-    public class StockRequest : CallerRequest
+    public class BuinessRequest : CallerRequest
     {
         [JsonPropertyName("tradeid")]
         public string TradeId { get; set; }

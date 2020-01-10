@@ -183,7 +183,7 @@ namespace MicroFeel.Yonyou.Api
         ///存货编码
         ///</Summary>
         [JsonPropertyName("entry")]
-        public IList<PurchaseorderEntry> Purchaseorderentry { get; set; }
+        public IList<PurchaseorderEntry> PurchaseorderEntry { get; set; }
     }
 
     public class PurchaseorderEntry

@@ -1,75 +1,100 @@
 import requests
 from lxml import etree
 
-plist=[]
+plist = []
 #关联的内类集合
 subclassList = []
 
 class Property(object):
     def __init__(self,n,t,c):
-        self.name=n
-        self.typename=t
-        self.comment=c
+        self.name = n
+        self.typename = t
+        self.comment = c
 
 class Subclass(object):
 
-    def __init__(self,name):
-        self.name=name
-        self.properties =[]
+    def __init__(self,name): 
+        self.name = name
+        self.properties = []
 
     def AddProperty(self,name,typename,comment):
         self.properties.append(Property(name,typename,comment))
 
     def GenCode(self,tab):
-        code = tab+'public class '+self.name +tab+'{'
+        code = tab + 'public class ' + self.name + tab + '{'
 
         for p in self.properties:
-            code += tab+'\t'+AddProperty(p.name,p.typename,p.comment,'\r\t\t\t')
-        code += '\r'+tab+'}'
+            code += tab + '    ' + AddProperty(p.name,p.typename,p.comment,'\n')
+        code += '\n' + tab + '}'
         return code
 
 
 def GetSubclass(name):
     for sc in subclassList:
-        if sc.name==name:
+        if sc.name == name:
             return sc
-    sc =Subclass(name)
+    sc = Subclass(name)
     subclassList.append(sc)
     return sc
 
 def AddCSHeader(classname):
     used = "using System;"
     used += "\rusing System.Collections.Generic;"
-    used += "\rusing System.Text.Json.Serialization;"
-    used += '\r\r' + "namespace MicroFeel.Yonyou.Api"
-    used += '\r' + "{"
-    used += '\r\t' + "public class " + classname + "\r\t{"
+    # used += "\rusing System.Text.Json.Serialization;"
+    used += '\n\n' + "namespace MicroFeel.Finance.Models"
+    used += '\n' + "{"
+    used += '\n    ' + "public class " + classname + "\n    {"
     return used
 
-def AddProperty(name,type,comment,tab ='\r\t\t'):
+def AddProperty(name,type,comment,tab='\n\    '):
     if plist.__contains__(name):
         return ''
     else:
         plist.append(name) 
 
-    if comment== None:
+    if comment == None:
         comment = ''
-    comm = tab +"///<Summary>"
-    comm += tab+"///" + comment
-    comm += tab+"///</Summary>"
-    # attr = tab+'[JsonPropertyName("' + name + '")]'  
+    comm = tab + "///<Summary>"
+    comm += tab + "///" + comment
+    comm += tab + "///</Summary>"
+   # attr = tab + '[JsonPropertyName("' + name.lower() + '")]'
     if type == None:
-        type='string'
-    if type=='number':
+        type = 'string'
+    if type == 'number':
         type = 'float'
-    if type=='date':
+    if type == 'date':
         type = 'DateTime'
+    if type == 'boolean':
+        type = 'bool'
+    p = tab + "public " + type + " " + name.replace('_',' ').title().replace(' ','') + " { get;set; }"
+    return comm  + p
 
-    p = tab+"public " + type + " " + name.replace('_',' ').title().replace(' ','') + " { get;set; }"
-    return comm + p
+def AddSubProperty(jsonname, name,type,comment,tab='\n    '):
+    if plist.__contains__(name):
+        return ''
+    else:
+        plist.append(name) 
+
+    if comment == None:
+        comment = ''
+    comm = tab + "///<Summary>"
+    comm += tab + "///" + comment
+    comm += tab + "///</Summary>"
+    # attr = tab + '[JsonPropertyName("' + jsonname.lower() + '")]'
+    if type == None:
+        type = 'string'
+    if type == 'number':
+        type = 'float'
+    if type == 'date':
+        type = 'DateTime'
+    if type == 'boolean':
+        type = 'bool'
+
+    p = tab + "public " + type + " " + name.replace('_',' ').title().replace(' ','') + " { get;set; }"
+    return comm +     p
 
 def AddTail():
-    content = "\t}\r}"
+    content = "\n}"
     return content 
 
 
@@ -77,14 +102,13 @@ html = requests.get("http://open.yonyouup.com/apiCenter/index")
 
 etree_html = etree.HTML(html.text)
 
-apiurls = etree_html.xpath('//*[@id="allapi"]/div/table/tbody/tr/td/a/@href')
+apiurls = etree_html.xpath('//*[@id="allapi"]/div[6]/table/tbody/tr/td/a/@href')
 
 for url in apiurls:
-    if not url.endswith("_add"): continue 
-    #fullurl = "http://open.yonyouup.com/apiCenter/" + url
-    url ="saleout_get";
-    fullurl="http://open.yonyouup.com/apiCenter/"+ url;
-    classname = url.replace('/','').replace('_get','').title()
+    if not url.endswith("_add"): continue
+    # url ="saleout_get";
+    fullurl = "http://open.yonyouup.com/apiCenter/" + url
+    classname = url.replace('/','').replace("_add","").title()
     filecontent = AddCSHeader(classname)
     html = requests.get(fullurl)
     body = etree.HTML(html.text)
@@ -104,26 +128,44 @@ for url in apiurls:
             namestr = tds[0].text
 
         typestr = tds[1].text
-        last= len(tds)-1
+        last = len(tds) - 1 
         #生成内类
-        if len(tds) >= 4 and tds[2]!= None and tds[2].text != None and tds[2].text != '\xa0':
-            namestr = url.replace('/','').replace('_get','').title()+tds[2].text.title()
-            typestr = 'IList<'+namestr+'>'
-            sc=GetSubclass(namestr)
-            sc.AddProperty(tds[0].text, tds[1].text,tds[last].text);
+        if len(tds) >= 4 and tds[2] != None and tds[2].text != None and tds[2].text != '\xa0':
+            namestr = url.replace('/','').replace('_add','').title() + tds[2].text.title()
+            typestr = 'IList<' + namestr + '>' 
+        filecontent = filecontent + AddSubProperty((tds[2].text if tds[2].text else namestr),namestr,typestr,tds[last].text)
 
-        filecontent = filecontent + AddProperty(namestr,typestr,tds[last].text)
+    filecontent += "\t}"
 
+    for tr in trelements:
+        tds = tr.xpath('.//td')
+        #表头,直接跳过
+        if len(tds) == 0:
+            continue
+        if tds[0].text == None:
+            namestr = tds[0].xpath('./a/text()')[0]
+        else:
+            namestr = tds[0].text
+
+        typestr = tds[1].text
+        last = len(tds) - 1 
+        #生成内类
+        if len(tds) >= 4 and tds[2] != None and tds[2].text != None and tds[2].text != '\xa0':
+            namestr = url.replace('/','').replace('_add','').title() + tds[2].text.title()
+            typestr = 'IList<' + namestr + '>'
+            sc = GetSubclass(namestr)
+            sc.AddProperty(tds[0].text, tds[1].text,tds[last].text) 
+        
     #添加内类
-    filecontent += '\r'
+    filecontent += '\n'
     for sc in subclassList:
-        filecontent +=  sc.GenCode('\r\t\t')
+        filecontent +=  sc.GenCode('\n    ')
     #添加尾
-    filecontent = filecontent + '\r' + AddTail()    
+    filecontent = filecontent + '\n' + AddTail()    
     print(filecontent)
 
     #保存到文件
-    csfile = open('d:\\results\\model\\'+classname+'.cs', 'wt',encoding="utf-8")
+    csfile = open('d:\\results\\model\\' + classname + '.cs', 'wt',encoding="utf-8")
     csfile.write(filecontent)
     csfile.close()
 

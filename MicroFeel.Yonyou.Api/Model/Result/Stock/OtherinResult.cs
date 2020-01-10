@@ -10,15 +10,9 @@ using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model
         public string Errmsg { get; set; }
     }
 
-    public class OtherinListResult : DbListResult<Otherin>, IApiResult
+    public class OtherinListResult : DbListResult<Otherin>
     {
-        [JsonPropertyName("errcode")]
-
-        public string Errcode { get; set; }
-
-        [JsonPropertyName("errmsg")]
-
-        public string Errmsg { get; set; }
+       
         [JsonPropertyName("otherinlist")]
         public override List<Otherin> List { get; set; }
     }

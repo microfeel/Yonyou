@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4233a4e3-995d-47f0-a847-b5fa0343f9fe}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>GetPageContents.py</StartupFile>
+    <StartupFile>GetResult.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>

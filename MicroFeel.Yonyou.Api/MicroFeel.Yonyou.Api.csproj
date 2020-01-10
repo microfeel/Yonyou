@@ -17,6 +17,7 @@
   <ItemGroup>
     <Folder Include="Model\Data\Purchasere\" />
     <Folder Include="Model\Result\Stock\" />
+    <Folder Include="Model\Result\Purchasere\" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model.Result;using System.Text.Json.Serialization;namespace MicroFeel.Yonyou.Api{
-    public class TransvouchResult : Transvouch, IApiResult
+    public class PurchaseinvoiceResult : Purchaseinvoice, IApiResult
     {
         [JsonPropertyName("errcode")]
 
@@ -10,10 +10,9 @@ using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model
         public string Errmsg { get; set; }
     }
 
-    public class TransvouchListResult : DbListResult<Transvouch>
+    public class PurchaseinvoiceListResult : DbListResult<Purchaseinvoice>
     {
-       
-        [JsonPropertyName("transvouchlist")]
-        public override List<Transvouch> List { get; set; }
+        [JsonPropertyName("purchaseinvoicelist")]
+        public override List<Purchaseinvoice> List { get; set; }
     }
 }

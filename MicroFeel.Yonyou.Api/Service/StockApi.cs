@@ -54,7 +54,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <returns>BillResult</returns>
         public async Task<DbResult> Add_ProductinAsync(Productin productin, int dsSequence = 1, bool sync = true)
         {
-            return await AddStockSync(productin, dsSequence, sync);
+            return await AddSync(productin, dsSequence, sync);
         }
         /// <summary>
         /// 其他入库单   批量获取其他入库信息 
@@ -117,7 +117,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <returns>BillResult</returns>
         public async Task<DbResult> Add_OtherinSync(Otherin otherin, int dsSequence = 1, bool sync = true)
         {
-            return await AddStockSync(otherin, dsSequence, sync);
+            return await AddSync(otherin, dsSequence, sync);
         }
         /// <summary>
         /// 弃审其他入库单（工作流） 
@@ -312,7 +312,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async Task<DbResult> Add_PurchaseinAsync(Purchasein purchasein, int dsSequence = 1, bool sync = true)
         {
-            return await AddStockSync(purchasein, dsSequence, sync);
+            return await AddSync(purchasein, dsSequence, sync);
         }
 
         /// <summary>
@@ -339,72 +339,6 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个销售出库单   
         /// </summary> 
         /// <return></return>
-        public object get_saleout() { return null; }
-
-        /// <summary>
-        /// 添加出入库
-        /// </summary>
-        /// <typeparam name="TRequest"></typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <typeparam name="TData"></typeparam>
-        /// <param name="req"></param>
-        /// <param name="data"></param>
-        /// <param name="dsSequence"></param>
-        /// <param name="sync"></param>
-        /// <param name="callername"></param>
-        /// <returns></returns>
-        private async Task<DbResult> AddStockSync<TData>(TData data, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
-        {
-            pathprefix = "api";
-            var req = new StockRequest
-            {
-                AppKey = _appKey,
-                FromAccount = _fromAccount,
-                ToAccount = _toAccount,
-                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
-                TradeId = await TradeidManager.GetTradeidAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
-                DsSequence = dsSequence,
-                Sync = true ? 1 : 0
-            };
-            var options = new JsonSerializerOptions();
-            options.Converters.Add(new DateTimeConverter());
-            var json = "{\"" + typeof(TData).Name.ToLower() + "\":" + JsonSerializer.Serialize(data, options) + "}";
-            var result = await CallAsync<StockRequest, DbResult>(req, json, callername);
-            if (result.Errcode == "0")
-            {
-                return result;
-            }
-            else
-            {
-                throw new ApiException($"({result.Errcode}){result.Errmsg}");
-            }
-        }
-
-
-    }
-    public class DateTimeConverter : JsonConverter<DateTime>
-    {
-        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            return DateTime.Parse(reader.GetString());
-        }
-
-        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString("yyyy-MM-dd"));
-        }
-    }
-
-    public class DateTimeNullableConverter : JsonConverter<DateTime?>
-    {
-        public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            return string.IsNullOrEmpty(reader.GetString()) ? default(DateTime?) : DateTime.Parse(reader.GetString());
-        }
-
-        public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value?.ToString("yyyy-MM-dd"));
-        }
-    }
+        public object get_saleout() { return null; } 
+    } 
 }
