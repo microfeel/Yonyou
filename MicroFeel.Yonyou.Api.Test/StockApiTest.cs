@@ -11,7 +11,7 @@ namespace MicroFeel.Yonyou.Api.Test
     public class StockApiTest : ApiTest
     {
         [TestMethod]
-        public async Task GetProductAsync()
+        public async Task BatchGetProductAsync()
         {
             var api = new StockApi();
             api.Init(base_url, appkey, appSecret, from_account, to_account);
@@ -65,7 +65,7 @@ namespace MicroFeel.Yonyou.Api.Test
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = api.Add_PurchaseinAsync(new Purchasein()
             {
-                Code = "1234",
+                Code = "0000001263",
                 Maker = "测试",
                 Date = DateTime.Now,
                 Define8 = "高柏诗",
@@ -99,6 +99,15 @@ namespace MicroFeel.Yonyou.Api.Test
             }).Result;
             Console.WriteLine(result.Tradeid);
             Assert.IsTrue(result.Errcode == "0");
+        }
+
+        [TestMethod]
+        public async Task BatchGetPurchaseinAsync() {
+            var api = new StockApi();
+            api.Init(base_url, appkey, appSecret, from_account, to_account);
+            var result = await api.Batch_Get_PurchaseinlistAsync();
+            Assert.IsNotNull(result);
+            System.Console.WriteLine($"Purchasein( is :{result}");
         }
     }
 }

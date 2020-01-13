@@ -289,7 +289,10 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 采购入库单   获取采购入库单列表 
         /// </summary> 
         /// <return></return>
-        public object batch_get_purchaseinlist() { return null; }
+        public async Task<List<Purchasein>> Batch_Get_PurchaseinlistAsync(int dsSequence = 1)
+        {
+            return await GetsSync<PurchaseinListResult, Purchasein>(dsSequence);
+        }
         /// <summary>
         /// 审核一张采购入库单   
         /// </summary> 
