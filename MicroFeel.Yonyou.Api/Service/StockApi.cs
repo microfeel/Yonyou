@@ -312,7 +312,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async Task<DbResult> Add_PurchaseinAsync(Purchasein purchasein, int dsSequence = 1, bool sync = true)
         {
-            return await AddSync(purchasein, dsSequence, sync, "1234");
+            return await AddSync(purchasein, dsSequence, sync, "PRPO20191230327");
         }
 
         /// <summary>

@@ -65,7 +65,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var api = new PurchaseApi();
             api.Init(base_url, appkey, appSecret, from_account, to_account);
-            var result = await api.Get_PurchaseorderAsync("1234");
+            var result = await api.Get_PurchaseorderAsync("PRPO20191230327");
             Console.WriteLine(result);
             Assert.IsNotNull(result);
         }
