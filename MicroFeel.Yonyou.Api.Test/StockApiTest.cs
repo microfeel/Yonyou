@@ -60,12 +60,12 @@ namespace MicroFeel.Yonyou.Api.Test
         /// </summary>
         [TestMethod]
         public void AddPurchasein()
-        { 
+        {
             var api = new StockApi();
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = api.Add_PurchaseinAsync(new Purchasein()
             {
-                Code = "0000001263",
+                Code = "0000101263",
                 Maker = "测试",
                 Date = DateTime.Now,
                 Define8 = "高柏诗",
@@ -75,7 +75,7 @@ namespace MicroFeel.Yonyou.Api.Test
                 Warehousecode = "1001",
                 Departmentname = "信息技术部",
                 Receivename = "委外入库",
-                Vendorabbname = "珠海祥茂辉", 
+                Vendorabbname = "珠海祥茂辉",
                 Vendorcode = "010105",
                 Vendorname = "珠海祥茂辉",
                 Taxrate = 1,
@@ -94,18 +94,29 @@ namespace MicroFeel.Yonyou.Api.Test
                                         Cmassunitname = "支",
                                         Inventoryname = "轻盈感光隔离霜（金色）支盒",
                                         Inventorystd = "JGNT24",
-                                        Ioritaxcost = 10 
+                                        Ioritaxcost = 10
                                     }  }
-            }).Result;
+            }, "PRPO20191230327").Result;
             Console.WriteLine(result.Tradeid);
             Assert.IsTrue(result.Errcode == "0");
         }
 
         [TestMethod]
-        public async Task BatchGetPurchaseinAsync() {
+        public async Task BatchGetPurchaseinAsync()
+        {
             var api = new StockApi();
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = await api.Batch_Get_PurchaseinlistAsync();
+            Assert.IsNotNull(result);
+            System.Console.WriteLine($"Purchasein( is :{result}");
+        }
+
+        [TestMethod]
+        public async Task GetPurchaseinAsync()
+        {
+            var api = new StockApi();
+            api.Init(base_url, appkey, appSecret, from_account, to_account);
+            var result = await api.Get_PurchaseinAsync("0000001263");
             Assert.IsNotNull(result);
             System.Console.WriteLine($"Purchasein( is :{result}");
         }

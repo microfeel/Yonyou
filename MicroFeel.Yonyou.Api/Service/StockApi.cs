@@ -307,15 +307,18 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个采购入库单   
         /// </summary> 
         /// <return></return>
-        public object get_purchasein() { return null; }
+        public async Task<PurchaseinResult> Get_PurchaseinAsync(string id, int dsSequence = 1)
+        {
+            return await GetSync<PurchaseinResult>(id, dsSequence);
+        }
 
         /// <summary>
         /// 新增一张采购入库单   
         /// </summary> 
         /// <return></return>
-        public async Task<DbResult> Add_PurchaseinAsync(Purchasein purchasein, int dsSequence = 1, bool sync = true)
+        public async Task<DbResult> Add_PurchaseinAsync(Purchasein purchasein, string bizId, int dsSequence = 1, bool sync = true)
         {
-            return await AddSync(purchasein, dsSequence, sync, "PRPO20191230327");
+            return await AddSync(purchasein, dsSequence, sync, bizId);
         }
 
         /// <summary>

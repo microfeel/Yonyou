@@ -353,7 +353,7 @@ namespace MicroFeel.Yonyou.Api
                 BizId = bizId,
                 TradeId = bizId ?? await TradeidManager.GetTradeidAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
                 DsSequence = dsSequence,
-                Sync = true ? 1 : 0
+                Sync = sync ? 1 : 0
             };
             var options = new JsonSerializerOptions();
             options.Converters.Add(new DateTimeConverter());
