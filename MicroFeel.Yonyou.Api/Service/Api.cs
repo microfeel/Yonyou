@@ -113,8 +113,10 @@ namespace MicroFeel.Yonyou.Api
                 {
                     response.EnsureSuccessStatusCode();
                     string resultString = await response.Content.ReadAsStringAsync();
-                    _logger.LogInformation($"Call completed .ResultString is :{resultString}"); 
-                    return JsonSerializer.Deserialize<ResultType>(resultString);
+                    _logger.LogInformation($"Call completed .ResultString is :{resultString}");
+                    var options = new JsonSerializerOptions();
+                    options.Converters.Add(new DateTimeConverter());
+                    return JsonSerializer.Deserialize<ResultType>(resultString, options);
                 }
                 catch (Exception e)
                 {
@@ -335,11 +337,12 @@ namespace MicroFeel.Yonyou.Api
         /// <typeparam name="TData"></typeparam>
         /// <param name="req"></param>
         /// <param name="data"></param>
+        /// <param name="bizId">上级单号</param>
         /// <param name="dsSequence"></param>
         /// <param name="sync"></param>
         /// <param name="callername"></param>
         /// <returns></returns>
-        public async Task<DbResult> AddSync<TData>(TData data, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+        public async Task<DbResult> AddSync<TData>(TData data, int dsSequence = 1, bool sync = true, string bizId = null, [CallerMemberName] string callername = "")
         {
             var req = new BuinessRequest
             {
@@ -347,7 +350,8 @@ namespace MicroFeel.Yonyou.Api
                 FromAccount = _fromAccount,
                 ToAccount = _toAccount,
                 Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
-                TradeId = await TradeidManager.GetTradeidAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                BizId = bizId,
+                TradeId = bizId ?? await TradeidManager.GetTradeidAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
                 DsSequence = dsSequence,
                 Sync = true ? 1 : 0
             };
@@ -355,7 +359,7 @@ namespace MicroFeel.Yonyou.Api
             options.Converters.Add(new DateTimeConverter());
             var json = "{\"" + typeof(TData).Name.ToLower() + "\":" + JsonSerializer.Serialize(data, options) + "}";
             return await AddSync<BuinessRequest, DbResult>(req, json, dsSequence, sync, callername);
-        } 
+        }
     }
     public class DateTimeConverter : JsonConverter<DateTime>
     {

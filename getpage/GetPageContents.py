@@ -104,11 +104,13 @@ etree_html = etree.HTML(html.text)
 
 apiurls = etree_html.xpath('//*[@id="allapi"]/div[6]/table/tbody/tr/td/a/@href')
 
+removefield="_get";
+
 for url in apiurls:
-    if not url.endswith("_add"): continue
-    # url ="saleout_get";
+    if not url.endswith(removefield): continue
+    url ="bom_get";
     fullurl = "http://open.yonyouup.com/apiCenter/" + url
-    classname = url.replace('/','').replace("_add","").title()
+    classname = url.replace('/','').replace(removefield,"").title()
     filecontent = AddCSHeader(classname)
     html = requests.get(fullurl)
     body = etree.HTML(html.text)
@@ -131,7 +133,7 @@ for url in apiurls:
         last = len(tds) - 1 
         #生成内类
         if len(tds) >= 4 and tds[2] != None and tds[2].text != None and tds[2].text != '\xa0':
-            namestr = url.replace('/','').replace('_add','').title() + tds[2].text.title()
+            namestr = url.replace('/','').replace(removefield,'').title() + tds[2].text.title()
             typestr = 'IList<' + namestr + '>' 
         filecontent = filecontent + AddSubProperty((tds[2].text if tds[2].text else namestr),namestr,typestr,tds[last].text)
 
@@ -151,7 +153,7 @@ for url in apiurls:
         last = len(tds) - 1 
         #生成内类
         if len(tds) >= 4 and tds[2] != None and tds[2].text != None and tds[2].text != '\xa0':
-            namestr = url.replace('/','').replace('_add','').title() + tds[2].text.title()
+            namestr = url.replace('/','').replace(removefield,'').title() + tds[2].text.title()
             typestr = 'IList<' + namestr + '>'
             sc = GetSubclass(namestr)
             sc.AddProperty(tds[0].text, tds[1].text,tds[last].text) 

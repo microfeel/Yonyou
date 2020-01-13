@@ -10,6 +10,12 @@ namespace MicroFeel.Yonyou.Api.Model.Request
         [JsonPropertyName("tradeid")]
         public string TradeId { get; set; }
 
+        /// <summary>
+        /// 上游id，需要保证biz_id与ERP主键唯一对应关系，tradeid与biz_id只能传入一个
+        /// </summary>
+        [JsonPropertyName("biz_id")]
+        public string BizId { get; set; }
+
         [JsonPropertyName("ds_sequence")]
         public int DsSequence { get; set; }
 
@@ -18,7 +24,9 @@ namespace MicroFeel.Yonyou.Api.Model.Request
 
         public override string ToString()
         {
-            return $"{base.ToString()}&tradeid={TradeId}&ds_sequence={DsSequence}&sync={Sync}";
+            if (string.IsNullOrEmpty(BizId))
+                return $"{base.ToString()}&tradeid={TradeId}&ds_sequence={DsSequence}&sync={Sync}";
+            return $"{base.ToString()}&biz_id={BizId}&ds_sequence={DsSequence}&sync={Sync}";
         }
-    } 
+    }
 }

@@ -15,12 +15,18 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 物料清单 获取单个物料清单    
         /// </summary> 
         /// <return></return>
-        public object get_bom() { return null; }
+        public async System.Threading.Tasks.Task<BomResult> Get_BomAsync(string id, int dsSequence = 1)
+        {
+            return await GetSync<BomResult>(id, dsSequence);
+        }
         /// <summary>
         /// 批量获取物料清单    
         /// </summary> 
         /// <return></return>
-        public object batch_get_bom() { return null; }
+        public async System.Threading.Tasks.Task<List<BomBatch>> Batch_Get_BomAsync(int dsSequence = 1)
+        {
+            return await GetsSync<BomListResult, BomBatch>(dsSequence);
+        }
 
     }
 }

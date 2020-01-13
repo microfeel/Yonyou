@@ -312,7 +312,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async Task<DbResult> Add_PurchaseinAsync(Purchasein purchasein, int dsSequence = 1, bool sync = true)
         {
-            return await AddSync(purchasein, dsSequence, sync);
+            return await AddSync(purchasein, dsSequence, sync, "1234");
         }
 
         /// <summary>
@@ -339,6 +339,6 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单个销售出库单   
         /// </summary> 
         /// <return></return>
-        public object get_saleout() { return null; } 
-    } 
+        public object get_saleout() { return null; }
+    }
 }
