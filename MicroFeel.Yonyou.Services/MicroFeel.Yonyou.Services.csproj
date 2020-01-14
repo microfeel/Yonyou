@@ -5,13 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MicroFeel.Yonyou.Api\MicroFeel.Yonyou.Api.csproj" />
+    <PackageReference Include="MicroFeel.Finance" Version="2.0.0-bate0114.1042" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="MicroFeel.Finance">
-      <HintPath>..\..\Finance\src\MicroFeel.Finance\bin\Debug\netstandard2.0\MicroFeel.Finance.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\MicroFeel.Yonyou.Api\MicroFeel.Yonyou.Api.csproj" />
   </ItemGroup>
 
 </Project>

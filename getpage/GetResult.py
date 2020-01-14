@@ -19,7 +19,7 @@ def AddTail():
     content = "\t}\r"
     return content 
 
-subdir="Bom"
+subdir="Sale"
 path = "D:\git\Yonyou\MicroFeel.Yonyou.Api\Model\Data\\"+subdir #文件夹目录
 files= os.listdir(path) #得到文件夹下的所有文件名称
 

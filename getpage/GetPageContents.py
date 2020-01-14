@@ -102,13 +102,12 @@ html = requests.get("http://open.yonyouup.com/apiCenter/index")
 
 etree_html = etree.HTML(html.text)
 
-apiurls = etree_html.xpath('//*[@id="allapi"]/div[6]/table/tbody/tr/td/a/@href')
+apiurls = etree_html.xpath('//*[@id="allapi"]/div[5]/table/tbody/tr/td/a/@href')
 
-removefield="_get";
+removefield="_add";
 
 for url in apiurls:
-    if not url.endswith(removefield): continue
-    url ="bom_get";
+    if not url.endswith(removefield): continue 
     fullurl = "http://open.yonyouup.com/apiCenter/" + url
     classname = url.replace('/','').replace(removefield,"").title()
     filecontent = AddCSHeader(classname)

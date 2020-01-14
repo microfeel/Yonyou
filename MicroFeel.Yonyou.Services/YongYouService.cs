@@ -3,6 +3,7 @@ using MicroFeel.Finance.Models;
 using MicroFeel.Yonyou.Api.Service;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,7 +11,22 @@ namespace MicroFeel.Yonyou.Services
 {
     public class YongYouService : IFinanceService
     {
-        StockApi stockApi = new StockApi();
+        private const string appkey = "opaddd40e399ef4e98a";
+        private const string appSecret = "ee5e0ee78c5942ef91686b61d2b76239";
+        private const string from_account = "microfeel";
+        private const string to_account = "test_microfeel";
+        private const string base_url = "https://api.yonyouup.com/";
+        private StockApi stockApi = new StockApi();
+        private SystemApi systemApi = new SystemApi();
+        private BasicApi basicApi = new BasicApi();
+
+        public YongYouService()
+        {
+            stockApi.Init(base_url, appkey, appSecret, from_account, to_account);
+            systemApi.Init(base_url, appkey, appSecret, from_account, to_account);
+            basicApi.Init(base_url, appkey, appSecret, from_account, to_account);
+        }
+
         public Customer AddCustomer(Customer customer)
         {
             throw new NotImplementedException();
@@ -62,11 +78,6 @@ namespace MicroFeel.Yonyou.Services
             throw new NotImplementedException();
         }
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
         public IList<Account> GetAccount()
         {
             throw new NotImplementedException();
@@ -84,12 +95,14 @@ namespace MicroFeel.Yonyou.Services
 
         public List<Store> GetPlaces(string storecode)
         {
-            throw new NotImplementedException();
+            return new List<Store>();
+
         }
 
         public List<Store> GetStores(string brand)
         {
-            throw new NotImplementedException();
+            return basicApi.Batch_Get_WarehouseAsync().Result.Select<Api.Warehouse, Store>(t => { return t.To<Store>(); }).ToList();
+
         }
 
         public IList<VoucherTemplate> GetVoucherTemplate(IEnumerable<string> tempTypeNames)
@@ -104,12 +117,12 @@ namespace MicroFeel.Yonyou.Services
 
         public List<Store> GetWorkShops(string brand)
         {
-            throw new NotImplementedException();
+            return basicApi.Batch_Get_DepartmentAsync().Result.Select<Api.Department, Store>(t => { return t.To<Store>(); }).ToList();
         }
 
         public Task<Datasource> Get_DatasourceAsync()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         #region Stock
@@ -160,5 +173,12 @@ namespace MicroFeel.Yonyou.Services
             throw new NotImplementedException();
         }
         #endregion
+
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

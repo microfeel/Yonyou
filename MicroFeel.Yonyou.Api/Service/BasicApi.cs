@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace MicroFeel.Yonyou.Api
+namespace MicroFeel.Yonyou.Api.Service
 {
     /// <summary>
     /// 基础档案 API  88

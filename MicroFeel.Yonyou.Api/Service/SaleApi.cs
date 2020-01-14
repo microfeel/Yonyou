@@ -1,4 +1,7 @@
-﻿namespace MicroFeel.Yonyou.Api.Service
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+namespace MicroFeel.Yonyou.Api.Service
 {
     /// <summary>
     /// 销售管理API  33个
@@ -11,7 +14,10 @@
         /// 发货单 获取发货单列表信息   
         /// </summary> 
         /// <return></return>
-        public object batch_get_consignmentlist() { return null; }
+        public async System.Threading.Tasks.Task<List<Consignment>> Batch_Get_ConsignmentlistAsync(int dsSequence)
+        {
+            return await GetsSync<ConsignmentListResult, Consignment>(dsSequence);
+        }
         /// <summary>
         /// 审核一张发货单 
         /// </summary> 
@@ -36,7 +42,10 @@
         /// 获取单张发货单 
         /// </summary> 
         /// <return></return>
-        public object get_consignment() { return null; }
+        public async System.Threading.Tasks.Task<ConsignmentResult> Get_ConsignmentAsync(string id, int dsSequence)
+        {
+            return await GetSync<ConsignmentResult>(id, dsSequence);
+        }
         /// <summary>
         /// 获取发货单工作流按钮是否可用状态    
         /// </summary> 
@@ -51,7 +60,10 @@
         /// 新增一张发货单 
         /// </summary> 
         /// <return></return>
-        public object add_consignment() { return null; }
+        public async System.Threading.Tasks.Task<DbResult> Add_ConsignmentAsync(Consignment  consignment, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+        {
+            return await AddSync(consignment, dsSequence, sync, callername);
+        }
         /// <summary>
         /// 弃审发货单   
         /// </summary> 
@@ -81,7 +93,10 @@
         /// 新增一张销售发票    
         /// </summary> 
         /// <return></return>
-        public object add_saleinvoice() { return null; }
+        public async System.Threading.Tasks.Task<DbResult> Add_SaleinvoiceAsync(Saleinvoice  saleinvoice, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+        {
+            return await AddSync(saleinvoice, dsSequence, sync, callername);
+        }
         /// <summary>
         /// 销售结账状态  批量获取销售结账状态 
         /// </summary> 
@@ -91,7 +106,10 @@
         /// 销售订单    获取销售订单列表信息 
         /// </summary> 
         /// <return></return>
-        public object batch_get_saleorderlist() { return null; }
+        public async System.Threading.Tasks.Task<List<Saleorder>> Batch_Get_SaleorderlistAsync(int dsSequence)
+        {
+            return await GetsSync<SaleorderListResult, Saleorder>(dsSequence);
+        }
         /// <summary>
         /// 审核一张销售订单    
         /// </summary> 
@@ -121,7 +139,10 @@
         /// 获取单张销售订单    
         /// </summary> 
         /// <return></return>
-        public object get_saleorder() { return null; }
+        public async System.Threading.Tasks.Task<SaleorderResult> Get_SaleorderAsync(string id, int dsSequence)
+        {
+            return await GetSync<SaleorderResult>(id, dsSequence);
+        }
         /// <summary>
         /// 关闭一张销售订单    
         /// </summary> 
@@ -141,7 +162,10 @@
         /// 新增一张销售订单    
         /// </summary> 
         /// <return></return>
-        public object add_saleorder() { return null; }
+        public async System.Threading.Tasks.Task<DbResult> Add_SaleorderAsync(Saleorder  saleorder, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
+        {
+            return await AddSync(saleorder, dsSequence, sync, callername);
+        }
         /// <summary>
         /// 弃审销售订单  
         /// </summary> 
@@ -151,7 +175,10 @@
         /// 销售退货单   获取销售退货单列表信息 
         /// </summary> 
         /// <return></return>
-        public object batch_get_returnorderlist() { return null; }
+        public async System.Threading.Tasks.Task<List<Returnorder>> Batch_Get_ReturnorderlistAsync(int dsSequence)
+        {
+            return await GetsSync<ReturnorderListResult, Returnorder>(dsSequence);
+        }
         /// <summary>
         /// 审核一张销售退货单   
         /// </summary> 
@@ -166,13 +193,17 @@
         /// 获取单个销售退货单   
         /// </summary> 
         /// <return></return>
-        public object get_returnorder() { return null; }
+        public async System.Threading.Tasks.Task<Returnorder> Get_ReturnorderAsync(string id, int dsSequence)
+        {
+            return await GetSync<ReturnorderResult>(id, dsSequence);
+        }
         /// <summary>
         /// 新增一张销售退货单   
         /// </summary> 
         /// <return></return>
-        public object add_returnorder() { return null; }
-
-
+        public async System.Threading.Tasks.Task<DbResult> Add_ReturnorderAsync(Returnorder returnorder, int dsSequence=1,bool sync=true, [CallerMemberName] string callername = "") 
+        {
+            return await AddSync(returnorder, dsSequence, sync, callername);
+        } 
     }
 }
