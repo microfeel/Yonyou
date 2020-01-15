@@ -356,6 +356,7 @@ namespace MicroFeel.Yonyou.Api
                 Sync = sync ? 1 : 0
             };
             var options = new JsonSerializerOptions();
+            options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All);
             options.Converters.Add(new DateTimeConverter());
             var json = "{\"" + typeof(TData).Name.ToLower() + "\":" + JsonSerializer.Serialize(data, options) + "}";
             return await AddSync<BuinessRequest, DbResult>(req, json, dsSequence, sync, callername);

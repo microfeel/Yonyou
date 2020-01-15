@@ -47,7 +47,9 @@ namespace MicroFeel.Yonyou.Api.Test
             });
 
             Assert.IsNotNull(result);
-            System.Console.WriteLine($"Purchaseorder is :{result}");
+            var jsonResult = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);
+
+            System.Console.WriteLine($"Purchaseorder is :{jsonResult}");
         }
 
         [TestMethod]
@@ -66,8 +68,9 @@ namespace MicroFeel.Yonyou.Api.Test
             var api = new PurchaseApi();
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = await api.Get_PurchaseorderAsync("PRPO20191230327");
-            Console.WriteLine(result);
-            Assert.IsNotNull(result);
+            var jsonResult = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);
+            Console.WriteLine(jsonResult);
+            Assert.IsNotNull(jsonResult);
         }
 
         [TestMethod]

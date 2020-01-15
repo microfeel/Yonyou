@@ -26,7 +26,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_AccountAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -36,7 +36,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_AccountAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -47,7 +47,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_PayunitclassAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -57,7 +57,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "03";
             var result = await api.Get_PayunitclassAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -68,7 +68,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_PayunitAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -78,7 +78,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_PayunitAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -89,7 +89,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_PersonAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -99,7 +99,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "BG637";
             var result = await api.Get_PersonAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -110,7 +110,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_PersontypeAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -120,7 +120,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "101";
             var result = await api.Get_PersontypeAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -131,7 +131,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_WarehouseAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -141,7 +141,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "1002";
             var result = await api.Get_WarehouseAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -152,7 +152,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_PeriodAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -163,7 +163,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_VendorAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -173,7 +173,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "010104";
             var result = await api.Get_VendorAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -184,7 +184,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_VendorclassAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -194,7 +194,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "0101";
             var result = await api.Get_VendorclassAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -205,7 +205,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_Vendor_BankAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -215,7 +215,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_Vendor_BankAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -226,7 +226,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_DsignAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -236,7 +236,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "6";
             var result = await api.Get_DsignAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -247,7 +247,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_DistrictclassAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -257,7 +257,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "11";
             var result = await api.Get_DistrictclassAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -269,7 +269,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_InventoryclassAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -279,7 +279,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "11105";
             var result = await api.Get_InventoryclassAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -290,17 +290,17 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_InventoryAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
         [TestMethod]
         public async Task Get_Inventory()
         {
-            var id = "111010006";
+            var id = "131030069";
             var result = await api.Get_InventoryAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -311,7 +311,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_CustomerAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -321,7 +321,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "102011";
             var result = await api.Get_CustomerAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -332,7 +332,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_CustomerclassAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -342,7 +342,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "103";
             var result = await api.Get_CustomerclassAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -353,7 +353,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_CustomeraddressAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -363,7 +363,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "276002";
             var result = await api.Get_CustomeraddressAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -374,7 +374,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_CustomercontactsAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -384,7 +384,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "00000018";
             var result = await api.Get_CustomercontactsAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -395,7 +395,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_Customer_BankAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -405,7 +405,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_Customer_BankAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -416,7 +416,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_CurrencyAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -426,7 +426,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "RMB";
             var result = await api.Get_CurrencyAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -437,7 +437,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_DigestAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -447,7 +447,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_DigestAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -458,7 +458,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_AgreementAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -468,7 +468,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_AgreementAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -479,7 +479,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_ReceivesendtypeAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -489,7 +489,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "102";
             var result = await api.Get_ReceivesendtypeAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -500,7 +500,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_AccountingbankAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -510,7 +510,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_AccountingbankAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -521,7 +521,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_ExchangerateAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -531,7 +531,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_ExchangerateAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -542,7 +542,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_CashflowitemAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -552,7 +552,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "03";
             var result = await api.Get_CashflowitemAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -563,7 +563,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_CodeAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -573,7 +573,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "122101";
             var result = await api.Get_CodeAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -584,7 +584,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_SettlestyleAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -594,7 +594,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "1";
             var result = await api.Get_SettlestyleAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -605,7 +605,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_CodeschemeAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -615,7 +615,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "rd_style";
             var result = await api.Get_CodeschemeAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -626,7 +626,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_JobAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -636,7 +636,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "001";
             var result = await api.Get_JobAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -647,7 +647,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_DutyAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -657,7 +657,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "001";
             var result = await api.Get_DutyAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -668,7 +668,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_DutytypeAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -678,7 +678,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "7";
             var result = await api.Get_DutytypeAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -689,7 +689,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_DefineAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -700,7 +700,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_FreearchAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -710,7 +710,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_FreearchAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -721,7 +721,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_UnitAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -731,7 +731,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "0301";
             var result = await api.Get_UnitAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -742,7 +742,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_ExpenseitemAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -752,7 +752,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_ExpenseitemAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -763,7 +763,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_ExpitemclassAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -773,7 +773,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_ExpitemclassAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -784,7 +784,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_DepartmentAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -794,7 +794,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "0901";
             var result = await api.Get_DepartmentAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -805,7 +805,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_BankAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -815,7 +815,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "00005";
             var result = await api.Get_BankAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -826,7 +826,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_SaletypeAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -836,7 +836,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "02";
             var result = await api.Get_SaletypeAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -849,7 +849,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_FitemAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -860,7 +860,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_FitemclassAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -871,7 +871,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_FitemcategoryAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -881,7 +881,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_FitemcategoryAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
@@ -892,7 +892,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var result = await api.Batch_Get_BudgetcaliberAsync();
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
 
@@ -902,7 +902,7 @@ namespace MicroFeel.Yonyou.Api.Test
             var id = "999";
             var result = await api.Get_BudgetcaliberAsync(id);
             Assert.IsNotNull(result);
-            var json = JsonSerializer.Serialize(result);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine($"{json}");
         }
         #endregion
