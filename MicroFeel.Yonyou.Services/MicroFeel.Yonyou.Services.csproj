@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MicroFeel.Finance" Version="2.0.0-bate0114.1042" />
+    <PackageReference Include="MicroFeel.Finance" Version="2.0.0-beta0115.2" />
   </ItemGroup>
 
   <ItemGroup>
