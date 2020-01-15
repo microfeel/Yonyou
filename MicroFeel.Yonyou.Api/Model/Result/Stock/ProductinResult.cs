@@ -1,13 +1,7 @@
 using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model.Result;using System.Text.Json.Serialization;namespace MicroFeel.Yonyou.Api{
-    public class ProductinResult : Productin, IApiResult
+    public class ProductinResult : ApiResult
     {
-        [JsonPropertyName("errcode")]
-
-        public string Errcode { get; set; }
-
-        [JsonPropertyName("errmsg")]
-
-        public string Errmsg { get; set; }
+        public Productin Productin { get; set; }
     }
 
     public class ProductinListResult : DbListResult<Productin>

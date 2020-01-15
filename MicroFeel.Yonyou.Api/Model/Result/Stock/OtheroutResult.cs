@@ -1,13 +1,11 @@
-using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model.Result;using System.Text.Json.Serialization;namespace MicroFeel.Yonyou.Api{
-    public class OtheroutResult : Otherout, IApiResult
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+
+namespace MicroFeel.Yonyou.Api.Model.Result
+{
+    public class OtheroutResult : ApiResult
     {
-        [JsonPropertyName("errcode")]
-
-        public string Errcode { get; set; }
-
-        [JsonPropertyName("errmsg")]
-
-        public string Errmsg { get; set; }
+        public Otherout Otherout { get; set; }
     }
 
     public class OtheroutListResult : DbListResult<Otherout>
@@ -15,4 +13,4 @@ using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model
         [JsonPropertyName("otheroutlist")]
         public override List<Otherout> List { get; set; }
     }
-}
+}

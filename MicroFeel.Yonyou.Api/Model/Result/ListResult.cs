@@ -2,7 +2,7 @@
 
 namespace MicroFeel.Yonyou.Api
 {
-    public class ListResult : ApiResult
+    public class ListResult<TResult> : ApiResult where TResult : class
     {
         /// <summary>
         /// 页号

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace MicroFeel.Yonyou.Api
+namespace MicroFeel.Yonyou.Api.Model.Result
 {
     public class DbResult : ApiResult
     {
@@ -13,10 +13,12 @@ namespace MicroFeel.Yonyou.Api
         [JsonPropertyName("tradeid")]
         public string Tradeid { get; set; }
     }
-    public abstract class DbListResult<TModel> : ApiResult
-    {        /// <summary>
-             /// 页号
-             /// </summary>
+
+    public class DbListResult<TModel> : ApiResult
+    {
+        /// <summary>
+        /// 页号
+        /// </summary>
         [JsonPropertyName("page_index")]
         public string PageIndex { get; set; }
         /// <summary>
@@ -24,10 +26,21 @@ namespace MicroFeel.Yonyou.Api
         /// </summary>
         [JsonPropertyName("rows_per_page")]
         public string RowsPerPage { get; set; }
+        /// <summary>
+        /// 总页数
+        /// </summary>
         [JsonPropertyName("page_count")]
         public string PageCount { get; set; }
+        /// <summary>
+        /// 本页行数?
+        /// </summary>
         [JsonPropertyName("row_count")]
         public string RowCount { get; set; }
-        public abstract List<TModel> List { get; set; }
+        public virtual List<TModel> List { get; set; }
     }
+
+    //public class TListResult<TResult> : ApiResult
+    //{
+    //    public Dictionary<string, TResult> dd { get; set; }
+    //}
 }

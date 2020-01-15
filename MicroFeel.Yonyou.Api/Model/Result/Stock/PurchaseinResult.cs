@@ -1,13 +1,13 @@
-using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model.Result;using System.Text.Json.Serialization;namespace MicroFeel.Yonyou.Api{
-    public class PurchaseinResult : Purchasein, IApiResult
+using System;
+using System.Collections.Generic;
+using MicroFeel.Yonyou.Api.Model.Result;
+using System.Text.Json.Serialization;
+
+namespace MicroFeel.Yonyou.Api
+{
+    public class PurchaseinResult : ApiResult
     {
-        [JsonPropertyName("errcode")]
-
-        public string Errcode { get; set; }
-
-        [JsonPropertyName("errmsg")]
-
-        public string Errmsg { get; set; }
+        public Purchasein Purchasein { get; set; }
     }
 
     public class PurchaseinListResult : DbListResult<Purchasein>
@@ -16,4 +16,4 @@ using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model
         [JsonPropertyName("purchaseinlist")]
         public override List<Purchasein> List { get; set; }
     }
-}
+}

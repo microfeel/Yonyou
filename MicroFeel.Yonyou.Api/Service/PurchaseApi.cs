@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MicroFeel.Yonyou.Api.Model.Result;
 
 namespace MicroFeel.Yonyou.Api.Service
 {
@@ -22,9 +23,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 供应商存货调价单    获取供应商存货调价单列表信息 
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<List<Venpriceadjust>> Batch_Get_VenpriceadjustlistAsync(int dsSequence = 1)
+        public async Task<List<Venpriceadjust>> Batch_Get_VenpriceadjustlistAsync(int dsSequence = 1)
         {
-            return await GetsSync<VenpriceadjustListResult, Venpriceadjust>(dsSequence);
+            return (await GetsSync<Venpriceadjust>(dsSequence)).List;
         }
         /// <summary>
         /// 获取供应商存货调价单待办任务  
@@ -133,9 +134,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 采购到货单列表 获取采购到货单列表 
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<List<Purchasereceipt>> Batch_Get_PurchasereceiptlistAsync(int dsSequence)
+        public async Task<List<Purchasereceipt>> Batch_Get_PurchasereceiptlistAsync(int dsSequence)
         {
-            return await GetsSync<PurchasereceiptListResult, Purchasereceipt>(dsSequence);
+            return (await GetsSync<Purchasereceipt>(dsSequence)).List;
         }
         /// <summary>
         /// 采购发票    获取采购发票列表信息 
@@ -151,7 +152,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 新增一张采购发票    
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<DbResult> Add_PurchaseinvoiceAsync(Purchaseinvoice purchaseinvoice, int dsSequence = 1, bool sync = true)
+        public async Task<DbResult> Add_PurchaseinvoiceAsync(Purchaseinvoice purchaseinvoice, int dsSequence = 1, bool sync = true)
         {
             return await AddSync(purchaseinvoice, dsSequence, sync);
         }
@@ -169,9 +170,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取采购订单列表信息  
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<List<Purchaseorder>> Batch_Get_PurchaseorderlistAsync(int dsSequence = 1)
+        public async Task<List<Purchaseorder>> Batch_Get_PurchaseorderlistAsync(int dsSequence = 1)
         {
-            return await GetsSync<PurchaseorderListResult, Purchaseorder>(dsSequence);
+            return (await GetsSync<Purchaseorder>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张采购订单    
@@ -228,9 +229,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 采购请购单   获取请购单列表 
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<List<Purchaserequisition>> Batch_Get_PurchaserequisitionlistAsync(int dsSequence = 1)
+        public async Task<List<Purchaserequisition>> Batch_Get_PurchaserequisitionlistAsync(int dsSequence = 1)
         {
-            return await GetsSync<PurchaserequisitionListResult, Purchaserequisition>(dsSequence);
+            return (await GetsSync<Purchaserequisition>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张采购请购单   
@@ -292,9 +293,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 采购退货单   获取采购退货单列表信息 
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<List<Purchasereturn>> Batch_Get_PurchasereturnlistAsync(int dsSequence = 1)
+        public async Task<List<Purchasereturn>> Batch_Get_PurchasereturnlistAsync(int dsSequence = 1)
         {
-            return await GetsSync<PurchasereturnListResult, Purchasereturn>(dsSequence);
+            return (await GetsSync<Purchasereturn>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张采购退货单   
@@ -320,7 +321,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 获取单张采购退货单   
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<PurchasereturnResult> Get_PurchasereturnAsync(string id, int dsSequence = 1)
+        public async Task<PurchasereturnResult> Get_PurchasereturnAsync(string id, int dsSequence = 1)
         {
             return await GetSync<PurchasereturnResult>(id, dsSequence);
         }

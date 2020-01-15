@@ -1,13 +1,8 @@
 using System;using System.Collections.Generic;using MicroFeel.Yonyou.Api.Model.Result;using System.Text.Json.Serialization;namespace MicroFeel.Yonyou.Api{
-    public class BomResult : Bom, IApiResult
+    public class BomResult : ApiResult
     {
-        [JsonPropertyName("errcode")]
-
-        public string Errcode { get; set; }
-
-        [JsonPropertyName("errmsg")]
-
-        public string Errmsg { get; set; }
+        [JsonPropertyName("bom")]
+        public Bom Bom { get; set; }
     }
 
     public class BomListResult : DbListResult<BomBatch>

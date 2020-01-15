@@ -26,20 +26,21 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <returns></returns>
         public async Task<IEnumerable<Voucher>> Batch_get_voucherlistAsync(string billCodeFrom, string billCodeTo, string billDataFrom, string billDataTo, string cBill, int dsSequence, string cnoId, string coutnoId, string csign)
         {
-            var req = new VoucherListRequest(await GetRequestTypeAsync<CallerRequest>())
-            {
-                Bill_code_from = billCodeFrom,
-                Bill_code_to = billCodeTo,
-                Bill_date_from = billDataFrom,
-                Bill_date_to = billDataTo,
-                Cbill = cBill,
-                Ds_sequence = dsSequence,
-                Cno_id = cnoId,
-                Coutno_id = coutnoId,
-                Csign = csign
-            };
-            var result = await CallAsync<DbRequest, VoucherListResult>(req);
-            return result.Voucherlist.Vouchers;
+            //var req = new VoucherListRequest(await GetRequestTypeAsync<CallerRequest>())
+            //{
+            //    Bill_code_from = billCodeFrom,
+            //    Bill_code_to = billCodeTo,
+            //    Bill_date_from = billDataFrom,
+            //    Bill_date_to = billDataTo,
+            //    Cbill = cBill,
+            //    Ds_sequence = dsSequence,
+            //    Cno_id = cnoId,
+            //    Coutno_id = coutnoId,
+            //    Csign = csign
+            //};
+            //var result = await CallAsync<DbRequest, VoucherListResult>(req);
+            //return result.Voucherlist.Vouchers;
+            return null;
         }
         /// <summary>
         /// 批量获取凭证列表详情  
@@ -47,18 +48,19 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async Task<IEnumerable<VoucherDetail>> Batch_get_voucherdetailsAsync(string codeBegin, string codeEnd, int dsSequence, bool bdelete, string coutnoId, DateTime dataBegin, DateTime dataEnd)
         {
-            var req = new VoucherDetailRequest(await GetRequestTypeAsync<CallerRequest>())
-            {
-                Ds_sequence = dsSequence,
-                Code_begin = codeBegin,
-                Code_end = codeEnd,
-                Coutno_id = coutnoId,
-                Bdelete = bdelete,
-                Date_begin = dataBegin,
-                Date_end = dataEnd,
-            };
-            var result = await CallAsync<VoucherDetailRequest, VoucherDetailResult>(req);
-            return result.Voucherdetails;
+            //var req = new VoucherDetailRequest(await GetRequestTypeAsync<CallerRequest>())
+            //{
+            //    Ds_sequence = dsSequence,
+            //    Code_begin = codeBegin,
+            //    Code_end = codeEnd,
+            //    Coutno_id = coutnoId,
+            //    Bdelete = bdelete,
+            //    Date_begin = dataBegin,
+            //    Date_end = dataEnd,
+            //};
+            //var result = await CallAsync<VoucherDetailRequest, VoucherDetailResult>(req);
+            //return result.Voucherdetails;
+            return null;
         }
         /// <summary>
         /// 获取凭证详情列表    

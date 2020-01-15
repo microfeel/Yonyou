@@ -25,7 +25,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async System.Threading.Tasks.Task<List<BomBatch>> Batch_Get_BomAsync(int dsSequence = 1)
         {
-            return await GetsSync<BomListResult, BomBatch>(dsSequence);
+            return (await GetsSync<BomBatch>(dsSequence)).List;
         }
 
     }

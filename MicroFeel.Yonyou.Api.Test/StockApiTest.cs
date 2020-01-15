@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MicroFeel.Yonyou.Api.Test
@@ -17,7 +18,8 @@ namespace MicroFeel.Yonyou.Api.Test
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = await api.Batch_Get_ProductinlistAsync();
             Assert.IsNotNull(result);
-            System.Console.WriteLine($"productlist is :{result}");
+            var json = JsonSerializer.Serialize(result, JsonOptions);
+            System.Console.WriteLine($"productlist is :{json}");
         }
 
         /// <summary>
@@ -108,7 +110,9 @@ namespace MicroFeel.Yonyou.Api.Test
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = await api.Batch_Get_PurchaseinlistAsync();
             Assert.IsNotNull(result);
-            System.Console.WriteLine($"Purchasein( is :{result}");
+            System.Console.WriteLine($"Purchasein count is :{result.Count}");
+            var json = JsonSerializer.Serialize(result, JsonOptions);
+            Console.WriteLine($"Result: {json}");
         }
 
         [TestMethod]

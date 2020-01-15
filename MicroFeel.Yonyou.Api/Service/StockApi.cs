@@ -1,12 +1,6 @@
-﻿using MicroFeel.Yonyou.Api.Model.Request;
-using MicroFeel.Yonyou.Api.Model.Result;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using MicroFeel.Yonyou.Api.Model.Result;
 
 namespace MicroFeel.Yonyou.Api.Service
 {
@@ -24,7 +18,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async Task<List<Productin>> Batch_Get_ProductinlistAsync(int dsSequence = 1)
         {
-            return await GetsSync<ProductinListResult, Productin>(dsSequence);
+            return (await GetsSync<Productin>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张产成品入库单  
@@ -62,7 +56,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async Task<List<Otherin>> Batch_Get_OtherinlistAsync(int dsSequence = 1)
         {
-            return await GetsSync<OtherinListResult, Otherin>(dsSequence);
+            return (await GetsSync<Otherin>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张其他入库单   
@@ -130,7 +124,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async Task<List<Otherout>> Batch_Get_OtheroutlistAsync(int dsSequence = 1)
         {
-            return await GetsSync<OtheroutListResult, Otherout>(dsSequence);
+            return (await GetsSync<Otherout>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张其他出库单   
@@ -291,7 +285,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async Task<List<Purchasein>> Batch_Get_PurchaseinlistAsync(int dsSequence = 1)
         {
-            return await GetsSync<PurchaseinListResult, Purchasein>(dsSequence);
+            return (await GetsSync<Purchasein>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张采购入库单   

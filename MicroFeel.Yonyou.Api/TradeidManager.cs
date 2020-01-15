@@ -9,17 +9,12 @@ using MicroFeel.Yonyou.Api.Service;
 namespace MicroFeel.Yonyou.Api
 {
     /// <summary>
-    /// Token 生命周期维护器。平台 Token 生效期为 2 小时，SDK 1小时55分钟为重新获取新 token 的周期。
+    /// Tradeid 生命周期维护器
     /// </summary>
     internal class TradeidManager
     {
-        private static long? timestamp;
-
-        private const long MILLISECONDS_EXPIRED = 6900000; //1000 * 60 * 115 (1小时55分钟);
-        private static string token = string.Empty;
-
         /// <summary>
-        /// 获取令牌
+        /// 获取Tradeid
         /// </summary>
         /// <param name="baseUrl"></param>
         /// <param name="appKey"></param>

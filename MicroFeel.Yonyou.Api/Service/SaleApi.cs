@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using MicroFeel.Yonyou.Api.Model.Result;
 
 namespace MicroFeel.Yonyou.Api.Service
 {
@@ -16,7 +17,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async System.Threading.Tasks.Task<List<Consignment>> Batch_Get_ConsignmentlistAsync(int dsSequence)
         {
-            return await GetsSync<ConsignmentListResult, Consignment>(dsSequence);
+            return (await GetsSync<Consignment>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张发货单 
@@ -108,7 +109,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async System.Threading.Tasks.Task<List<Saleorder>> Batch_Get_SaleorderlistAsync(int dsSequence)
         {
-            return await GetsSync<SaleorderListResult, Saleorder>(dsSequence);
+            return (await GetsSync<Saleorder>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张销售订单    
@@ -177,7 +178,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async System.Threading.Tasks.Task<List<Returnorder>> Batch_Get_ReturnorderlistAsync(int dsSequence)
         {
-            return await GetsSync<ReturnorderListResult, Returnorder>(dsSequence);
+            return (await GetsSync<Returnorder>(dsSequence)).List;
         }
         /// <summary>
         /// 审核一张销售退货单   
@@ -195,7 +196,7 @@ namespace MicroFeel.Yonyou.Api.Service
         /// <return></return>
         public async System.Threading.Tasks.Task<Returnorder> Get_ReturnorderAsync(string id, int dsSequence)
         {
-            return await GetSync<ReturnorderResult>(id, dsSequence);
+            return (await GetSync<ReturnorderResult>(id, dsSequence)).Returnorder;
         }
         /// <summary>
         /// 新增一张销售退货单   

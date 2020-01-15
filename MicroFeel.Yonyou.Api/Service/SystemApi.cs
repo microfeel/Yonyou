@@ -65,14 +65,16 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 批量获取数据源配置
         /// </summary>
         /// <returns>数据源配置</returns>
-        public async Task<IEnumerable<Datasource>> Batch_get_DatasourceAsync()
+        public async Task<IEnumerable<Datasource>> Batch_get_DatasourceAsync(int startNum = 1, int endNum = 10)
         {
             var req = new DsListRequest()
             {
                 AppKey = _appKey,
                 FromAccount = _fromAccount,
                 ToAccount = _toAccount,
-                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount)
+                Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
+                SequenceBegin = startNum,
+                SequenceEnd = endNum
             };
             var dataSourceResult = await CallAsync<DsListRequest, DsListResult>(req);
             return dataSourceResult.Datasources;

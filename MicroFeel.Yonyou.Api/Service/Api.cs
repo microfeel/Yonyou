@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using MicroFeel.Yonyou.Api.Model.Request;
 using MicroFeel.Yonyou.Api.Model.Result;
-using MicroFeel.Yonyou.Api.Service;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -36,7 +33,7 @@ namespace MicroFeel.Yonyou.Api
         /// <summary>
         /// 默认的Json序列化选项
         /// </summary>
-        public static readonly JsonSerializerOptions JsOptions = new JsonSerializerOptions { IgnoreNullValues = true, IgnoreReadOnlyProperties = true };
+        public static System.Text.Json.JsonSerializerOptions JsOptions { get; set; }
 
         /// <summary>
         /// 构造API
@@ -50,16 +47,31 @@ namespace MicroFeel.Yonyou.Api
         }
 
         /// <summary>
+        /// 静态构造,初始化JSOptions
+        /// </summary>
+        static Api()
+        {
+            JsOptions = new JsonSerializerOptions
+            {
+                IgnoreNullValues = true,
+                IgnoreReadOnlyProperties = true,
+                PropertyNameCaseInsensitive = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All)
+            };
+            JsOptions.Converters.Add(new DateTimeConverter());
+        }
+
+        /// <summary>
         /// 接口调用
         /// </summary>
-        /// <typeparam name="UrlParamType">http命令参数类型</typeparam>
-        /// <typeparam name="ResultType">返回类型</typeparam>
+        /// <typeparam name="TUrlParam">http命令参数类型</typeparam>
+        /// <typeparam name="TResult">返回类型</typeparam>
         /// <param name="urlParameter">参数对象实例</param>
         /// <param name="postData">需要post的对象序列化结果</param>
         /// <returns>结果对象</returns>
-        internal async Task<ResultType> CallAsync<UrlParamType, ResultType>(UrlParamType urlParameter, string postData = "", [CallerMemberName] string membername = "")
-            where UrlParamType : ApiRequest
-            where ResultType : IApiResult
+        internal async Task<TResult> CallAsync<TUrlParam, TResult>(TUrlParam urlParameter, string postData = "", [CallerMemberName] string membername = "")
+            where TUrlParam : ApiRequest
+            where TResult : ApiResult
         {
             _logger.LogInformation($"MemberName:{membername}");
             membername = membername.ToLower().Replace("async", "");
@@ -114,9 +126,22 @@ namespace MicroFeel.Yonyou.Api
                     response.EnsureSuccessStatusCode();
                     string resultString = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation($"Call completed .ResultString is :{resultString}");
-                    var options = new JsonSerializerOptions();
-                    options.Converters.Add(new DateTimeConverter());
-                    return JsonSerializer.Deserialize<ResultType>(resultString, options);
+                    var runType = typeof(TResult);
+                    if (runType.Name.StartsWith("DbListResult"))
+                    {
+                        var t2 = runType.GenericTypeArguments[0];
+                        var typename = runType.Namespace + "." + t2.Name + "ListResult";
+                        Type t = Type.GetType(typename);
+                        if (t==null)
+                        {
+                            throw new Exception($"无法找到目标类型:{typename}");
+                        }
+                        return JsonSerializer.Deserialize(resultString, t, JsOptions) as TResult;
+                    }
+                    else
+                    {
+                        return JsonSerializer.Deserialize<TResult>(resultString, JsOptions);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -203,7 +228,7 @@ namespace MicroFeel.Yonyou.Api
         /// <param name="callername"></param>
         /// <returns></returns>
         public async Task<TResult> GetSync<TResult>(string id, int dsSequence = 1, [CallerMemberName] string callername = "")
-            where TResult : IApiResult
+            where TResult : ApiResult
         {
             pathprefix = "api";
             var req = new SingleRequest()
@@ -238,7 +263,7 @@ namespace MicroFeel.Yonyou.Api
         /// <returns></returns>
         public async Task<TResult> GetSync<TRequest, TResult>(TRequest req, int dsSequence = 1, [CallerMemberName] string callername = "")
              where TRequest : ApiRequest
-            where TResult : IApiResult
+            where TResult : ApiResult
         {
             pathprefix = "api";
             var result = await CallAsync<TRequest, TResult>(req, "", callername);
@@ -262,16 +287,16 @@ namespace MicroFeel.Yonyou.Api
         /// <param name="dsSequence"></param>
         /// <param name="callername"></param>
         /// <returns></returns>
-        public async Task<List<TData>> GetsSync<TRequest, TResult, TData>(TRequest req, int dsSequence = 1, [CallerMemberName] string callername = "")
+        public async Task<DbListResult<TData>> GetsSync<TRequest, TData>(TRequest req, int dsSequence = 1, [CallerMemberName] string callername = "")
          where TRequest : ApiRequest
-            where TResult : DbListResult<TData>
         {
             pathprefix = "api";
 
-            var result = await CallAsync<TRequest, TResult>(req, "", callername);
+            var result = await CallAsync<TRequest, DbListResult<TData>>(req, "", callername);
+            //var result = await CallAsync<TRequest, DbListResult<TData>>(req, "", callername);
             if (result.Errcode == "0")
             {
-                return result.List;
+                return result;
             }
             else
             {
@@ -279,8 +304,7 @@ namespace MicroFeel.Yonyou.Api
             }
         }
 
-        public async Task<List<TData>> GetsSync<TResult, TData>(int dsSequence = 1, [CallerMemberName] string callername = "")
-           where TResult : DbListResult<TData>
+        public async Task<DbListResult<TResult>> GetsSync<TResult>(int dsSequence = 1, [CallerMemberName] string callername = "", int pageNumber = 1)
         {
             pathprefix = "api";
             var req = new DbRequest()
@@ -291,15 +315,7 @@ namespace MicroFeel.Yonyou.Api
                 Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
                 Ds_sequence = dsSequence,
             };
-            var result = await CallAsync<DbRequest, TResult>(req, "", callername);
-            if (result.Errcode == "0")
-            {
-                return result.List;
-            }
-            else
-            {
-                throw new ApiException($"({result.Errcode}){result.Errmsg}");
-            }
+            return await GetsSync<DbRequest, TResult>(req, dsSequence, callername);
         }
 
         /// <summary>
@@ -315,7 +331,7 @@ namespace MicroFeel.Yonyou.Api
         /// <returns></returns>
         public async Task<TResult> AddSync<TRequest, TResult>(TRequest req, string data, int dsSequence = 1, bool sync = true, [CallerMemberName] string callername = "")
          where TRequest : ApiRequest
-         where TResult : IApiResult
+         where TResult : ApiResult
         {
             pathprefix = "api";
             var result = await CallAsync<TRequest, TResult>(req, data, callername);
@@ -355,36 +371,9 @@ namespace MicroFeel.Yonyou.Api
                 DsSequence = dsSequence,
                 Sync = sync ? 1 : 0
             };
-            var options = new JsonSerializerOptions();
-            options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All);
-            options.Converters.Add(new DateTimeConverter());
-            var json = "{\"" + typeof(TData).Name.ToLower() + "\":" + JsonSerializer.Serialize(data, options) + "}";
+            //var json = "{\"" + typeof(TData).Name.ToLower() + "\":" + JsonConvert.SerializeObject(data) + "}";
+            var json = "{\"" + typeof(TData).Name.ToLower() + "\":" + JsonSerializer.Serialize(data, Api.JsOptions) + "}";
             return await AddSync<BuinessRequest, DbResult>(req, json, dsSequence, sync, callername);
-        }
-    }
-    public class DateTimeConverter : JsonConverter<DateTime>
-    {
-        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            return DateTime.Parse(reader.GetString());
-        }
-
-        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString("yyyy-MM-dd"));
-        }
-    }
-
-    public class DateTimeNullableConverter : JsonConverter<DateTime?>
-    {
-        public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            return string.IsNullOrEmpty(reader.GetString()) ? default(DateTime?) : DateTime.Parse(reader.GetString());
-        }
-
-        public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value?.ToString("yyyy-MM-dd"));
         }
     }
 }

@@ -16,10 +16,10 @@ namespace MicroFeel.Yonyou.Api
         /// 结束数据源序号
         /// </summary>
         [JsonPropertyName("sequence_end")]
-        public int SequenceEnd { get; set; } = 100;
+        public int SequenceEnd { get; set; } = 10;
         public override string ToString()
         {
-            return base.ToString();
+            return $"{base.ToString()}&SequenceBegin={SequenceBegin}&SequenceEnd={SequenceEnd}";
         }
     }
 }
