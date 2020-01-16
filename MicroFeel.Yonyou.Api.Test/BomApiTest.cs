@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MicroFeel.Yonyou.Api.Test
@@ -28,6 +29,8 @@ namespace MicroFeel.Yonyou.Api.Test
             var result = await api.Batch_Get_BomAsync();
             Console.WriteLine(result.Count);
             Assert.IsTrue(result.Count > 0);
+            var json = JsonSerializer.Serialize(result, JsonOptions);
+            Console.WriteLine(json);
         }
     }
 }

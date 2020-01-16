@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MicroFeel.Yonyou.Api
+namespace MicroFeel.Yonyou.Api.Model.Result
 {
     public class ApiResult
     {
@@ -8,8 +8,6 @@ namespace MicroFeel.Yonyou.Api
         public string Errcode { get; set; }
         [JsonPropertyName("errmsg")]
         public string Errmsg { get; set; }
-
-        public ApiResult() { }
     }
 
 }

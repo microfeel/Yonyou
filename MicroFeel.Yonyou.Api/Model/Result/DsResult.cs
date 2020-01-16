@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MicroFeel.Yonyou.Api
+namespace MicroFeel.Yonyou.Api.Model.Result
 {
     public class DsResult : ApiResult
     {
-        [JsonPropertyName("datasource")]
         public Datasource Datasource { get; set; }
     }
 }

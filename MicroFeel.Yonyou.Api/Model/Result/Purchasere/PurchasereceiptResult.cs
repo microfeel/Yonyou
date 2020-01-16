@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MicroFeel.Yonyou.Api.Model.Result;
 using System.Text.Json.Serialization;
 
-namespace MicroFeel.Yonyou.Api
+namespace MicroFeel.Yonyou.Api.Model.Result
 {
     public class PurchasereceiptResult : ApiResult
     {

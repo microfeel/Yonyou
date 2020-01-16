@@ -38,9 +38,4 @@ namespace MicroFeel.Yonyou.Api.Model.Result
         public string RowCount { get; set; }
         public virtual List<TModel> List { get; set; }
     }
-
-    //public class TListResult<TResult> : ApiResult
-    //{
-    //    public Dictionary<string, TResult> dd { get; set; }
-    //}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MicroFeel.Yonyou.Api.Model.Result;
 
 namespace MicroFeel.Yonyou.Api.Service
 {
@@ -23,9 +24,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 批量获取物料清单    
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<List<BomBatch>> Batch_Get_BomAsync(int dsSequence = 1)
+        public async System.Threading.Tasks.Task<List<Bom>> Batch_Get_BomAsync(int dsSequence = 1)
         {
-            return (await GetsSync<BomBatch>(dsSequence)).List;
+            return (await GetsSync<Bom>(dsSequence)).List;
         }
 
     }
