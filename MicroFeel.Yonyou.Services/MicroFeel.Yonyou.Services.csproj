@@ -1,14 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.0.0-beta0224.2</Version>
+    <Description>用友财务服务</Description>
+    <Authors>MicroFeel</Authors>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MicroFeel.Finance" Version="2.0.0-beta0115.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Finance\src\MicroFeel.Finance\MicroFeel.Finance.csproj" />
+    <ProjectReference Include="..\MicroFeel.YongYou.Models\MicroFeel.YongYou.Models.csproj" />
     <ProjectReference Include="..\MicroFeel.Yonyou.Api\MicroFeel.Yonyou.Api.csproj" />
   </ItemGroup>
 

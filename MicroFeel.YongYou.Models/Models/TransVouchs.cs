@@ -1,0 +1,106 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace MicroFeel.YongYou.Models.Models
+{
+    public partial class TransVouchs
+    {
+        public string CTvcode { get; set; }
+        public string CInvCode { get; set; }
+        public int? RdsId { get; set; }
+        public decimal? ITvnum { get; set; }
+        public decimal? ITvquantity { get; set; }
+        public decimal? ITvacost { get; set; }
+        public decimal? ITvaprice { get; set; }
+        public decimal? ITvpcost { get; set; }
+        public decimal? ITvpprice { get; set; }
+        public string CTvbatch { get; set; }
+        public DateTime? DDisDate { get; set; }
+        public string CFree1 { get; set; }
+        public string CFree2 { get; set; }
+        public string CDefine22 { get; set; }
+        public string CDefine23 { get; set; }
+        public string CDefine24 { get; set; }
+        public string CDefine25 { get; set; }
+        public double? CDefine26 { get; set; }
+        public double? CDefine27 { get; set; }
+        public string CItemCode { get; set; }
+        public string CItemClass { get; set; }
+        public decimal? FSaleCost { get; set; }
+        public decimal? FSalePrice { get; set; }
+        public string CName { get; set; }
+        public string CItemCname { get; set; }
+        public int AutoId { get; set; }
+        public int? Id { get; set; }
+        public int? IMassDate { get; set; }
+        public string CBarCode { get; set; }
+        public string CAssUnit { get; set; }
+        public string CFree3 { get; set; }
+        public string CFree4 { get; set; }
+        public string CFree5 { get; set; }
+        public string CFree6 { get; set; }
+        public string CFree7 { get; set; }
+        public string CFree8 { get; set; }
+        public string CFree9 { get; set; }
+        public string CFree10 { get; set; }
+        public string CDefine28 { get; set; }
+        public string CDefine29 { get; set; }
+        public string CDefine30 { get; set; }
+        public string CDefine31 { get; set; }
+        public string CDefine32 { get; set; }
+        public string CDefine33 { get; set; }
+        public int? CDefine34 { get; set; }
+        public int? CDefine35 { get; set; }
+        public DateTime? CDefine36 { get; set; }
+        public DateTime? CDefine37 { get; set; }
+        public int? IMpoIds { get; set; }
+        public string CBvencode { get; set; }
+        public string CInVouchCode { get; set; }
+        public DateTime? DMadeDate { get; set; }
+        public short? CMassUnit { get; set; }
+        public int? ITrids { get; set; }
+        public int? AppTransIds { get; set; }
+        public int? ISsoType { get; set; }
+        public string ISsodid { get; set; }
+        public int? IDsoType { get; set; }
+        public string IDsodid { get; set; }
+        public bool? BCosting { get; set; }
+        public string Cvmivencode { get; set; }
+        public string Cinposcode { get; set; }
+        public string Coutposcode { get; set; }
+        public int? Iinvsncount { get; set; }
+        public decimal? Iinvexchrate { get; set; }
+        public string Comcode { get; set; }
+        public string Cmocode { get; set; }
+        public string Invcode { get; set; }
+        public int? Imoseq { get; set; }
+        public int? Iomids { get; set; }
+        public int? Imoids { get; set; }
+        public string Corufts { get; set; }
+        public short? IExpiratDateCalcu { get; set; }
+        public string CExpirationdate { get; set; }
+        public DateTime? DExpirationdate { get; set; }
+        public decimal? CBatchProperty1 { get; set; }
+        public decimal? CBatchProperty2 { get; set; }
+        public decimal? CBatchProperty3 { get; set; }
+        public decimal? CBatchProperty4 { get; set; }
+        public decimal? CBatchProperty5 { get; set; }
+        public string CBatchProperty6 { get; set; }
+        public string CBatchProperty7 { get; set; }
+        public string CBatchProperty8 { get; set; }
+        public string CBatchProperty9 { get; set; }
+        public DateTime? CBatchProperty10 { get; set; }
+        public string Cciqbookcode { get; set; }
+        public string CbMemo { get; set; }
+        public int? Irowno { get; set; }
+        public Guid? Strowguid { get; set; }
+        public string Cinvouchtype { get; set; }
+        public string Cbsourcecodels { get; set; }
+        public string CMoLotCode { get; set; }
+        public int? CInVoucherLineId { get; set; }
+        public string CInVoucherCode { get; set; }
+        public string CInVoucherType { get; set; }
+        public string Cbsysbarcode { get; set; }
+        public string Csyssourceautoid { get; set; }
+    }
+}
