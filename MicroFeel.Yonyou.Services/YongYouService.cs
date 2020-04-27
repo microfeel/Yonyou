@@ -543,7 +543,7 @@ namespace MicroFeel.Yonyou.Services
             {
                 e.PurchaseOrderDetails = dbContext.PuArrBodies.Where(t => t.Id == e.Id).Select(t => new DtoPurchaseOrder.DtoPurchaseOrderDetail
                 {
-                    Id = t.Autoid,
+                    AutoId = t.Autoid,
                     Numbers = t.Iquantity,
                     ProductModel = t.Cinvstd,
                     ProductName = t.Cinvname,
@@ -551,6 +551,44 @@ namespace MicroFeel.Yonyou.Services
                     StoreCode = t.Cwhcode,
                     StoreName = t.Cwhname,
                     UnitName = t.Cinvm_Unit
+                }).ToList();
+            });
+            return orders;
+        }
+
+        public List<DtoPurchaseOrder> GetPurchaseOrders(string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
+        {
+            var tmp_datas = dbContext.PuArrHeads.Where(t => t.Cdefine8 == brand
+                            && t.Cvoucherstate == state
+                            && (string.IsNullOrEmpty(key) || t.Ccode.Contains(key))
+                            && (starttime == null || t.Ddate >= starttime)
+                            && (endtime == null || t.Ddate <= endtime)
+                            && (string.IsNullOrEmpty(supplier) || t.Cvenname.Contains(supplier)));
+            total = tmp_datas.Count();
+            var orders = tmp_datas.Skip(pageindex * pagesize).Take(pagesize == 0 ? 200000 : pagesize).Select(t => new DtoPurchaseOrder()
+            {
+                Maker = t.Cmaker,
+                Id = t.Id,
+                OrderNo = t.Ccode,
+                OrderType = t.Cbustype,
+                Remark = t.Cmemo,
+                Supplier = t.Cvenname,
+                SupplierCode = t.Cvencode,
+                CreateDate = t.Ddate
+            }).ToList();
+            orders.ForEach(e =>
+            {
+                e.PurchaseOrderDetails = dbContext.PuArrBodies.Where(t => t.Id == e.Id).Select(t => new DtoPurchaseOrder.DtoPurchaseOrderDetail
+                {
+                    AutoId = t.Autoid,
+                    Numbers = t.Iquantity,
+                    ProductModel = t.Cinvstd,
+                    ProductName = t.Cinvname,
+                    ProductNumbers = t.Cinvcode,
+                    StoreCode = t.Cwhcode,
+                    StoreName = t.Cwhname,
+                    UnitName = t.Cinvm_Unit,
+                    Price = t.Ioritaxcost
                 }).ToList();
             });
             return orders;
@@ -604,7 +642,7 @@ namespace MicroFeel.Yonyou.Services
         /// <returns></returns>
         public List<DtoMaterialOrder> GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
         {
-            var tmp_orders = dbContext.OmMomain.Where(t => t.CDepCode == departmentcode && (starttime == null || t.DDate > starttime) && (endtime == null || t.DDate < endtime)).Join(dbContext.OmMomaterialsheads, t => t.Moid, t1 => t1.Moid, (t, t1) => new { t, t1 }).
+            var tmp_orders = dbContext.OmMomain.Where(t => t.CDepCode == departmentcode && (starttime == null || t.DDate >= starttime) && (endtime == null || t.DDate <= endtime)).Join(dbContext.OmMomaterialsheads, t => t.Moid, t1 => t1.Moid, (t, t1) => new { t, t1 }).
                 Select(t => new DtoMaterialOrder()
                 {
                     Maker = t.t.CMaker,
@@ -825,7 +863,9 @@ namespace MicroFeel.Yonyou.Services
                     Ivouchrowno = orderitem.SourceEntryId,
                     Cbsysbarcode = $"||omdh|{code}|{orderitem.SourceEntryId}",
                     BGsp = 1,
-                    BInspect = 0
+                    BInspect = 0,
+                    Irowno = puArrivalVouch.PuArrivalVouchs.Count() + 1,
+                    Iorderseq = orderitem.SourceEntryId
                 });
             }
             return puArrivalVouch;
@@ -919,7 +959,9 @@ namespace MicroFeel.Yonyou.Services
                     Ivouchrowno = orderitem.SourceEntryId,
                     Cbsysbarcode = $"||pudh|{code}|{orderitem.SourceEntryId}",
                     BGsp = 1,
-                    BInspect = 0
+                    BInspect = 0,
+                    Irowno = puArrivalVouch.PuArrivalVouchs.Count() + 1,
+                    Iorderseq = orderitem.SourceEntryId
                 });
             }
             return puArrivalVouch;
@@ -946,7 +988,6 @@ namespace MicroFeel.Yonyou.Services
                 dbContext.Rdrecords01.AddRange(result.Rdrecords01s);
             });
             return dbContext.SaveChanges() > 0;
-
         }
 
         private List<RdRecord01> CreateRdrecord01s(PuArrivalVouch puArrival, DtoStockOrder order)
@@ -1083,6 +1124,175 @@ namespace MicroFeel.Yonyou.Services
                 });
             }
             return rdrecord;
+        }
+
+
+        private List<RdRecord01> CreateRdrecord01s(PuArrivalVouch puArrival)
+        {
+            List<RdRecord01> list = new List<RdRecord01>();
+            var dic = puArrival.PuArrivalVouchs.GroupBy(t => t.CWhCode).ToDictionary(t => t.Key, t => t.ToList());
+            long id = 0, detailid = 0;
+            foreach (var key in dic.Keys)
+            {
+                puArrival.PuArrivalVouchs = dic[key];
+                list.Add(CreateRdrecord01(key, puArrival, ref id, ref detailid));
+            }
+            return list;
+        }
+        private Dictionary<string, string> rdcode = new Dictionary<string, string>() {
+            {"普通采购","101" },
+            { "委外加工","102"}
+        };
+        private Dictionary<string, string> source = new Dictionary<string, string>() {
+            {"普通采购","采购订单" },
+            { "委外加工","委外订单"}
+        };
+        private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid)
+        {
+            id = id == 0 ? dbContext.RdRecord01.Max(t => t.Id) + 5 : id + 1;
+            string code = $"MFIN{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
+            var rdrecord = new RdRecord01()
+            {
+
+                Id = id,
+                BRdFlag = 1,
+                CVouchType = "01",
+                CBusType = puArrival.CBusType,
+                CSource = source.ContainsKey(puArrival.CBusType) ? source[puArrival.CBusType] : "微感服务",
+                CCode = code,
+                CBusCode = puArrival.CCode,
+                CWhCode = cwhcode,
+                DDate = DateTime.Now.Date,
+                CRdCode = rdcode.ContainsKey(puArrival.CBusType) ? rdcode[puArrival.CBusType] : "103",
+                CDepCode = puArrival.CDepCode,
+                CPersonCode = puArrival.CPersonCode,
+                CPtcode = null,
+                CVenCode = puArrival.CVenCode,
+                COrderCode = puArrival.Cpocode,
+                CArvcode = puArrival.CCode,
+                CHandler = puArrival.CMaker,
+                CMemo = puArrival.CMemo,
+                BTransFlag = false,
+                CMaker = puArrival.CMaker,
+                CDefine1 = puArrival.CDefine1,
+                CDefine2 = puArrival.CDefine2,
+                CDefine10 = puArrival.CDefine10,
+                CDefine11 = puArrival.CDefine11,
+                CDefine12 = puArrival.CDefine12,
+                CDefine13 = puArrival.CDefine13,
+                CDefine14 = puArrival.CDefine14,
+                CDefine15 = puArrival.CDefine15,
+                CDefine16 = puArrival.CDefine16,
+                CDefine3 = puArrival.CDefine3,
+                CDefine4 = puArrival.CDefine4,
+                CDefine5 = puArrival.CDefine5,
+                CDefine6 = puArrival.CDefine6,
+                CDefine7 = puArrival.CDefine7,
+                CDefine8 = puArrival.CDefine8,
+                CDefine9 = puArrival.CDefine9,
+                DArvdate = DateTime.Now.Date,
+                VtId = 27,
+                Ufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
+                Dnmaketime = DateTime.Now,
+                Bredvouch = 0,
+                Ipurarriveid = puArrival.Id,
+                ITaxRate = puArrival.ITaxRate,
+                IExchRate = puArrival.IExchRate,
+                CExchName = puArrival.CexchName,
+                Csysbarcode = $"||st01|{code}",
+                Rdrecords01s = new List<Rdrecords01>()
+            };
+            detailid = detailid == 0 ? dbContext.Rdrecords01.Max(t => t.AutoId) + 5 : detailid;
+            foreach (var item in puArrival.PuArrivalVouchs)
+            {
+                detailid += 1;
+                rdrecord.Rdrecords01s.Add(new Rdrecords01()
+                {
+                    AutoId = detailid,
+                    Id = rdrecord.Id,
+                    CInvCode = item.CInvCode,
+                    INum = item.INum,
+                    IQuantity = item.IQuantity,
+                    IUnitCost = item.IOriCost,
+                    IPrice = item.ICost,
+                    IAprice = item.IOriTaxCost,
+                    CDefine22 = item.CDefine22,
+                    CDefine23 = item.CDefine23,
+                    CDefine24 = item.CDefine24,
+                    CDefine25 = item.CDefine25,
+                    CDefine26 = item.CDefine26,
+                    CDefine27 = item.CDefine27,
+                    CDefine28 = item.CDefine28,
+                    CDefine29 = item.CDefine29,
+                    CDefine30 = item.CDefine30,
+                    CDefine31 = item.CDefine31,
+                    CDefine32 = item.CDefine32,
+                    CDefine33 = item.CDefine33,
+                    CDefine34 = item.CDefine34,
+                    CDefine35 = item.CDefine35,
+                    CDefine36 = item.CDefine36,
+                    CDefine37 = item.CDefine37,
+                    CBatch = item.CBatch,
+                    CItemCode = item.CItemCode,
+                    CName = puArrival.CDefine8,
+                    CItemCname = item.CItemName,
+                    CItemClass = item.CItemClass,
+                    IPosId = item.IPosId,
+                    FAcost = item.ICost,
+                    INquantity = item.IQuantity,
+                    ChVencode = puArrival.CVenCode,
+                    IArrsId = item.Autoid,
+                    IOriTaxCost = item.IOriTaxCost,
+                    IOriCost = item.IOriCost,
+                    IOriMoney = item.IOriMoney,
+                    IoriSum = item.IOriSum,
+                    ITaxRate = item.ITaxRate,
+                    ITaxPrice = item.ITaxPrice,
+                    ISum = item.ISum,
+                    BTaxCost = item.BTaxCost,
+                    CPoid = item.Cordercode,
+                    Cbarvcode = puArrival.CCode,
+                    Dbarvdate = DateTime.Now.ToString("yyyy-MM-dd"),
+
+                    IFlag = 0,
+                    BLpuseFree = false,
+                    IOriTrackId = 0,
+                    BCosting = true,
+                    BVmiused = false,
+                    Iordertype = item.Iordertype,
+                    Iorderseq = item.Iorderseq,
+                    Irowno = item.Irowno ?? item.Ivouchrowno,
+                    Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
+                    Cbsysbarcode = $"||st01|{rdrecord.CCode}|{item.Iorderseq}"
+                });
+            }
+            return rdrecord;
+        }
+        #endregion
+
+        #region 到货单下推入库单
+        /// <summary>
+        /// 到货单下推入库单
+        /// </summary>
+        /// <param name="puarrivalOrderNo"></param>
+        /// <returns></returns>
+        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo)
+        {
+            var puarrival = dbContext.PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
+            if (puarrival == null) return false;
+            puarrival.PuArrivalVouchs = dbContext.PuArrivalVouchs.AsNoTracking().Where(t => t.Id == puarrival.Id).ToList();
+            var results = CreateRdrecord01s(puarrival);
+            results.ForEach(result =>
+            {
+                dbContext.RdRecord01.Add(result);
+                dbContext.Rdrecords01.AddRange(result.Rdrecords01s);
+            });
+            puarrival.Ccloser = puarrival.CMaker;
+            puarrival.Cverifier = puarrival.CMaker;
+            puarrival.Dclosedate = puarrival.CAuditDate = DateTime.Now.Date;
+            puarrival.Caudittime = DateTime.Now;
+            dbContext.PuArrivalVouch.Update(puarrival);
+            return dbContext.SaveChanges() > 0;
         }
         #endregion
 
@@ -1273,6 +1483,9 @@ namespace MicroFeel.Yonyou.Services
         }
         private Rdrecord11 CreateRdrecord11(string cwhcode, MaterialAppVouch materialApp, DtoStockOrder order, ref long id, ref long detailid)
         {
+            var momain = dbContext.OmMomain.FirstOrDefault(t => t.CCode == materialApp.MaterialAppVouchs.FirstOrDefault().Comcode);
+            if (momain == null)
+                throw new FinancialException($"申请单（{materialApp.CCode})明细中关联的委外订单单号（{materialApp.MaterialAppVouchs.FirstOrDefault()?.Comcode}）没有对应的委外单据");
             id = id == 0 ? dbContext.Rdrecord11.Max(t => t.Id) + 5 : id + 1;
             string code = $"MFMA{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
             var rdrecord = new Rdrecord11()
@@ -1322,7 +1535,7 @@ namespace MicroFeel.Yonyou.Services
                 Dnmaketime = DateTime.Now,
                 Bredvouch = 0,
                 IMquantity = materialApp.Imquantity.HasValue ? (double)materialApp.Imquantity.Value : 0,
-
+                Iproorderid = momain.Moid,
 
                 Csysbarcode = $"||st11|{materialApp.CCode}",
                 Rdrecords11s = new List<Rdrecords11>()
@@ -1376,12 +1589,18 @@ namespace MicroFeel.Yonyou.Services
                     Ipesoseq = orderitem.SourceEntryId,
                     Irowno = orderitem.SourceEntryId,
                     Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
-                    Cbsysbarcode = $"||st11|{rdrecord.CCode}|{orderitem.SourceEntryId}"
+                    Cbsysbarcode = $"||st11|{rdrecord.CCode}|{orderitem.SourceEntryId}",
+                    BOutMaterials = 1,
+                    //Applycode ="",
+                    // Applydid = 1,
+                    //  CbMemo = item.CbMemo,
+                    //    Iorderdid = 1,
+                    //     Iorderseq =1, 
                 });
             }
             return rdrecord;
         }
-        #endregion 
+        #endregion
 
         #region 添加领料申请单
         public bool AddMetarialApply(DtoStockOrder order)
@@ -1623,7 +1842,7 @@ namespace MicroFeel.Yonyou.Services
             var list = dbContext.VPoPodetails.Where(t => t.Poid == po.Poid).Select(t => new DtoPurchaseOrder.DtoPurchaseOrderDetail()
             {
                 ArriveDate = t.Darrivedate,
-                Id = t.Id,
+                //Id = t.Id,
                 Numbers = t.Iquantity.Value,
                 ProductModel = t.Cinvstd,
                 ProductName = t.Cinvname,
@@ -1675,7 +1894,7 @@ namespace MicroFeel.Yonyou.Services
 
         public List<DtoAllotOutRecord> GetAllotOutRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
         {
-            var tmp_orders = dbContext.RdRecord09.Where(t => t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) && (starttime == null || t.DDate > starttime) && (endtime == null || t.DDate < endtime) && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
+            var tmp_orders = dbContext.RdRecord09.Where(t => t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) && (starttime == null || t.DDate >= starttime) && (endtime == null || t.DDate <= endtime) && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
             total = tmp_orders.Count();
             var datas = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
             return datas.Select(t => new DtoAllotOutRecord()
@@ -1705,7 +1924,7 @@ namespace MicroFeel.Yonyou.Services
 
         public List<DtoAllotInRecord> GetAllotInRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
         {
-            var tmp_orders = dbContext.RdRecord08.Where(t => t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) && (starttime == null || t.DDate > starttime) && (endtime == null || t.DDate < endtime) && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
+            var tmp_orders = dbContext.RdRecord08.Where(t => t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) && (starttime == null || t.DDate >= starttime) && (endtime == null || t.DDate <= endtime) && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
             total = tmp_orders.Count();
             var datas = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
             return datas.Select(t => new DtoAllotInRecord()
@@ -1734,7 +1953,7 @@ namespace MicroFeel.Yonyou.Services
 
         public List<DtoAllotRecord> GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
         {
-            var tmp_orders = dbContext.RdRecord09.Where(t => t.CBusType == "调拨出库" && t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) && (starttime == null || t.DDate > starttime) && (endtime == null || t.DDate < endtime) && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)))
+            var tmp_orders = dbContext.RdRecord09.Where(t => t.CBusType == "调拨出库" && t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) && (starttime == null || t.DDate >= starttime) && (endtime == null || t.DDate <= endtime) && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)))
                 .Join(dbContext.TransVouch, t => t.CBusCode, d => d.CTvcode, (t, d) => new { t, d }).Join(dbContext.Rdrecords09.Where(t => t.CDefine29 != "checked"), t => t.t.Id, d => d.Id, (t, d) => new { t = t.t, d });
 
             total = tmp_orders.Count();
@@ -1837,8 +2056,6 @@ namespace MicroFeel.Yonyou.Services
             return true;
         }
         #endregion
-
-
 
         #endregion
 
