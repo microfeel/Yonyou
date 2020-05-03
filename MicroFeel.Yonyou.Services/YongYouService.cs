@@ -1096,6 +1096,7 @@ namespace MicroFeel.Yonyou.Services
                 detailid += 1;
                 rdrecord.Rdrecords01s.Add(new Rdrecords01()
                 {
+                    IOmoDid =item.IPosId,
                     AutoId = detailid,
                     Id = rdrecord.Id,
                     CInvCode = orderitem.ProductNumbers,
@@ -1238,6 +1239,7 @@ namespace MicroFeel.Yonyou.Services
                 detailid += 1;
                 rdrecord.Rdrecords01s.Add(new Rdrecords01()
                 {
+                    IOmoDid = item.IPosId,
                     AutoId = detailid,
                     Id = rdrecord.Id,
                     CInvCode = item.CInvCode,
