@@ -905,7 +905,7 @@ namespace MicroFeel.Yonyou.Services
         /// <param name="order"></param>
         /// <returns></returns>
         public bool AddPurchaseArrivalVouch(DtoStockOrder order)
-        { 
+        {
             var pomain = dbContext.PoPomain.FirstOrDefault(t => t.CPoid == order.SourceOrderNo);
             if (pomain == null) return false;
             pomain.Podetails = dbContext.PoPodetails.Where(t => t.Poid == pomain.Poid).ToList();
@@ -1096,7 +1096,7 @@ namespace MicroFeel.Yonyou.Services
                 detailid += 1;
                 rdrecord.Rdrecords01s.Add(new Rdrecords01()
                 {
-                    IOmoDid =item.IPosId,
+                    IOmoDid = item.IPosId,
                     AutoId = detailid,
                     Id = rdrecord.Id,
                     CInvCode = orderitem.ProductNumbers,
@@ -1152,7 +1152,9 @@ namespace MicroFeel.Yonyou.Services
                     Iorderseq = orderitem.SourceEntryId,
                     Irowno = orderitem.SourceEntryId,
                     Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
-                    Cbsysbarcode = $"||st01|{rdrecord.CCode}|{orderitem.SourceEntryId}"
+                    Cbsysbarcode = $"||st01|{rdrecord.CCode}|{orderitem.SourceEntryId}",
+                    Iorderdid = item.Iorderdid,
+                    Iordercode = item.Csoordercode
                 });
             }
             return rdrecord;
@@ -1296,7 +1298,8 @@ namespace MicroFeel.Yonyou.Services
                     Irowno = item.Irowno ?? item.Ivouchrowno,
                     Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
                     Cbsysbarcode = $"||st01|{rdrecord.CCode}|{item.Iorderseq}",
-                    Iorderdid = item.Iorderdid
+                    Iorderdid = item.Iorderdid,
+                    Iordercode = item.Csoordercode
                 });
             }
             return rdrecord;
@@ -2202,7 +2205,5 @@ namespace MicroFeel.Yonyou.Services
             return true;
         }
         #endregion
-
-
     }
 }
