@@ -1,4 +1,6 @@
-using System;using System.Collections.Generic;using System.Text.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MicroFeel.Yonyou.Api
 {
@@ -223,7 +225,10 @@ namespace MicroFeel.Yonyou.Api
         ///数量
         ///</Summary>
         [JsonPropertyName("quantity")]
-        public float Quantity { get; set; }
+        public string QuantityValue { get; set; }
+
+        [JsonIgnore]
+        public float Quantity { get { return float.Parse(QuantityValue); } set { QuantityValue = value.ToString(); } }
 
         ///<Summary>
         ///计划到货日期
@@ -235,37 +240,51 @@ namespace MicroFeel.Yonyou.Api
         ///原币单价
         ///</Summary>
         [JsonPropertyName("price")]
-        public float Price { get; set; }
+        public string PriceValue { get; set; }
+
+        [JsonIgnore]
+        public float Price { get { return float.Parse(PriceValue); } set { PriceValue = value.ToString(); } }
 
         ///<Summary>
         ///报价
         ///</Summary>
         [JsonPropertyName("quotedprice")]
-        public float Quotedprice { get; set; }
+        public string QuotedpriceValue { get; set; }
+
+        [JsonIgnore]
+        public float Quotedprice { get { return float.Parse(QuotedpriceValue); } set { QuotedpriceValue = value.ToString(); } }
 
         ///<Summary>
         ///含税单价
         ///</Summary>
         [JsonPropertyName("taxprice")]
-        public float Taxprice { get; set; }
+        public string TaxpriceValue { get; set; }
+        [JsonIgnore]
+        public float Taxprice { get { return float.Parse(TaxpriceValue); } set { TaxpriceValue = value.ToString(); } }
 
         ///<Summary>
         ///原币金额
         ///</Summary>
         [JsonPropertyName("money")]
-        public float Money { get; set; }
+        public string MoneyValue { get; set; }
+        [JsonIgnore]
+        public float Money { get { return float.Parse(MoneyValue); } set { MoneyValue = value.ToString(); } }
 
         ///<Summary>
         ///原币税额
         ///</Summary>
         [JsonPropertyName("tax")]
-        public float Tax { get; set; }
+        public string TaxValue { get; set; }
+        [JsonIgnore]
+        public float Tax { get { return float.Parse(TaxValue); } set { TaxValue = value.ToString(); } }
 
         ///<Summary>
         ///原币价税合计
         ///</Summary>
         [JsonPropertyName("sum")]
-        public float Sum { get; set; }
+        public string SumValue { get; set; }
+        [JsonIgnore]
+        public float Sum { get { return float.Parse(SumValue); } set { SumValue = value.ToString(); } }
 
         ///<Summary>
         ///折扣额
@@ -313,7 +332,10 @@ namespace MicroFeel.Yonyou.Api
         ///税率
         ///</Summary>
         [JsonPropertyName("taxrate")]
-        public float Taxrate { get; set; }
+        public string TaxrateValue { get; set; }
+
+        [JsonIgnore]
+        public float Taxrate { get { return float.Parse(TaxrateValue); } set { TaxrateValue = value.ToString(); } }
 
         ///<Summary>
         ///自由项1
@@ -475,7 +497,9 @@ namespace MicroFeel.Yonyou.Api
         ///行号
         ///</Summary>
         [JsonPropertyName("rowno")]
-        public float Rowno { get; set; }
+        public string RownoValue { get; set; }
+        [JsonIgnore]
+        public float Rowno { get { return float.Parse(RownoValue); } set { RownoValue = value.ToString(); } }
 
     }
 
