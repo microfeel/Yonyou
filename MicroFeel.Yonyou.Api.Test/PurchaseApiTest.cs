@@ -19,7 +19,7 @@ namespace MicroFeel.Yonyou.Api.Test
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = await api.Add_PurchaseorderAsync(new Purchaseorder()
             {
-                Code = "1234",
+                Code = "5678",
                 CurrencyRate = 1,
                 Date = DateTime.Now,
                 Define8 = "柏瑞美",
@@ -71,7 +71,7 @@ namespace MicroFeel.Yonyou.Api.Test
         {
             var api = new PurchaseApi();
             api.Init(base_url, appkey, appSecret, from_account, to_account);
-            var result = await api.Get_PurchaseorderAsync("PRPO20191230327");
+            var result = await api.Get_PurchaseorderAsync("5678");
             var jsonResult = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);
             Console.WriteLine(jsonResult);
             Assert.IsNotNull(jsonResult);

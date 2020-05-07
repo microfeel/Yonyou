@@ -30,7 +30,7 @@ namespace MicroFeel.Yonyou.Api.Test
                          ProductBatch = "aaa",
                           ProductNumbers = "311010016",
                            SourceEntryId = 1,
-                            StoreId = 1010
+                            StoreId = "1010"
                    }
                 }
             });

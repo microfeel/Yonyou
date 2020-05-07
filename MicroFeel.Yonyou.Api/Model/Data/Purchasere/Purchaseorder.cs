@@ -120,7 +120,9 @@ namespace MicroFeel.Yonyou.Api
         ///单据头自定义项5
         ///</Summary>
         [JsonPropertyName("define5")]
-        public float Define5 { get; set; }
+        public string Define5Value { get; set; }
+        [JsonIgnore]
+        public float Define5 { get { return float.Parse(Define5Value); } set { Define5Value = value.ToString(); } }
         ///<Summary>
         ///单据头自定义项6
         ///</Summary>
@@ -130,7 +132,11 @@ namespace MicroFeel.Yonyou.Api
         ///单据头自定义项7
         ///</Summary>
         [JsonPropertyName("define7")]
-        public float Define7 { get; set; }
+        public string Define7Value { get; set; }
+
+        [JsonIgnore]
+        public float Define7 { get { return float.Parse(Define7Value); } set { Define7Value = value.ToString(); } }
+
         ///<Summary>
         ///单据头自定义项8
         ///</Summary>
@@ -170,12 +176,19 @@ namespace MicroFeel.Yonyou.Api
         ///单据头自定义项15
         ///</Summary>
         [JsonPropertyName("define15")]
-        public float Define15 { get; set; }
+        public string Define15Value { get; set; }
+
+        [JsonIgnore]
+        public float Define15 { get { return float.Parse(Define15Value); } set { Define15Value = value.ToString(); } }
+
         ///<Summary>
         ///单据头自定义项16
         ///</Summary>
         [JsonPropertyName("define16")]
-        public float Define16 { get; set; }
+        public string Define16Value { get; set; }
+        [JsonIgnore]
+        public float Define16 { get { return float.Parse(Define16Value); } set { Define16Value = value.ToString(); } }
+
         ///<Summary>
         ///备注
         ///</Summary>
@@ -425,13 +438,18 @@ namespace MicroFeel.Yonyou.Api
         ///单据体自定义项5
         ///</Summary>
         [JsonPropertyName("define26")]
-        public float Define26 { get; set; }
+        public string Define26Value { get; set; }
+
+        [JsonIgnore]
+        public float Define26 { get { return float.Parse(Define26Value); } set { Define26Value = value.ToString(); } }
 
         ///<Summary>
         ///单据体自定义项6
         ///</Summary>
         [JsonPropertyName("define27")]
-        public float Define27 { get; set; }
+        public string Define27Value { get; set; }
+        [JsonIgnore]
+        public float Define27 { get { return float.Parse(Define27Value); } set { Define27Value = value.ToString(); } }
 
         ///<Summary>
         ///单据体自定义项7
@@ -473,13 +491,19 @@ namespace MicroFeel.Yonyou.Api
         ///单据体自定义项13
         ///</Summary>
         [JsonPropertyName("define34")]
-        public float Define34 { get; set; }
+        public string Define34Value { get; set; }
+
+        [JsonIgnore]
+        public float Define34 { get { return float.Parse(Define34Value); } set { Define34Value = value.ToString(); } }
 
         ///<Summary>
         ///单据体自定义项14
         ///</Summary>
         [JsonPropertyName("define35")]
-        public float Define35 { get; set; }
+        public string Define35Value { get; set; }
+
+        [JsonIgnore]
+        public float Define35 { get { return float.Parse(Define35Value); } set { Define35Value = value.ToString(); } }
 
         ///<Summary>
         ///单据体自定义项15
