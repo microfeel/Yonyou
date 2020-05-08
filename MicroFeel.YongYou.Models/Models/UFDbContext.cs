@@ -55,6 +55,9 @@ namespace MicroFeel.YongYou.Models.Models
         public virtual DbSet<SoSomain> SoSomain { get; set; }
         public virtual DbSet<Vendor> Vendor { get; set; }
 
+
+        public virtual DbQuery<ScmItem> ScmItems { get; set; }
+
         #region 视图
         public virtual DbQuery<OmMomaterialsbody> OmMomaterialsbodies { get; set; }
         public virtual DbQuery<OmMomaterialshead> OmMomaterialsheads { get; set; }
@@ -76,12 +79,8 @@ namespace MicroFeel.YongYou.Models.Models
         #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("server=.;user id=sa;password=1989210liuyu;database=UFDATA_001_2019;");
-            }
+        { 
+            optionsBuilder.EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -101,7 +100,8 @@ namespace MicroFeel.YongYou.Models.Models
             modelBuilder.Query<Materialappd>().ToView("materialappd");
             modelBuilder.Query<CurrentStock>().ToView("CurrentStock");
             modelBuilder.Query<VPoPodetails>().ToView("zpurpotail");
-            #endregion
+            modelBuilder.Query<ScmItem>().ToView("SCM_ITEM");
+            #endregion 
 
             modelBuilder.Entity<TransVouch>(entity =>
             {
@@ -14822,7 +14822,7 @@ CREATE DEFAULT dbo.Vendor_iVenCreDate_D AS 0
                     .WithMany(p => p.Vendor)
                     .HasForeignKey(d => d.CVenDepart)
                     .HasConstraintName("FK__Vendor__cVenDepa__3E681DFB");
-            });
+            }); 
         }
     }
 }

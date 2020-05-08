@@ -12,12 +12,12 @@ namespace MicroFeel.Yonyou.Api.Test
         YongYouService service;
         public DBOperatorTest()
         {
-            service = new YongYouService("server=192.168.12.19;user id=sa;password=123.com;database=UFDATA_999_2019;");
+            service = new YongYouService("server=.;user id=sa;password=1989210liuyu;database=UFDATA_001_2019;");
         }
 
         [TestMethod]
         public void MyTestMethod()
-        { 
+        {
             var result = service.AddPuarrivalVouch(new Finance.Models.DbDto.DtoStockOrder()
             {
                 Brand = "柏瑞美",
@@ -30,11 +30,18 @@ namespace MicroFeel.Yonyou.Api.Test
                          ProductBatch = "aaa",
                           ProductNumbers = "311010016",
                            SourceEntryId = 1,
-                            StoreId = 1010
+                            StoreId = ""
                    }
                 }
             });
 
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void MyTestMethod1()
+        {
+            var result = service.FromPuArrivalVouchToStoreRecord("DH2002290001");
             Assert.IsTrue(result);
         }
     }

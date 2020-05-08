@@ -18,8 +18,8 @@ namespace MicroFeel.Yonyou.Api.Test
             var api = new PurchaseApi();
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = await api.Add_PurchaseorderAsync(new Purchaseorder()
-            {
-                Code = "1234",
+            { 
+                Code = "5678",
                 CurrencyRate = 1,
                 Date = DateTime.Now,
                 Define8 = "柏瑞美",
@@ -46,7 +46,7 @@ namespace MicroFeel.Yonyou.Api.Test
                                 Inventorystd = "JGNT24"
                             }
                 }
-            });
+            }, "QG2005070011");
 
             Assert.IsNotNull(result);
             var jsonResult = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);

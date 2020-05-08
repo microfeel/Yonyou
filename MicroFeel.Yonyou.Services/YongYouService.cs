@@ -790,13 +790,13 @@ namespace MicroFeel.Yonyou.Services
             {
                 try
                 {
-                    var momain = dbContext.OmMomain.Where(t => t.CCode == order.SourceOrderNo).Include(t => t.OmModetails).AsNoTracking().FirstOrDefault();
+                    var momain = dbContext.OmMomain.Where(t => t.CCode == order.SourceOrderNo).Include(t => t.OmModetails).FirstOrDefault();
                     var result = CreatePuarrivalVouch(momain, order);
                     order.OrderNo = result.CCode;
                     dbContext.PuArrivalVouch.Add(result);
                     dbContext.PuArrivalVouchs.AddRange(result.PuArrivalVouchs);
                     //回填到货数量
-                    dbContext.OmModetails.UpdateRange(momain.OmModetails);
+                    // dbContext.OmModetails.UpdateRange(momain.OmModetails);
                     var commitResult = (dbContext.SaveChanges() > 0);
                     tran.Commit();
                     return commitResult;
@@ -890,7 +890,8 @@ namespace MicroFeel.Yonyou.Services
                     PlanLotNumber = item.CPlanLotNumber,
                     CItemClass = item.CItemClass,
                     CItemCode = item.CItemCode,
-                    CItemName = momain.CDefine8
+                    CItemName = momain.CDefine8,
+                    Csoordercode = item.Csoordercode
                 });
                 item.IArrQty = (item.IArrQty ?? 0) + orderitem.Numbers.Value;
             }
@@ -990,7 +991,9 @@ namespace MicroFeel.Yonyou.Services
                     Irowno = puArrivalVouch.PuArrivalVouchs.Count() + 1,
                     Iorderseq = orderitem.SourceEntryId,
                     FValidInQuan = 0,
-                    FValidQuantity = null
+                    FValidQuantity = null,
+                    Iorderdid = item.Iorderdid,
+                    Csoordercode = item.Csoordercode
                 });
                 item.IReceivedQty = (item.IReceivedQty ?? 0) + orderitem.Numbers.Value;
             }
@@ -1017,8 +1020,17 @@ namespace MicroFeel.Yonyou.Services
                 dbContext.RdRecord01.Add(result);
                 dbContext.Rdrecords01.AddRange(result.Rdrecords01s);
             });
-            InsertOrUpdateStore(order, (s, t) => { return s + t; });
-            return dbContext.SaveChanges() > 0;
+            if (!InsertOrUpdateStore(order, (s, t) => { return s + t; })) return false;
+
+            UpdateModetailsReceiveNumber(puarrival.PuArrivalVouchs);
+
+            var commitResult = dbContext.SaveChanges() > 0;
+            if (commitResult)
+                results.ForEach(t =>
+                {
+                    AddUnAccountRdrecord(t.Id, t.Rdrecords01s.Select(d => d.AutoId).ToList(), "01", t.CBusType);
+                });
+            return commitResult;
         }
 
         private List<RdRecord01> CreateRdrecord01s(PuArrivalVouch puArrival, DtoStockOrder order)
@@ -1349,7 +1361,7 @@ namespace MicroFeel.Yonyou.Services
             puarrival.Caudittime = DateTime.Now;
             dbContext.PuArrivalVouch.Update(puarrival);
             //更新库存
-            InsertOrUpdateStore(new DtoStockOrder()
+            if (!InsertOrUpdateStore(new DtoStockOrder()
             {
                 Brand = puarrival.CDefine8,
                 SourceOrderNo = puarrival.CCode,
@@ -1360,8 +1372,15 @@ namespace MicroFeel.Yonyou.Services
                     ProductNumbers = t.CInvCode,
                     StoreId = t.CWhCode
                 })
-            }, (s, t) => { return s + t; }); ;
-            return dbContext.SaveChanges() > 0;
+            }, (s, t) => { return s + t; })) return false;
+            UpdateModetailsReceiveNumber(puarrival.PuArrivalVouchs);
+            var commitResult = dbContext.SaveChanges() > 0;
+            if (commitResult)
+                results.ForEach(t =>
+                {
+                    AddUnAccountRdrecord(t.Id, t.Rdrecords01s.Select(d => d.AutoId).ToList(), "01", t.CBusType);
+                });
+            return commitResult;
         }
         #endregion
 
@@ -1394,7 +1413,13 @@ namespace MicroFeel.Yonyou.Services
                 var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductBatch == item.CBatch && t.ProductNumbers == item.CInvCode);
                 detail.IFhquantity = (detail.IFhquantity ?? 0) + orderdetail?.Numbers ?? item.IQaquantity;
             }
-            return dbContext.SaveChanges() > 0;
+            var commitResult = dbContext.SaveChanges() > 0;
+            if (commitResult)
+                results.ForEach(t =>
+                {
+                    AddUnAccountRdrecord(t.Id, t.Rdrecords32s.Select(d => d.AutoId).ToList(), "32", t.CBusType);
+                });
+            return commitResult;
         }
         private List<Rdrecord32> CreateRdrecord32s(DispatchList dispatch, DtoStockOrder order)
         {
@@ -1563,7 +1588,13 @@ namespace MicroFeel.Yonyou.Services
             dbContext.Rdrecords11.AddRange(list);
             var app = dbContext.MaterialAppVouch.First(t => t.Id == materialApp.Id);
             app.CCloser = app.CMaker;
-            return dbContext.SaveChanges() > 0;
+            var commitResult = dbContext.SaveChanges() > 0;
+            if (commitResult)
+                results.ForEach(t =>
+                {
+                    AddUnAccountRdrecord(t.Id, t.Rdrecords11s.Select(d => d.AutoId).ToList(), "11", t.CBusType);
+                });
+            return commitResult;
         }
 
         private List<Rdrecord11> CreateRdrecord11s(MaterialAppVouch materialApp, DtoStockOrder order)
@@ -1984,12 +2015,45 @@ namespace MicroFeel.Yonyou.Services
 
         #region 调拨
 
-        public List<DtoAllotOrder> GetAllotOrders(string brand, string orderno, int pageindex, int pagesize, out int total)
+        public List<DtoAllotOrder> GetAllotOrders(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
         {
-            var tmp_datas = dbContext.TransVouch.Where(t => t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CTvcode.Contains(orderno))).OrderByDescending(t => t.DTvdate);
-            total = tmp_datas.Count();
-            var datas = tmp_datas.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
-            throw new NotImplementedException();
+            var tmp_orders = dbContext.RdRecord09.Where(t => t.CBusType == "调拨出库" && t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) && (starttime == null || t.DDate >= starttime) && (endtime == null || t.DDate <= endtime) && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)))
+            .Join(dbContext.TransVouch, t => t.CBusCode, d => d.CTvcode, (t, d) => new { t, d }).OrderByDescending(t => t.t.DDate);
+            total = tmp_orders.Count();
+            var datas = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
+
+            return datas.Select(t =>
+            {
+                var targetStoreName = dbContext.Warehouse.FirstOrDefault(w => w.CWhCode == t.t.CWhCode)?.CWhName ?? "";
+                var sourceStoreName = dbContext.Warehouse.FirstOrDefault(w => w.CWhCode == t.d.COwhCode)?.CWhName ?? "";
+                return new DtoAllotOrder()
+                {
+                    AllotOrderNo = t.d.CTvcode,
+                    OrderNo = t.t.CCode,
+                    CreateTime = t.t.DDate,
+                    Remark = t.t.CMemo,
+                    Brand = t.d.CDefine2,
+                    TargetBrand = t.d.CDefine1,
+                    TargetStoreName = targetStoreName,
+                    SourceStoreName = sourceStoreName,
+                    AllotOrderDetails = dbContext.Rdrecords09.Where(d => d.CDefine29 != "checked" && d.Id == t.t.Id).ToList().Select(d =>
+                    {
+                        var inventory = dbContext.Inventory.FirstOrDefault(i => i.CInvCode == d.CInvCode);
+                        var unitcode = inventory?.CComUnitCode ?? "";
+                        return new DtoAllotOrder.DtoAllotOrderDetail()
+                        {
+                            AutoId = d.AutoId,
+                            ProductBathcNo = d.CBatch,
+                            ProductName = inventory?.CInvName,
+                            ProductNumbers = d.CInvCode,
+                            Numbers = d.IQuantity.HasValue ? d.IQuantity.Value : 0,
+                            ProductModel = inventory?.CInvStd,
+                            UnitName = dbContext.ComputationUnit.FirstOrDefault(u => u.CComunitCode == unitcode)?.CComUnitName ?? ""
+                        };
+                    }).ToList(),
+
+                };
+            }).ToList();
         }
 
         public List<DtoAllotOutRecord> GetAllotOutRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
@@ -2167,13 +2231,14 @@ namespace MicroFeel.Yonyou.Services
         {
             foreach (var item in order.StoreStockDetail)
             {
-                var tmp_stocks = dbContext.CurrentStocks.Where(t => t.CInvCode == item.ProductNumbers);
-                if (tmp_stocks.Count() == 0) return false;
-                var itemid = tmp_stocks.First().ItemId;
-                var stock = tmp_stocks.FirstOrDefault(t => t.CBatch == item.ProductBatch && t.CWhCode == item.StoreId);
+                var scmItems = dbContext.ScmItems.FirstOrDefault(t => t.CInvCode == item.ProductNumbers);
+                if (scmItems == null) return false;
+                var itemid = scmItems.Id;
+                var stock = dbContext.CurrentStocks.FirstOrDefault(t => t.CInvCode == item.ProductNumbers && t.CBatch == item.ProductBatch && t.CWhCode == item.StoreId);
                 if (stock != null)
                 {
                     stock.IQuantity = action(stock.IQuantity ?? 0, item.Numbers ?? 0);
+                    dbContext.Database.ExecuteSqlCommand("update currentstock set iQuantity =" + stock.IQuantity + " where cInvCode = '" + item.ProductNumbers + "' and cBatch = '" + item.ProductBatch + "' and cWhCode = " + item.StoreId);
                     continue;
                 }
 
@@ -2203,6 +2268,48 @@ namespace MicroFeel.Yonyou.Services
                 stock.IQuantity = action(stock.IQuantity ?? 0, item.Numbers ?? 0);
             }
             return true;
+        }
+
+        private void UpdateModetailsReceiveNumber(ICollection<PuArrivalVouchs> vouchs)
+        {
+            foreach (var item in vouchs)
+            {
+                var detail = dbContext.OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId);
+                if (detail == null) continue;
+                detail.IReceivedQty = detail.IReceivedQty ?? 0 + item.IQuantity;
+            }
+        }
+
+        /// <summary>
+        /// 添加未记账数据
+        /// </summary>
+        /// <param name="mid"></param>
+        /// <param name="did"></param>
+        /// <param name="vouchType"></param>
+        /// <param name="busType"></param>
+        /// <returns></returns>
+        private bool AddUnAccountRdrecord(long mid, long did, string vouchType, string busType)
+        {
+            var sql = "insert IA_ST_UnAccountVouch" + vouchType + " (IDUN,IDSUN,cVouTypeUN,cBustypeUN) values (" + mid + "," + did + ",'" + vouchType + "','" + busType + "')";
+            return dbContext.Database.ExecuteSqlCommand(sql) > 0;
+        }
+
+        /// <summary>
+        /// 添加未记账数据
+        /// </summary>
+        /// <param name="mid"></param>
+        /// <param name="dids"></param>
+        /// <param name="vouchType"></param>
+        /// <param name="busType"></param>
+        /// <returns></returns>
+        private bool AddUnAccountRdrecord(long mid, List<long> dids, string vouchType, string busType)
+        {
+            var sql = new StringBuilder();
+            foreach (var did in dids)
+            {
+                sql.Append("insert IA_ST_UnAccountVouch" + vouchType + " (IDUN,IDSUN,cVouTypeUN,cBustypeUN) values (" + mid + "," + did + ",'" + vouchType + "','" + busType + "');");
+            }
+            return dbContext.Database.ExecuteSqlCommand(sql.ToString()) > 0;
         }
         #endregion
     }
