@@ -893,7 +893,7 @@ namespace MicroFeel.Yonyou.Services
                     CItemName = momain.CDefine8,
                     Csoordercode = item.Csoordercode
                 });
-                item.IArrQty = (item.IArrQty ?? 0) + orderitem.Numbers.Value;
+                //item.IArrQty = (item.IArrQty ?? 0) + orderitem.Numbers.Value;
             }
             return puArrivalVouch;
         }
