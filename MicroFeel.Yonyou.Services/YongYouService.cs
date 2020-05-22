@@ -1530,8 +1530,8 @@ namespace MicroFeel.Yonyou.Services
             using (var tran = dbContext.Database.BeginTransaction())
             {
                 try
-                {
-                    if (!UpdateStore(order, (s, t) => { return s - t; })) throw new FinancialException("更新库存数量时发生异常");
+                { 
+                    if (!UpdateStore(order, (s, t) => { return s - t; },ref errmsg)) throw new FinancialException(errmsg);
 
                     var dispatch = dbContext.DispatchList.AsNoTracking().FirstOrDefault(t => t.CDlcode == order.SourceOrderNo);
                     if (dispatch == null) throw new FinancialException($"无法查询当前发货单[{order.SourceOrderNo}]");
@@ -1713,7 +1713,7 @@ namespace MicroFeel.Yonyou.Services
             {
                 try
                 {
-                    if (!UpdateStore(order, (s, t) => { return s - t; })) throw new FinancialException("更新库存数量发生异常，可能导致库存为负数");
+                    if (!UpdateStore(order, (s, t) => { return s - t; },ref errmsg)) throw new FinancialException(errmsg);
                     var materialApp = dbContext.MaterialAppVouch.AsNoTracking().FirstOrDefault(t => t.CCode == order.SourceOrderNo);
                     if (materialApp == null) return false;
                     materialApp.MaterialAppVouchs = dbContext.MaterialAppVouchs.AsNoTracking().Where(t => t.Id == materialApp.Id).ToList();
@@ -2423,22 +2423,25 @@ namespace MicroFeel.Yonyou.Services
         /// <param name="order"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        private bool UpdateStore(DtoStockOrder order, Func<decimal, decimal, decimal> action)
+        private bool UpdateStore(DtoStockOrder order, Func<decimal, decimal, decimal> action, ref string errmsg)
         {
             foreach (var item in order.StoreStockDetail)
             {
                 var tmp_stocks = dbContext.CurrentStocks.Where(t => t.CInvCode == item.ProductNumbers);
-                if (tmp_stocks.Count() == 0) return false;
-                var itemid = tmp_stocks.First().ItemId;
-                var stocks = tmp_stocks.Where(t => t.CWhCode == item.StoreId);
-                var stock = stocks.FirstOrDefault(t => t.CBatch == item.ProductBatch);
-                if (stock == null) return false;
-                var needNumber = item.Numbers ?? 0;
-                stock.IQuantity = action(stock.IQuantity ?? 0, needNumber);
-                if (stock.IQuantity < 0)
+                if (tmp_stocks.Count() == 0)
                 {
-                    stock.IQuantity = 0;
-                    needNumber = Math.Abs(stock.IQuantity ?? 0);
+                    errmsg = $"{item.ProductNumbers}不存在任何库存记录";
+                    return false;
+                }
+                var itemid = tmp_stocks.First().ItemId;
+                var stocks = tmp_stocks.Where(t => t.CWhCode == item.StoreId); 
+                var stock = stocks.FirstOrDefault(t => t.CBatch == item.ProductBatch);
+                var needNumber = item.Numbers ?? 0;
+                var oddNumber = action(stock?.IQuantity ?? 0, needNumber);
+                if (oddNumber < 0)
+                {
+                    if (stock != null) stock.IQuantity = 0;
+                    needNumber = Math.Abs(oddNumber);
                     var stocksOderderByBatch = stocks.OrderBy(t => t.CBatch);
                     foreach (var s in stocksOderderByBatch)
                     {
@@ -2455,7 +2458,11 @@ namespace MicroFeel.Yonyou.Services
                         needNumber = 0;
                         break;
                     }//所有批号的都进行了递减后还是无法满足要出库/入库的数量
-                    if (needNumber != 0) return false;
+                    if (needNumber != 0)
+                    {
+                        errmsg = $"{item.ProductNumbers}在仓库{item.StoreId}库存不足";
+                        return false;
+                    }
                 }
             }
             return true;
