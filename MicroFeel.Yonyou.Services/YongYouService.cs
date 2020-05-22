@@ -5,6 +5,7 @@ using MicroFeel.YongYou.Models.Models;
 using MicroFeel.Yonyou.Api.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Sugar.Utils;
@@ -66,6 +67,11 @@ namespace MicroFeel.Yonyou.Services
             var options = new DbContextOptionsBuilder().UseSqlServer(connectstring, op => op.UseRowNumberForPaging()).Options;
 
             dbContext = new UFDbContext(options);
+        }
+
+        public IDbContextTransaction BeginTransaction()
+        {
+            return dbContext.Database.BeginTransaction();
         }
 
         public Finance.Models.Customer AddCustomer(Finance.Models.Customer customer)
@@ -189,9 +195,17 @@ namespace MicroFeel.Yonyou.Services
             return result.Errcode == "0";
         }
 
-        public bool PurchaseIn(Purchasein purchasein)
+        /// <summary>
+        /// 采购入库
+        /// </summary>
+        /// <param name="purchasein"></param>
+        /// <param name="purchaseorderno"></param>
+        /// <returns></returns>
+        public async Task<bool> PurchaseInAsync(Purchasein purchasein, string purchaseorderno)
         {
-            throw new NotImplementedException();
+            var arg = purchasein.ToJson().ToObject<Api.Purchasein>();
+            return (await stockApi.Add_PurchaseinAsync(arg, purchaseorderno)).Errcode == "0";
+
         }
 
         public bool Saleout(Saleout saleout)
@@ -430,6 +444,18 @@ namespace MicroFeel.Yonyou.Services
         }
 
 
+        public DtoPerson GetPersonByName(string name)
+        {
+            var person = dbContext.Person.FirstOrDefault(t => t.CPersonName == name);
+            if (person == null) return null;
+            return new DtoPerson()
+            {
+                Code = person.CPersonCode,
+                DeparmentCode = person.CDepCode,
+                Name = person.CPersonName,
+                PhoneCode = person.CPersonPhone
+            };
+        }
         public DtoSupplier GetSupplierByPhone(string phonecode)
         {
             var supplier = dbContext.Vendor.FirstOrDefault(t => t.CVenPhone == phonecode);
@@ -471,7 +497,43 @@ namespace MicroFeel.Yonyou.Services
                 }).Distinct().ToList();
         }
 
-
+        /// <summary>
+        /// 获取委外生产产品明细单
+        /// </summary>
+        /// <param name="brand"></param>
+        /// <param name="key"></param>
+        /// <param name="supplier"></param>
+        /// <param name="starttime"></param>
+        /// <param name="endtime"></param>
+        /// <param name="pageindex"></param>
+        /// <param name="pagesize"></param>
+        /// <param name="total"></param>
+        /// <returns></returns>
+        public List<DtoOutsourcingOrder> GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
+        {
+            var tmp_datas = dbContext.OmMomain.Where(t => t.CState > 0 && t.CDefine8 == brand &&
+                                                        (string.IsNullOrEmpty(key) || t.CCode.Contains(key)) &&
+                                                        (string.IsNullOrEmpty(supplier) || t.CVenPerson.Contains(supplier)) &&
+                                                        (starttime == null || t.DDate >= starttime) &&
+                                                        (endtime == null || t.DDate <= endtime)).Join(dbContext.OmModetails, t => t.Moid, d => d.Moid, (t, d) => new { t, d }).Where(t => (t.d.IQuantity - (t.d.IReceivedQty ?? t.d.IArrQty ?? t.d.Freceivedqty ?? 0)) > 0);
+            total = tmp_datas.Count();
+            var datas = tmp_datas.Skip(pageindex * pagesize).Take(pagesize).ToList().Select(t =>
+            {
+                var product = dbContext.Inventory.FirstOrDefault(i => i.CInvCode == t.d.CInvCode);
+                return new DtoOutsourcingOrder()
+                {
+                    DateTime = t.t.DDate,
+                    DetailId = t.d.ModetailsId,
+                    OrderNo = t.t.CCode,
+                    CommitDate = t.d.DArriveDate,
+                    ProductName = product?.CInvName,
+                    ProductModel = product.CInvStd,
+                    ProductNumbers = t.d.CInvCode,
+                    Numbers = t.d.IQuantity - (t.d.IReceivedQty ?? t.d.IArrQty ?? t.d.Freceivedqty)
+                };
+            }).ToList();
+            return datas;
+        }
 
         /// <summary>
         /// 获取销售发货单
@@ -501,14 +563,14 @@ namespace MicroFeel.Yonyou.Services
             }).ToList();
             orders.ForEach(e =>
             {
-                e.SellOrderDetails = dbContext.DispatchLists.Where(t => t.Dlid == e.Id).Join(dbContext.Inventory, t => t.CInvCode, d => d.CInvCode, (t, d) => new { t, d })
+                e.SellOrderDetails = dbContext.DispatchLists.Where(t => t.Dlid == e.Id && ((t.IQuantity ?? 0) - (t.FOutQuantity ?? 0)) > 0).Join(dbContext.Inventory, t => t.CInvCode, d => d.CInvCode, (t, d) => new { t, d })
                 //  .Join(dbContext.Warehouse, t => t.t.CWhCode, w => w.CWhCode, (t, w) => new { t = t.t, d = t.d, w = w })
                 .Join(dbContext.ComputationUnit, t => t.d.CComUnitCode, u => u.CComunitCode, (t, u) => new { t = t.t, d = t.d, u = u })
                 .Select(t => new DtoSellOrder.DtoSellOrderDetail()
                 {
                     Id = t.t.AutoId,
                     IsBatchManage = t.d.BInvBatch,
-                    Numbers = t.t.IQuantity.Value,
+                    Numbers = (t.t.IQuantity ?? 0) - (t.t.FOutQuantity ?? 0),
                     ProcutModel = t.d.CInvStd,
                     ProductBatchNo = "",
                     ProductName = t.d.CInvName,
@@ -522,23 +584,29 @@ namespace MicroFeel.Yonyou.Services
         /// <summary>
         /// 获取采购到货单
         /// </summary>
+        /// <param name="ordertype"></param>
         /// <param name="brand"></param>
         /// <param name="orderno"></param>
+        /// <param name="state"></param>
         /// <returns></returns>
-        public List<DtoPurchaseOrder> GetPurchaseOrders(string brand, string orderno)
+        public List<DtoPurchaseOrder> GetPurchaseOrders(string ordertype, string brand, string orderno, string state)
         {
-            var orders = dbContext.PuArrHeads.Where(t => t.Cdefine8 == brand && t.Cvoucherstate == "审核" && (string.IsNullOrEmpty(orderno) || t.Ccode.Contains(orderno)))
-                .Select(t => new DtoPurchaseOrder()
-                {
-                    Maker = t.Cmaker,
-                    Id = t.Id,
-                    OrderNo = t.Ccode,
-                    OrderType = t.Cbustype,
-                    Remark = t.Cmemo,
-                    Supplier = t.Cvenname,
-                    SupplierCode = t.Cvencode,
-                    CreateDate = t.Ddate
-                }).ToList();
+            var tmp_datas = dbContext.PuArrHeads.Where(t => t.Cdefine8 == brand
+                            && t.Cbustype == ordertype
+                            && t.Cvoucherstate == state
+                            && t.Ccode == orderno);
+            var orders = tmp_datas.Skip(0).Take(1).Select(t => new DtoPurchaseOrder()
+            {
+                Maker = t.Cmaker,
+                Id = t.Id,
+                OrderNo = t.Ccode,
+                PurchaseOrderNo = t.Cpocode,
+                OrderType = t.Cbustype,
+                Remark = t.Cmemo,
+                Supplier = t.Cvenname,
+                SupplierCode = t.Cvencode,
+                CreateDate = t.Ddate
+            }).ToList();
             orders.ForEach(e =>
             {
                 e.PurchaseOrderDetails = dbContext.PuArrBodies.Where(t => t.Id == e.Id).Select(t => new DtoPurchaseOrder.DtoPurchaseOrderDetail
@@ -548,17 +616,20 @@ namespace MicroFeel.Yonyou.Services
                     ProductModel = t.Cinvstd,
                     ProductName = t.Cinvname,
                     ProductNumbers = t.Cinvcode,
+                    ProductBatch = t.Cbatch,
                     StoreCode = t.Cwhcode,
                     StoreName = t.Cwhname,
-                    UnitName = t.Cinvm_Unit
+                    UnitName = t.Cinvm_Unit,
+                    Price = t.Ioritaxcost
                 }).ToList();
             });
             return orders;
         }
 
-        public List<DtoPurchaseOrder> GetPurchaseOrders(string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
+        public List<DtoPurchaseOrder> GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
         {
             var tmp_datas = dbContext.PuArrHeads.Where(t => t.Cdefine8 == brand
+                            && t.Cbustype == ordertype
                             && t.Cvoucherstate == state
                             && (string.IsNullOrEmpty(key) || t.Ccode.Contains(key))
                             && (starttime == null || t.Ddate >= starttime)
@@ -790,12 +861,16 @@ namespace MicroFeel.Yonyou.Services
             {
                 try
                 {
-                    var momain = dbContext.OmMomain.Where(t => t.CCode == order.SourceOrderNo).Include(t => t.OmModetails).FirstOrDefault();
+                    var momain = dbContext.OmMomain.Where(t => t.CCode == order.SourceOrderNo).Include(t => t.OmModetails).AsNoTracking().FirstOrDefault();
                     var result = CreatePuarrivalVouch(momain, order);
                     order.OrderNo = result.CCode;
                     dbContext.PuArrivalVouch.Add(result);
                     dbContext.PuArrivalVouchs.AddRange(result.PuArrivalVouchs);
                     //回填到货数量
+                    foreach (var item in result.PuArrivalVouchs)
+                    {
+                        UpdateModetailsArrQtyNumber(item);
+                    }
                     // dbContext.OmModetails.UpdateRange(momain.OmModetails);
                     var commitResult = (dbContext.SaveChanges() > 0);
                     tran.Commit();
@@ -893,7 +968,6 @@ namespace MicroFeel.Yonyou.Services
                     CItemName = momain.CDefine8,
                     Csoordercode = item.Csoordercode
                 });
-                //item.IArrQty = (item.IArrQty ?? 0) + orderitem.Numbers.Value;
             }
             return puArrivalVouch;
         }
@@ -914,7 +988,10 @@ namespace MicroFeel.Yonyou.Services
             order.OrderNo = result.CCode;
             dbContext.PuArrivalVouch.Add(result);
             dbContext.PuArrivalVouchs.AddRange(result.PuArrivalVouchs);
-
+            foreach (var item in result.PuArrivalVouchs)
+            {
+                UpdatePoDetailsArrQtyNumber(item);
+            }
             return dbContext.SaveChanges() > 0;
         }
 
@@ -995,7 +1072,7 @@ namespace MicroFeel.Yonyou.Services
                     Iorderdid = item.Iorderdid,
                     Csoordercode = item.Csoordercode
                 });
-                item.IReceivedQty = (item.IReceivedQty ?? 0) + orderitem.Numbers.Value;
+                //item.IReceivedQty = (item.IReceivedQty ?? 0) + orderitem.Numbers.Value;
             }
             return puArrivalVouch;
         }
@@ -1021,9 +1098,7 @@ namespace MicroFeel.Yonyou.Services
                 dbContext.Rdrecords01.AddRange(result.Rdrecords01s);
             });
             if (!InsertOrUpdateStore(order, (s, t) => { return s + t; })) return false;
-
-            UpdateModetailsReceiveNumber(puarrival.PuArrivalVouchs);
-
+            //UpdateModetailsReceiveNumber(puarrival.PuArrivalVouchs);
             var commitResult = dbContext.SaveChanges() > 0;
             if (commitResult)
                 results.ForEach(t =>
@@ -1326,34 +1401,93 @@ namespace MicroFeel.Yonyou.Services
         /// <returns></returns>
         public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo)
         {
-            var puarrival = dbContext.PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
-            if (puarrival == null) return false;
-            puarrival.PuArrivalVouchs = dbContext.PuArrivalVouchs.AsNoTracking().Where(t => t.Id == puarrival.Id).ToList();
-            var results = CreateRdrecord01s(puarrival);
-            results.ForEach(result =>
+            return SaveRdRecordsTran(puarrivalOrderNo, null);
+        }
+
+        /// <summary>
+        /// 到货单下推入库单
+        /// </summary>
+        /// <param name="puarrivalOrderNo"></param>
+        /// <param name="batch"></param>
+        /// <returns></returns>
+        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs)
+        {
+            return SaveRdRecordsTran(puarrivalOrderNo, t =>
             {
-                dbContext.RdRecord01.Add(result);
-                dbContext.Rdrecords01.AddRange(result.Rdrecords01s);
+                t.ForEach(item => item.Rdrecords01s.ToList().ForEach(d =>
+                                                                    {
+                                                                        if (batchs.ContainsKey(d.CInvCode))
+                                                                            d.CBatch = batchs[d.CInvCode];
+                                                                    }));
             });
-            if (puarrival.CBusType == "普通采购")
+        }
+
+        /// <summary>
+        /// 到货单下推入库单
+        /// </summary>
+        /// <param name="puarrivalOrderNo"></param>
+        /// <param name="sendOrderNo"></param>
+        /// <returns></returns>
+        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
+        {
+            return SaveRdRecordsTran(puarrivalOrderNo, t => { t.ForEach(item => item.CDefine10 = sendOrderNo); });
+        }
+        private bool SaveRdRecordsTran(string puarrivalOrderNo, Action<List<RdRecord01>> action)
+        {
+            using (var tran = dbContext.Database.BeginTransaction())
+            {
+                try
+                {
+                    var puarrival = dbContext.PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
+                    if (puarrival == null) return false;
+                    puarrival.PuArrivalVouchs = dbContext.PuArrivalVouchs.Where(t => t.Id == puarrival.Id).ToList();
+                    var results = CreateRdrecord01s(puarrival);
+                    action?.Invoke(results);
+                    bool commitResult = SaveRdRecords(puarrival, results);
+                    if (commitResult) tran.Commit();
+                    else tran.Rollback();
+                    return commitResult;
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    return false;
+                }
+
+            }
+        }
+        private bool SaveRdRecords(PuArrivalVouch puarrival, List<RdRecord01> results)
+        {
+            foreach (var item in puarrival.PuArrivalVouchs)
             {
                 //更新采购订单到入库数量 
-                foreach (var item in puarrival.PuArrivalVouchs)
+                if (puarrival.CBusType == "普通采购")
                 {
                     var detail = dbContext.PoPodetails.FirstOrDefault(t => t.Id == item.IPosId);
                     if (detail == null) continue;
-                    detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
+                    //detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
+                    UpdatePoDetailsReceiveNumber(item);
                 }
-            }
-            else if (puarrival.CBusType == "委外加工")
-            {
-                //更新委外单据入库数量
-                foreach (var item in puarrival.PuArrivalVouchs)
+                else if (puarrival.CBusType == "委外加工")
                 {
+                    //更新委外单据入库数量 
                     var detail = dbContext.OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId);
                     if (detail == null) continue;
-                    detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
+                    //detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
+                    UpdateModetailsReceiveNumber(item);
+                    // 更新加工费用
+                    var rds = results.Where(t => t.Rdrecords01s.Any(d => d.IOmoDid == detail.ModetailsId)).Select(t => t.Rdrecords01s.FirstOrDefault(d => d.IOmoDid == detail.ModetailsId))?.FirstOrDefault();
+                    if (rds != null)
+                    {
+                        //加工费单价 
+                        rds.IProcessCost = detail.IUnitPrice;
+                        //加工费
+                        rds.IProcessFee = detail.IUnitPrice * item.IQuantity;
+                        //累计结算加工费
+                        //rds.ISprocessFee = 0;
+                    }
                 }
+                item.FValidQuantity = item.FValidInQuan = item.IQuantity;
             }
             puarrival.Ccloser = puarrival.CMaker;
             puarrival.Cverifier = puarrival.CMaker;
@@ -1372,14 +1506,15 @@ namespace MicroFeel.Yonyou.Services
                     ProductNumbers = t.CInvCode,
                     StoreId = t.CWhCode
                 })
-            }, (s, t) => { return s + t; })) return false;
-            UpdateModetailsReceiveNumber(puarrival.PuArrivalVouchs);
+            }, (s, t) => { return s + t; })) throw new Exception("更新库存时发生异常");
+            results.ForEach(result =>
+            {
+                //添加未记账数据
+                if (!AddUnAccountRdrecord(result.Id, result.Rdrecords01s.Select(d => d.AutoId).ToList(), "01", result.CBusType)) throw new Exception("添加未记账数据时发生异常");
+                dbContext.RdRecord01.Add(result);
+                dbContext.Rdrecords01.AddRange(result.Rdrecords01s);
+            });
             var commitResult = dbContext.SaveChanges() > 0;
-            if (commitResult)
-                results.ForEach(t =>
-                {
-                    AddUnAccountRdrecord(t.Id, t.Rdrecords01s.Select(d => d.AutoId).ToList(), "01", t.CBusType);
-                });
             return commitResult;
         }
         #endregion
@@ -1390,36 +1525,56 @@ namespace MicroFeel.Yonyou.Services
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public bool AddSellOrder(DtoStockOrder order)
+        public bool AddSellOrder(DtoStockOrder order, ref string errmsg)
         {
-            if (!UpdateStore(order, (s, t) => { return s - t; })) return false;
-
-            var dispatch = dbContext.DispatchList.AsNoTracking().FirstOrDefault(t => t.CDlcode == order.SourceOrderNo);
-            if (dispatch == null) return false;
-            dispatch.DispatchLists = dbContext.DispatchLists.AsNoTracking().Where(t => t.Dlid == dispatch.Dlid).ToList();
-            var results = CreateRdrecord32s(dispatch, order);
-            results.ForEach(result =>
+            using (var tran = dbContext.Database.BeginTransaction())
             {
-                order.OrderNo = result.CCode;
-                order.Note += result.CCode + ",";
-                dbContext.Rdrecord32.Add(result);
-                dbContext.Rdrecords32.AddRange(result.Rdrecords32s);
-            });
-            foreach (var item in dispatch.DispatchLists)
-            {
-                //更新销售订单发货数量
-                var detail = dbContext.SoSodetails.FirstOrDefault(t => t.ISosId == item.ISosId);
-                if (detail == null) continue;
-                var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductBatch == item.CBatch && t.ProductNumbers == item.CInvCode);
-                detail.IFhquantity = (detail.IFhquantity ?? 0) + orderdetail?.Numbers ?? item.IQaquantity;
-            }
-            var commitResult = dbContext.SaveChanges() > 0;
-            if (commitResult)
-                results.ForEach(t =>
+                try
                 {
-                    AddUnAccountRdrecord(t.Id, t.Rdrecords32s.Select(d => d.AutoId).ToList(), "32", t.CBusType);
-                });
-            return commitResult;
+                    if (!UpdateStore(order, (s, t) => { return s - t; })) throw new FinancialException("更新库存数量时发生异常");
+
+                    var dispatch = dbContext.DispatchList.AsNoTracking().FirstOrDefault(t => t.CDlcode == order.SourceOrderNo);
+                    if (dispatch == null) throw new FinancialException($"无法查询当前发货单[{order.SourceOrderNo}]");
+                    dispatch.DispatchLists = dbContext.DispatchLists.AsNoTracking().Where(t => t.Dlid == dispatch.Dlid).ToList();
+                    var results = CreateRdrecord32s(dispatch, order);
+                    results.ForEach(result =>
+                    {
+                        order.OrderNo = result.CCode;
+                        order.Note += result.CCode + ",";
+                        dbContext.Rdrecord32.Add(result);
+                        dbContext.Rdrecords32.AddRange(result.Rdrecords32s);
+                    });
+                    foreach (var item in dispatch.DispatchLists)
+                    {
+                        //更新销售订单发货数量
+                        var detail = dbContext.SoSodetails.FirstOrDefault(t => t.ISosId == item.ISosId);
+                        if (detail == null) continue;
+                        var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductBatch == item.CBatch && t.ProductNumbers == item.CInvCode);
+                        detail.IFhquantity = (detail.IFhquantity ?? 0) + orderdetail?.Numbers ?? item.IQaquantity;
+                        //更新已出库数量
+                        item.FOutQuantity = (item.FOutQuantity ?? 0) + (orderdetail?.Numbers ?? item.IQaquantity);
+                    }
+                    //添加未记账数据
+                    results.ForEach(t =>
+                    {
+                        if (!AddUnAccountRdrecord(t.Id, t.Rdrecords32s.Select(d => d.AutoId).ToList(), "32", t.CBusType))
+                            throw new FinancialException($"添加未记账数据时发生异常");
+
+                    });
+                    dbContext.DispatchLists.UpdateRange(dispatch.DispatchLists);
+                    var commitResult = dbContext.SaveChanges() > 0;
+                    if (commitResult) tran.Commit();
+                    else tran.Rollback();
+                    return commitResult;
+                }
+                catch (Exception ex)
+                {
+                    errmsg = ex.Message;
+                    tran.Rollback();
+                    return false;
+                }
+            }
+
         }
         private List<Rdrecord32> CreateRdrecord32s(DispatchList dispatch, DtoStockOrder order)
         {
@@ -1552,49 +1707,61 @@ namespace MicroFeel.Yonyou.Services
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public bool AddMaterialOrder(DtoStockOrder order)
+        public bool AddMaterialOrder(DtoStockOrder order, ref string errmsg)
         {
-            if (!UpdateStore(order, (s, t) => { return s - t; })) return false;
-            var materialApp = dbContext.MaterialAppVouch.AsNoTracking().FirstOrDefault(t => t.CCode == order.SourceOrderNo);
-            if (materialApp == null) return false;
-            materialApp.MaterialAppVouchs = dbContext.MaterialAppVouchs.AsNoTracking().Where(t => t.Id == materialApp.Id).ToList();
-            var results = CreateRdrecord11s(materialApp, order);
-            var list = new List<Rdrecords11>();
-            results.ForEach(result =>
+            using (var tran = dbContext.Database.BeginTransaction())
             {
-                order.OrderNo = result.CCode;
-                order.Note += result.CCode + ",";
-                list.AddRange(result.Rdrecords11s);
-            });
-            var detailid = 0;
-            foreach (var item in materialApp.MaterialAppVouchs)
-            {
-                //更新发料数量
-                var detail = dbContext.OmMomaterials.FirstOrDefault(t => t.MomaterialsId.ToString() == item.Ipesodid);
-                if (detail == null) continue;
-                detailid = detail.MoDetailsId;
-                var orderdetails = order.StoreStockDetail.Where(t => t.ProductNumbers == detail.CInvCode);
-                detail.ISendQty = (detail.ISendQty ?? 0) + orderdetails.Sum(t => t.Numbers);
-                detail.ISendNum = (detail.ISendNum ?? 0) + detail.ISendQty / item.Iinvexchrate;
-            }
-            if (detailid != 0)
-            {
-                //更新明细表中的领料数量
-                var detail = dbContext.OmModetails.FirstOrDefault(t => t.ModetailsId == detailid);
-                if (detail != null)
-                    detail.IMaterialSendQty = order.StoreStockDetail.Sum(t => t.Numbers);
-            }
-            dbContext.Rdrecord11.AddRange(results);
-            dbContext.Rdrecords11.AddRange(list);
-            var app = dbContext.MaterialAppVouch.First(t => t.Id == materialApp.Id);
-            app.CCloser = app.CMaker;
-            var commitResult = dbContext.SaveChanges() > 0;
-            if (commitResult)
-                results.ForEach(t =>
+                try
                 {
-                    AddUnAccountRdrecord(t.Id, t.Rdrecords11s.Select(d => d.AutoId).ToList(), "11", t.CBusType);
-                });
-            return commitResult;
+                    if (!UpdateStore(order, (s, t) => { return s - t; })) throw new FinancialException("更新库存数量发生异常，可能导致库存为负数");
+                    var materialApp = dbContext.MaterialAppVouch.AsNoTracking().FirstOrDefault(t => t.CCode == order.SourceOrderNo);
+                    if (materialApp == null) return false;
+                    materialApp.MaterialAppVouchs = dbContext.MaterialAppVouchs.AsNoTracking().Where(t => t.Id == materialApp.Id).ToList();
+                    var results = CreateRdrecord11s(materialApp, order);
+                    var list = new List<Rdrecords11>();
+                    results.ForEach(result =>
+                    {
+                        order.OrderNo = result.CCode;
+                        order.Note += result.CCode + ",";
+                        list.AddRange(result.Rdrecords11s);
+                        if (!AddUnAccountRdrecord(result.Id, result.Rdrecords11s.Select(d => d.AutoId).ToList(), "11", result.CBusType)) throw new FinancialException($"添加未记帐单时发生异常。单号：{result.CCode}");
+                    });
+                    var detailid = 0;
+                    foreach (var item in materialApp.MaterialAppVouchs)
+                    {
+                        //更新发料数量
+                        var detail = dbContext.OmMomaterials.FirstOrDefault(t => t.MomaterialsId.ToString() == item.Ipesodid);
+                        if (detail == null) continue;
+                        detailid = detail.MoDetailsId;
+                        var orderdetails = order.StoreStockDetail.Where(t => t.ProductNumbers == detail.CInvCode);
+                        detail.ISendQty = (detail.ISendQty ?? 0) + orderdetails.Sum(t => t.Numbers);
+                        detail.ISendNum = (detail.ISendNum ?? 0) + detail.ISendQty / item.Iinvexchrate;
+                    }
+                    if (detailid != 0)
+                    {
+                        //更新明细表中的领料数量
+                        var detail = dbContext.OmModetails.FirstOrDefault(t => t.ModetailsId == detailid);
+                        if (detail != null)
+                            detail.IMaterialSendQty = order.StoreStockDetail.Sum(t => t.Numbers);
+                    }
+                    dbContext.Rdrecord11.AddRange(results);
+                    dbContext.Rdrecords11.AddRange(list);
+                    var app = dbContext.MaterialAppVouch.First(t => t.Id == materialApp.Id);
+                    app.CCloser = app.CMaker;
+                    var commitResult = dbContext.SaveChanges() > 0;
+                    if (commitResult) tran.Commit();
+                    else tran.Rollback();
+                    return commitResult;
+                }
+                catch (Exception ex)
+                {
+                    errmsg = ex.Message;
+                    tran.Rollback();
+                    return false;
+                }
+
+            }
+
         }
 
         private List<Rdrecord11> CreateRdrecord11s(MaterialAppVouch materialApp, DtoStockOrder order)
@@ -1825,7 +1992,7 @@ namespace MicroFeel.Yonyou.Services
                 detail.Fsendapplyqty = item.Numbers;
                 detail.Fsendapplynum = item.Numbers * detail?.FBaseQtyD ?? 0;
             }
-            #endregion  
+            #endregion
             dbContext.MaterialAppVouch.Add(vouch);
             return dbContext.SaveChanges() > 0;
         }
@@ -2266,19 +2433,43 @@ namespace MicroFeel.Yonyou.Services
                 var stock = tmp_stocks.FirstOrDefault(t => t.CBatch == item.ProductBatch && t.CWhCode == item.StoreId);
                 if (stock == null) return false;
                 stock.IQuantity = action(stock.IQuantity ?? 0, item.Numbers ?? 0);
+                if (stock.IQuantity < 0) return false;
             }
             return true;
         }
 
-        private void UpdateModetailsReceiveNumber(ICollection<PuArrivalVouchs> vouchs)
+        private void UpdateModetailsReceiveNumber(PuArrivalVouchs item)
         {
-            foreach (var item in vouchs)
-            {
-                var detail = dbContext.OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId);
-                if (detail == null) continue;
-                detail.IReceivedQty = detail.IReceivedQty ?? 0 + item.IQuantity;
-            }
+            var detail = dbContext.OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId);
+            if (detail == null) return;
+            detail.IReceivedQty = detail.IReceivedQty ?? 0 + item.IQuantity;
+            if (detail.IArrQty.HasValue)
+                detail.IArrQty = detail.IArrQty > item.IQuantity ? (detail.IArrQty - item.IQuantity) : 0;
         }
+
+        [Obsolete]
+        private void UpdateModetailsArrQtyNumber(PuArrivalVouchs item)
+        {
+            dbContext.Database.ExecuteSqlCommand($"update OM_MODetails set iArrQty= isnull(iArrQty,0)+{item.IQuantity } where ModetailsId = {item.IPosId??0} ");
+        }
+
+        private void UpdatePoDetailsReceiveNumber(PuArrivalVouchs item)
+        {
+            var detail = dbContext.PoPodetails.FirstOrDefault(t => t.Id == item.IPosId);
+            if (detail == null) return;
+            detail.IReceivedQty = detail.IReceivedQty ?? 0 + item.IQuantity;
+            if (detail.IArrQty.HasValue)
+                detail.IArrQty = detail.IArrQty > item.IQuantity ? (detail.IArrQty - item.IQuantity) : 0;
+        }
+
+        private void UpdatePoDetailsArrQtyNumber(PuArrivalVouchs item)
+        {
+            var detail = dbContext.PoPodetails.FirstOrDefault(t => t.Id == item.IPosId);
+            if (detail == null) return;
+            detail.IArrQty = (detail.IArrQty ?? 0) + item.IQuantity;
+        }
+
+
 
         /// <summary>
         /// 添加未记账数据
@@ -2311,6 +2502,28 @@ namespace MicroFeel.Yonyou.Services
             }
             return dbContext.Database.ExecuteSqlCommand(sql.ToString()) > 0;
         }
+
+        #region close
+        public bool ClosePurarrivalOrderTransaction(string orderno, string closer, Func<bool, bool> action)
+        {
+            using (var tran = dbContext.Database.BeginTransaction())
+            {
+                var order = dbContext.PuArrivalVouch.FirstOrDefault(t => t.CCode == orderno);
+                if (order == null) return false;
+                order.Ccloser = closer;
+                order.Cverifier = order.Cverifier ?? closer;
+                order.Dclosedate = order.CAuditDate = DateTime.Now.Date;
+                order.Caudittime = DateTime.Now;
+                dbContext.PuArrivalVouch.Update(order);
+                var result = action(dbContext.SaveChanges() > 0);
+                if (result)
+                    tran.Commit();
+                else
+                    tran.Rollback();
+                return result;
+            }
+        }
+        #endregion
         #endregion
     }
 }

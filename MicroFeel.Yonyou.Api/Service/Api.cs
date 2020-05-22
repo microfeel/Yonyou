@@ -132,7 +132,7 @@ namespace MicroFeel.Yonyou.Api
                         var t2 = runType.GenericTypeArguments[0];
                         var typename = runType.Namespace + "." + t2.Name + "ListResult";
                         Type t = Type.GetType(typename);
-                        if (t==null)
+                        if (t == null)
                         {
                             throw new Exception($"无法找到目标类型:{typename}");
                         }
@@ -304,7 +304,7 @@ namespace MicroFeel.Yonyou.Api
             }
         }
 
-        public async Task<DbListResult<TResult>> GetsSync<TResult>(int dsSequence = 1, [CallerMemberName] string callername = "", int pageNumber = 1)
+        public async Task<DbListResult<TResult>> GetsSync<TResult>(int dsSequence = 1, [CallerMemberName] string callername = "", int pageNumber = 1, int pageSize = 10)
         {
             pathprefix = "api";
             var req = new DbRequest()
@@ -314,6 +314,8 @@ namespace MicroFeel.Yonyou.Api
                 ToAccount = _toAccount,
                 Token = await TokenManager.GetTokenAsync(BaseUrl, _appKey, _appSecret, _fromAccount, _toAccount),
                 Ds_sequence = dsSequence,
+                Page_index = pageNumber,
+                Rows_per_page = pageSize
             };
             return await GetsSync<DbRequest, TResult>(req, dsSequence, callername);
         }

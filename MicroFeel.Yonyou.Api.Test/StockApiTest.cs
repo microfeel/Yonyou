@@ -67,38 +67,72 @@ namespace MicroFeel.Yonyou.Api.Test
             api.Init(base_url, appkey, appSecret, from_account, to_account);
             var result = api.Add_PurchaseinAsync(new Purchasein()
             {
-                Code = "0000101263",
-                Maker = "测试",
+                 
                 Date = DateTime.Now,
-                Define8 = "高柏诗",
-                Departmentcode = "04",
-                Memory = "测试单据",
-                Receivecode = "102",
-                Warehousecode = "1001",
-                Departmentname = "信息技术部",
-                Receivename = "委外入库",
-                Vendorabbname = "珠海祥茂辉",
-                Vendorcode = "010105",
-                Vendorname = "珠海祥茂辉",
-                Taxrate = 1,
-                Warehousename = "柏瑞美成品仓",
+                Receivecode = "101", //收发类型编码 外购入库
+                Warehousecode = "1004", //仓库编码
+                Vendorcode = "031108", //供货单位简称  广州市威顿包装有限公司	威顿包装
                 Purchaseinentry = new List<PurchaseinEntry>() { new PurchaseinEntry()
                                     {
-                                        Cost = 1.12f,
-                                        Inventorycode = "131010018",
-                                        Irate = 1f,
-                                        Makedate = DateTime.Now,
-                                        Number = 2,
-                                        Quantity = 1,
-                                        Price = 12.1f,
-                                        Serial = "TEST20190109",
-                                        Assitantunitname = "支",
-                                        Cmassunitname = "支",
-                                        Inventoryname = "轻盈感光隔离霜（金色）支盒",
-                                        Inventorystd = "JGNT24",
-                                        Ioritaxcost = 10
-                                    }  }
-            }, "PRPO20191230327").Result;
+                                        Id = "CG2004070029",
+                                        //Cost = 1.12f,
+                                        Inventorycode = "121010102",
+                                        //Irate = 1f,
+                                        //Makedate = DateTime.Now,
+                                        Number = 10000,
+                                        //Quantity = 1,
+                                        //Price = 12.1f,
+                                        Serial = "20200407", 
+                                        //Inventoryname = "网状气垫粉底 壳子",
+                                        //Inventorystd = "PR-NT24",
+                                        //Ioritaxcost = 10
+                                    },new PurchaseinEntry()
+                                    { 
+                                        Id = "CG2004070029",
+                                        //Cost = 1.12f,
+                                        Inventorycode = "121010136",
+                                        //Irate = 1f,
+                                        //Makedate = DateTime.Now,
+                                        Number = 300,
+                                        //Quantity = 1,
+                                        //Price = 12.1f,
+                                        Serial = "20200407", 
+                                        //Inventoryname = "网状气垫粉底 壳子",
+                                        //Inventorystd = "PR-NT24",
+                                        //Ioritaxcost = 10
+                                    }
+                                    //,new PurchaseinEntry()
+                                    //{
+                                    //     Id = "CG2004070029",
+                                    //    Cost = 1.12f,
+                                    //    Inventorycode = "121030054",
+                                    //    Irate = 1f,
+                                    //    Makedate = DateTime.Now,
+                                    //    Number = 10000,
+                                    //    Quantity = 1,
+                                    //    Price = 12.1f,
+                                    //    Serial = "20200407", 
+                                    //    Inventoryname = "网状气垫粉底 网格",
+                                    //    Inventorystd = "PR-NT24",
+                                    //    Ioritaxcost = 10
+                                    //}
+                                    //,new PurchaseinEntry()
+                                    //{
+                                    //     Id = "CG2004070029",
+                                    //    Cost = 1.12f,
+                                    //    Inventorycode = "121030054",
+                                    //    Irate = 1f,
+                                    //    Makedate = DateTime.Now,
+                                    //    Number = 300,
+                                    //    Quantity = 1,
+                                    //    Price = 12.1f,
+                                    //    Serial = "20200407", 
+                                    //    Inventoryname = "网状气垫粉底 网格",
+                                    //    Inventorystd = "PR-NT24",
+                                    //    Ioritaxcost = 10
+                                    //}
+                }
+            }, "CG2004070029").Result; //""“POORD001850”
             Console.WriteLine(result.Tradeid);
             Assert.IsTrue(result.Errcode == "0");
         }

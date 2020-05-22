@@ -216,9 +216,9 @@ namespace MicroFeel.Yonyou.Api.Service
         /// 新增一张采购订单    
         /// </summary> 
         /// <return></return>
-        public async System.Threading.Tasks.Task<DbResult> Add_PurchaseorderAsync(Purchaseorder purchaseorder, int dsSequence = 1, bool sync = true)
+        public async System.Threading.Tasks.Task<DbResult> Add_PurchaseorderAsync(Purchaseorder purchaseorder, string bizid, int dsSequence = 1, bool sync = true)
         {
-            return await AddSync(purchaseorder, dsSequence, sync);
+            return await AddSync(purchaseorder, dsSequence, sync, bizid);
         }
         /// <summary>
         /// 弃审采购订单  

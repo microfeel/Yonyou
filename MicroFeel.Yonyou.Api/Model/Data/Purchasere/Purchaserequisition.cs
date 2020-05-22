@@ -150,43 +150,43 @@ namespace MicroFeel.Yonyou.Api
         ///数量
         ///</Summary>
         [JsonPropertyName("quantity")]
-        public float Quantity { get; set; }
+        public string Quantity { get; set; }
 
         ///<Summary>
         ///本币单价
         ///</Summary>
         [JsonPropertyName("price")]
-        public float Price { get; set; }
+        public string Price { get; set; }
 
         ///<Summary>
         ///税率（默认17）
         ///</Summary>
         [JsonPropertyName("taxrate")]
-        public float Taxrate { get; set; }
+        public string Taxrate { get; set; }
 
         ///<Summary>
         ///本币含税单价
         ///</Summary>
         [JsonPropertyName("taxprice")]
-        public float Taxprice { get; set; }
+        public string Taxprice { get; set; }
 
         ///<Summary>
         ///本币金额
         ///</Summary>
         [JsonPropertyName("money")]
-        public float Money { get; set; }
+        public string Money { get; set; }
 
         ///<Summary>
         ///本币税额
         ///</Summary>
         [JsonPropertyName("tax")]
-        public float Tax { get; set; }
+        public string Tax { get; set; }
 
         ///<Summary>
         ///本币价税合计
         ///</Summary>
         [JsonPropertyName("sum")]
-        public float Sum { get; set; }
+        public string Sum { get; set; }
 
         ///<Summary>
         ///需求日期（默认当天）
@@ -222,13 +222,13 @@ namespace MicroFeel.Yonyou.Api
         ///单价标准
         ///</Summary>
         [JsonPropertyName("btaxcost")]
-        public bool Btaxcost { get; set; }
+        public string Btaxcost { get; set; }
 
         ///<Summary>
         ///件数
         ///</Summary>
         [JsonPropertyName("num")]
-        public float Num { get; set; }
+        public string Num { get; set; }
 
         ///<Summary>
         ///单位编码
@@ -258,43 +258,43 @@ namespace MicroFeel.Yonyou.Api
         ///汇率（默认:1）
         ///</Summary>
         [JsonPropertyName("currency_rate")]
-        public float CurrencyRate { get; set; }
+        public string CurrencyRate { get; set; }
 
         ///<Summary>
         ///原币单价
         ///</Summary>
         [JsonPropertyName("originalprice")]
-        public float Originalprice { get; set; }
+        public string Originalprice { get; set; }
 
         ///<Summary>
         ///含税单价
         ///</Summary>
         [JsonPropertyName("originaltaxedprice")]
-        public float Originaltaxedprice { get; set; }
+        public string Originaltaxedprice { get; set; }
 
         ///<Summary>
         ///原币金额
         ///</Summary>
         [JsonPropertyName("originalmoney")]
-        public float Originalmoney { get; set; }
+        public string Originalmoney { get; set; }
 
         ///<Summary>
         ///原币税额
         ///</Summary>
         [JsonPropertyName("originaltax")]
-        public float Originaltax { get; set; }
+        public string Originaltax { get; set; }
 
         ///<Summary>
         ///原币价税合计
         ///</Summary>
         [JsonPropertyName("originalsum")]
-        public float Originalsum { get; set; }
+        public string Originalsum { get; set; }
 
         ///<Summary>
         ///行号
         ///</Summary>
         [JsonPropertyName("ivouchrowno")]
-        public float Ivouchrowno { get; set; }
+        public string Ivouchrowno { get; set; }
 
         ///<Summary>
         ///表体自定义项1
@@ -324,13 +324,13 @@ namespace MicroFeel.Yonyou.Api
         ///表体自定义项5
         ///</Summary>
         [JsonPropertyName("define26")]
-        public float Define26 { get; set; }
+        public string Define26 { get; set; }
 
         ///<Summary>
         ///表体自定义项6
         ///</Summary>
         [JsonPropertyName("define27")]
-        public float Define27 { get; set; }
+        public string Define27 { get; set; }
 
         ///<Summary>
         ///表体自定义项7
@@ -378,7 +378,7 @@ namespace MicroFeel.Yonyou.Api
         ///表体自定义项14
         ///</Summary>
         [JsonPropertyName("define35")]
-        public float Define35 { get; set; }
+        public string Define35 { get; set; }
 
         ///<Summary>
         ///表体自定义项15

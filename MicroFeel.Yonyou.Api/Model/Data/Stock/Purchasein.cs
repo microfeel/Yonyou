@@ -166,7 +166,8 @@ namespace MicroFeel.Yonyou.Api
     }
     public class PurchaseinEntry
     {
-
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
         ///<Summary>
         ///存货编码
         ///</Summary>
