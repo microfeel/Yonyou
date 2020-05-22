@@ -2430,10 +2430,33 @@ namespace MicroFeel.Yonyou.Services
                 var tmp_stocks = dbContext.CurrentStocks.Where(t => t.CInvCode == item.ProductNumbers);
                 if (tmp_stocks.Count() == 0) return false;
                 var itemid = tmp_stocks.First().ItemId;
-                var stock = tmp_stocks.FirstOrDefault(t => t.CBatch == item.ProductBatch && t.CWhCode == item.StoreId);
+                var stocks = tmp_stocks.Where(t => t.CWhCode == item.StoreId);
+                var stock = stocks.FirstOrDefault(t => t.CBatch == item.ProductBatch);
                 if (stock == null) return false;
-                stock.IQuantity = action(stock.IQuantity ?? 0, item.Numbers ?? 0);
-                if (stock.IQuantity < 0) return false;
+                var needNumber = item.Numbers ?? 0;
+                stock.IQuantity = action(stock.IQuantity ?? 0, needNumber);
+                if (stock.IQuantity < 0)
+                {
+                    stock.IQuantity = 0;
+                    needNumber = Math.Abs(stock.IQuantity ?? 0);
+                    var stocksOderderByBatch = stocks.OrderBy(t => t.CBatch);
+                    foreach (var s in stocksOderderByBatch)
+                    {
+                        if (s.CBatch == item.ProductBatch) continue;
+                        if (s.IQuantity <= 0) continue;
+                        s.IQuantity = action(s.IQuantity ?? 0, needNumber);
+                        if (s.IQuantity < 0)
+                        {
+                            s.IQuantity = 0;
+                            needNumber = Math.Abs(s.IQuantity ?? 0);
+                            continue;
+                        }
+                        //已经够出库/入库的数量了
+                        needNumber = 0;
+                        break;
+                    }//所有批号的都进行了递减后还是无法满足要出库/入库的数量
+                    if (needNumber != 0) return false;
+                }
             }
             return true;
         }
@@ -2450,7 +2473,7 @@ namespace MicroFeel.Yonyou.Services
         [Obsolete]
         private void UpdateModetailsArrQtyNumber(PuArrivalVouchs item)
         {
-            dbContext.Database.ExecuteSqlCommand($"update OM_MODetails set iArrQty= isnull(iArrQty,0)+{item.IQuantity } where ModetailsId = {item.IPosId??0} ");
+            dbContext.Database.ExecuteSqlCommand($"update OM_MODetails set iArrQty= isnull(iArrQty,0)+{item.IQuantity } where ModetailsId = {item.IPosId ?? 0} ");
         }
 
         private void UpdatePoDetailsReceiveNumber(PuArrivalVouchs item)
