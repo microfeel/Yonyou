@@ -1451,9 +1451,9 @@ namespace MicroFeel.Yonyou.Services
                 catch (Exception ex)
                 {
                     tran.Rollback();
-                    return false;
+                    throw ex;
                 }
-
+                return false;
             }
         }
         private bool SaveRdRecords(PuArrivalVouch puarrival, List<RdRecord01> results)
@@ -1553,7 +1553,7 @@ namespace MicroFeel.Yonyou.Services
                         var detail = dbContext.SoSodetails.FirstOrDefault(t => t.ISosId == item.ISosId);
                         if (detail == null) continue;
                         var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductBatch == item.CBatch && t.ProductNumbers == item.CInvCode);
-                        detail.IFhquantity = (detail.IFhquantity ?? 0) + orderdetail?.Numbers ?? item.IQaquantity;
+                        detail.IFhquantity = (detail.IFhquantity ?? 0) + (orderdetail?.Numbers ?? item.IQaquantity);
                         //更新已出库数量
                         item.FOutQuantity = (item.FOutQuantity ?? 0) + (orderdetail?.Numbers ?? item.IQaquantity);
                     }
@@ -1954,7 +1954,7 @@ namespace MicroFeel.Yonyou.Services
                     AutoId = autoid++,
                     Id = id,
                     CInvCode = item.ProductNumbers,
-                    INum = item.Numbers * detail?.FBaseQtyD ?? 0,
+                    INum = item.Numbers * (detail?.FBaseQtyD ?? 0),
                     IQuantity = item.Numbers,
                     CBatch = item.ProductBatch,
                     DDueDate = DateTime.Now.Date,
@@ -1993,7 +1993,7 @@ namespace MicroFeel.Yonyou.Services
                 });
                 //更新申请数量
                 detail.Fsendapplyqty = item.Numbers;
-                detail.Fsendapplynum = item.Numbers * detail?.FBaseQtyD ?? 0;
+                detail.Fsendapplynum = item.Numbers * (detail?.FBaseQtyD ?? 0);
             }
             #endregion
             dbContext.MaterialAppVouch.Add(vouch);
@@ -2056,7 +2056,7 @@ namespace MicroFeel.Yonyou.Services
                     AutoId = autoid++,
                     Id = id,
                     CInvCode = item.ProductNumbers,
-                    INum = item.Numbers * -1 * detail?.FBaseQtyD ?? 0,
+                    INum = item.Numbers * -1 * (detail?.FBaseQtyD ?? 0),
                     IQuantity = item.Numbers * -1,
                     CBatch = item.ProductBatch,
                     DDueDate = DateTime.Now.Date,
@@ -2475,7 +2475,8 @@ namespace MicroFeel.Yonyou.Services
         {
             var detail = dbContext.OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId);
             if (detail == null) return;
-            detail.IReceivedQty = detail.IReceivedQty ?? 0 + item.IQuantity;
+            //运算符优先级BUG
+            detail.IReceivedQty = (detail.IReceivedQty ?? 0) + item.IQuantity;
             if (detail.IArrQty.HasValue)
                 detail.IArrQty = detail.IArrQty > item.IQuantity ? (detail.IArrQty - item.IQuantity) : 0;
         }
@@ -2490,7 +2491,7 @@ namespace MicroFeel.Yonyou.Services
         {
             var detail = dbContext.PoPodetails.FirstOrDefault(t => t.Id == item.IPosId);
             if (detail == null) return;
-            detail.IReceivedQty = detail.IReceivedQty ?? 0 + item.IQuantity;
+            detail.IReceivedQty = (detail.IReceivedQty ?? 0) + item.IQuantity;
             if (detail.IArrQty.HasValue)
                 detail.IArrQty = detail.IArrQty > item.IQuantity ? (detail.IArrQty - item.IQuantity) : 0;
         }
