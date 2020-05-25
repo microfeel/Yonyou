@@ -1487,7 +1487,10 @@ namespace MicroFeel.Yonyou.Services
                         //rds.ISprocessFee = 0;
                     }
                 }
-                item.FValidQuantity = item.FValidInQuan = item.IQuantity;
+                //item.FValidQuantity = item.FValidInQuan = item.IQuantity;
+                // 实际入库数量应该在审核后赋值
+                item.FValidInQuan = 0;
+                item.FValidQuantity = item.IQuantity;
             }
             puarrival.Ccloser = puarrival.CMaker;
             puarrival.Cverifier = puarrival.CMaker;
