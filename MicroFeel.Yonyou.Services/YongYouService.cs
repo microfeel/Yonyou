@@ -6,18 +6,11 @@ using MicroFeel.Yonyou.Api.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
 using Sugar.Utils;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Dynamic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,37 +18,41 @@ namespace MicroFeel.Yonyou.Services
 {
     public partial class YongYouService : IFinanceService
     {
-        private const string appkey = "opaddd40e399ef4e98a";
-        private const string appSecret = "ee5e0ee78c5942ef91686b61d2b76239";
-        private const string from_account = "microfeel";
-        private const string to_account = "18926990017";
-        private const string base_url = "https://api.yonyouup.com/";
         private StockApi stockApi = new StockApi();
         private SystemApi systemApi = new SystemApi();
         private BasicApi basicApi = new BasicApi();
         private UFDbContext dbContext;
-        private IConfiguration Configuration;
 
-        public YongYouService()
+        /// <summary>
+        /// OpenAPI+数据库直连方式初始化数据库
+        /// </summary>
+        /// <param name="yonyouApiUrl"></param>
+        /// <param name="yonyouAppKey"></param>
+        /// <param name="yonyouAppSecret"></param>
+        /// <param name="fromAccount"></param>
+        /// <param name="toAccount"></param>
+        /// <param name="connectionString"></param>
+        public YongYouService(
+            string yonyouApiUrl,
+            string yonyouAppKey,
+            string yonyouAppSecret,
+            string fromAccount,
+            string toAccount,
+            string connectionString)
         {
-            stockApi.Init(base_url, appkey, appSecret, from_account, to_account);
-            systemApi.Init(base_url, appkey, appSecret, from_account, to_account);
-            basicApi.Init(base_url, appkey, appSecret, from_account, to_account);
+            stockApi.Init(yonyouApiUrl, yonyouAppKey, yonyouAppSecret, fromAccount, toAccount);
+            systemApi.Init(yonyouApiUrl, yonyouAppKey, yonyouAppSecret, fromAccount, toAccount);
+            basicApi.Init(yonyouApiUrl, yonyouAppKey, yonyouAppSecret, fromAccount, toAccount);
 
-            Configuration = new ConfigurationBuilder()
-                      .Add(new JsonConfigurationSource { Path = "appsettings.json", ReloadOnChange = true })
-                      .Build();
-
-            var options = new DbContextOptionsBuilder().UseSqlServer(Configuration.GetConnectionString("UFDb")).Options;
+            var options = new DbContextOptionsBuilder().UseSqlServer(connectionString).Options;
             dbContext = new UFDbContext(options);
         }
 
-        public YongYouService(string connectstring) : this()
-        {
-            ConfigDbConnect(connectstring);
-        }
-
-        public void ConfigDbConnect(string connectstring)
+        /// <summary>
+        /// 本地方式使用服务
+        /// </summary>
+        /// <param name="connectstring"></param>
+        public YongYouService(string connectstring)
         {
             var options = new DbContextOptionsBuilder().UseSqlServer(connectstring, op => op.UseRowNumberForPaging()).Options;
 
