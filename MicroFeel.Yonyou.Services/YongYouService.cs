@@ -42,19 +42,12 @@ namespace MicroFeel.Yonyou.Services
             systemApi.Init(base_url, appkey, appSecret, from_account, to_account);
             basicApi.Init(base_url, appkey, appSecret, from_account, to_account);
 
-            try
-            {
-                Configuration = new ConfigurationBuilder()
-                          .Add(new JsonConfigurationSource { Path = "appsettings.json", ReloadOnChange = true })
-                          .Build();
+            Configuration = new ConfigurationBuilder()
+                      .Add(new JsonConfigurationSource { Path = "appsettings.json", ReloadOnChange = true })
+                      .Build();
 
-                var options = new DbContextOptionsBuilder().UseSqlServer(Configuration.GetConnectionString("UFDb")).Options;
-                dbContext = new UFDbContext(options);
-            }
-            catch
-            {
-
-            }
+            var options = new DbContextOptionsBuilder().UseSqlServer(Configuration.GetConnectionString("UFDb")).Options;
+            dbContext = new UFDbContext(options);
         }
 
         public YongYouService(string connectstring) : this()
@@ -1270,7 +1263,7 @@ namespace MicroFeel.Yonyou.Services
         };
         private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid)
         {
-            id = id == 0 ? (dbContext.RdRecord01.Max(t => t.Id) + 1) % 1000000000 + 2000000000 : id + 1;
+            id = (id == 0 ? (dbContext.RdRecord01.Max(t => t.Id) + 1) % 1000000000 + 2000000000 : id) + 1;
             string code = $"MFIN{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
             var rdrecord = new RdRecord01()
             {
@@ -1453,7 +1446,6 @@ namespace MicroFeel.Yonyou.Services
                     tran.Rollback();
                     throw ex;
                 }
-                return false;
             }
         }
         private bool SaveRdRecords(PuArrivalVouch puarrival, List<RdRecord01> results)
@@ -1533,8 +1525,8 @@ namespace MicroFeel.Yonyou.Services
             using (var tran = dbContext.Database.BeginTransaction())
             {
                 try
-                { 
-                    if (!UpdateStore(order, (s, t) => { return s - t; },ref errmsg)) throw new FinancialException(errmsg);
+                {
+                    if (!UpdateStore(order, (s, t) => { return s - t; }, ref errmsg)) throw new FinancialException(errmsg);
 
                     var dispatch = dbContext.DispatchList.AsNoTracking().FirstOrDefault(t => t.CDlcode == order.SourceOrderNo);
                     if (dispatch == null) throw new FinancialException($"无法查询当前发货单[{order.SourceOrderNo}]");
@@ -1716,7 +1708,7 @@ namespace MicroFeel.Yonyou.Services
             {
                 try
                 {
-                    if (!UpdateStore(order, (s, t) => { return s - t; },ref errmsg)) throw new FinancialException(errmsg);
+                    if (!UpdateStore(order, (s, t) => { return s - t; }, ref errmsg)) throw new FinancialException(errmsg);
                     var materialApp = dbContext.MaterialAppVouch.AsNoTracking().FirstOrDefault(t => t.CCode == order.SourceOrderNo);
                     if (materialApp == null) return false;
                     materialApp.MaterialAppVouchs = dbContext.MaterialAppVouchs.AsNoTracking().Where(t => t.Id == materialApp.Id).ToList();
@@ -2437,7 +2429,7 @@ namespace MicroFeel.Yonyou.Services
                     return false;
                 }
                 var itemid = tmp_stocks.First().ItemId;
-                var stocks = tmp_stocks.Where(t => t.CWhCode == item.StoreId); 
+                var stocks = tmp_stocks.Where(t => t.CWhCode == item.StoreId);
                 var stock = stocks.FirstOrDefault(t => t.CBatch == item.ProductBatch);
                 var needNumber = item.Numbers ?? 0;
                 var oddNumber = action(stock?.IQuantity ?? 0, needNumber);
