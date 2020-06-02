@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MicroFeel.Yonyou.OpenApi\MicroFeel.Yonyou.OpenApi.csproj" />
     <ProjectReference Include="..\MicroFeel.Yonyou.Services\MicroFeel.Yonyou.Services.csproj" />
   </ItemGroup>
 

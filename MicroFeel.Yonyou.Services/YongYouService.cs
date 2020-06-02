@@ -2201,7 +2201,7 @@ namespace MicroFeel.Yonyou.Services
                     {
                         var inventory = dbContext.Inventory.FirstOrDefault(i => i.CInvCode == d.CInvCode);
                         var unitcode = inventory?.CComUnitCode ?? "";
-                        return new DtoAllotOrder.DtoAllotOrderDetail()
+                        return new DtoAllotOrderDetail()
                         {
                             AutoId = d.AutoId,
                             ProductBathcNo = d.CBatch,
@@ -2233,7 +2233,7 @@ namespace MicroFeel.Yonyou.Services
                 {
                     var inventory = dbContext.Inventory.FirstOrDefault(i => i.CInvCode == d.CInvCode);
                     var unitcode = inventory?.CComUnitCode ?? "";
-                    return new DtoAllotOutRecord.DtoAllotOutRecordDetail()
+                    return new DtoAllotOutRecordDetail()
                     {
                         OrderNo = t.CCode,
                         ProductBathcNo = d.CBatch,
@@ -2263,7 +2263,7 @@ namespace MicroFeel.Yonyou.Services
                 {
                     var inventory = dbContext.Inventory.FirstOrDefault(i => i.CInvCode == d.CInvCode);
                     var unitcode = inventory?.CComUnitCode ?? "";
-                    return new DtoAllotInRecord.DtoAllotInRecordDetail()
+                    return new DtoAllotInRecordDetail()
                     {
                         ProductName = inventory?.CInvName,
                         ProductNumbers = d.CInvCode,

@@ -22,9 +22,9 @@ namespace MicroFeel.Yonyou.Api.Test
             {
                 Brand = "柏瑞美",
                 SourceOrderNo = "WD2004260008",
-                StoreStockDetail = new List<Finance.Models.DbDto.DtoStockOrder.DtoStoreStockDetail>()
+                StoreStockDetail = new List<Finance.Models.DbDto.DtoStoreStockDetail>()
                 {
-                   new Finance.Models.DbDto.DtoStockOrder.DtoStoreStockDetail()
+                   new Finance.Models.DbDto.DtoStoreStockDetail()
                    {
                         Numbers = 11,
                          ProductBatch = "aaa",

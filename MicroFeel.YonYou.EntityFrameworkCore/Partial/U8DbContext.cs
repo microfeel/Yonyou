@@ -28,7 +28,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         }
 
-        public async System.Threading.Tasks.Task<TEntity> GetFirstAsync<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class
+        public async Task<TEntity> GetFirstAsync<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class
         {
             return await Set<TEntity>().FirstOrDefaultAsync(expression);
         }
