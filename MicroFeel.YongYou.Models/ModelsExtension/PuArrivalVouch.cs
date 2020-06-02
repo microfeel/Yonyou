@@ -8,5 +8,10 @@ namespace MicroFeel.YongYou.Models.Models
     {
         [NotMapped]
         public ICollection<PuArrivalVouchs> PuArrivalVouchs { get; set; }
+
+        public PuArrivalVouch()
+        {
+            PuArrivalVouchs = new List<PuArrivalVouchs>();
+        }
     }
 }
