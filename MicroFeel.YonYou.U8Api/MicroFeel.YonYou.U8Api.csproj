@@ -4,5 +4,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Finance\src\MicroFeel.Finance\MicroFeel.Finance.csproj" />
+    <ProjectReference Include="..\MicroFeel.YonYou.EntityFrameworkCore\MicroFeel.YonYou.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
 
 </Project>

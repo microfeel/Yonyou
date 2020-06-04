@@ -1,5 +1,4 @@
-﻿using MicroFeel.Yonyou.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,16 +24,6 @@ namespace MicroFeel.Yonyou.Api.Test
                 return options;
             }
         }
-        [TestMethod]
-        public void MyTestMethod()
-        {
-            var service = new Finance.Financial(new Finance.FinancialOptions()
-            {
-                FinancialType = Finance.FinancialType.YongYouU8,
-                FinancialDbConnectionString = "server=.;user id=sa;password=1989210liuyu;database=UFDATA_001_2019;"
-            });
-            Assert.IsNotNull(service.Service);
-        }
-
+     
     }
 }

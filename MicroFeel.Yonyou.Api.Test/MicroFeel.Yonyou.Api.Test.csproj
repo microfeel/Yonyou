@@ -21,8 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Finance\src\MicroFeel.Finance\MicroFeel.Finance.csproj" />
+    <ProjectReference Include="..\MicroFeel.YonYou.EntityFrameworkCore\MicroFeel.YonYou.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\MicroFeel.Yonyou.OpenApi\MicroFeel.Yonyou.OpenApi.csproj" />
-    <ProjectReference Include="..\MicroFeel.Yonyou.Services\MicroFeel.Yonyou.Services.csproj" />
   </ItemGroup>
 
 </Project>

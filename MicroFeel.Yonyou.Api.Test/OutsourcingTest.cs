@@ -1,12 +1,8 @@
 ﻿//using MicroFeel.YongYou.Models.Models;
-using MicroFeel.YongYou.Models.Models;
+using MicroFeel.YonYou.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 
 namespace MicroFeel.Yonyou.Api.Test
 {
@@ -33,16 +29,16 @@ namespace MicroFeel.Yonyou.Api.Test
         [TestMethod]
         public void MyTestMethod()
         {
-            var options = new DbContextOptionsBuilder().UseSqlServer("server=192.168.12.19;user id=sa;password=123.com;database=UFDATA_999_2019;").Options;
+            var options = new DbContextOptionsBuilder<U8DbContext>().UseSqlServer("server=192.168.12.19;user id=sa;password=123.com;database=UFDATA_999_2019;").Options;
 
-            using (var dbContext = new UFDbContext(options))
+            using (var dbContext = new U8DbContext(options))
             {
                 var materialApp = dbContext.MaterialAppVouch.FirstOrDefault(t => t.CCode == "MFAPP2020032000042");
 
                 materialApp.MaterialAppVouchs = dbContext.MaterialAppVouchs.Where(t => t.Id == materialApp.Id).ToList();
 
                 var dic = materialApp.MaterialAppVouchs.GroupBy(t => t.CWhCode ?? "-1").ToDictionary(t => t.Key, t => t.ToList());
-                
+
                 foreach (var key in dic.Keys)
                 {
                     materialApp.MaterialAppVouchs = dic[key];

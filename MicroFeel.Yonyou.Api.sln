@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroFeel.Yonyou.Api.Test", "MicroFeel.Yonyou.Api.Test\MicroFeel.Yonyou.Api.Test.csproj", "{698645E0-22E6-4221-B332-52BCA391F6D7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroFeel.Yonyou.Services", "MicroFeel.Yonyou.Services\MicroFeel.Yonyou.Services.csproj", "{292F268A-A39F-4BA3-B4F4-95DC78864E9A}"
-EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "getpage", "getpage\getpage.pyproj", "{4233A4E3-995D-47F0-A847-B5FA0343F9FE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroFeel.YongYou.Models", "MicroFeel.YongYou.Models\MicroFeel.YongYou.Models.csproj", "{792B3184-E165-4350-8ECF-1B2C2435CC5F}"
@@ -35,14 +33,6 @@ Global
 		{698645E0-22E6-4221-B332-52BCA391F6D7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{698645E0-22E6-4221-B332-52BCA391F6D7}.Release|x86.ActiveCfg = Release|Any CPU
 		{698645E0-22E6-4221-B332-52BCA391F6D7}.Release|x86.Build.0 = Release|Any CPU
-		{292F268A-A39F-4BA3-B4F4-95DC78864E9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{292F268A-A39F-4BA3-B4F4-95DC78864E9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{292F268A-A39F-4BA3-B4F4-95DC78864E9A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{292F268A-A39F-4BA3-B4F4-95DC78864E9A}.Debug|x86.Build.0 = Debug|Any CPU
-		{292F268A-A39F-4BA3-B4F4-95DC78864E9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{292F268A-A39F-4BA3-B4F4-95DC78864E9A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{292F268A-A39F-4BA3-B4F4-95DC78864E9A}.Release|x86.ActiveCfg = Release|Any CPU
-		{292F268A-A39F-4BA3-B4F4-95DC78864E9A}.Release|x86.Build.0 = Release|Any CPU
 		{4233A4E3-995D-47F0-A847-B5FA0343F9FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4233A4E3-995D-47F0-A847-B5FA0343F9FE}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{4233A4E3-995D-47F0-A847-B5FA0343F9FE}.Release|Any CPU.ActiveCfg = Release|Any CPU

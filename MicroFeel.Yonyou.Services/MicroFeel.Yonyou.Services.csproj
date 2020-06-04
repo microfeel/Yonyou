@@ -15,7 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Finance\src\MicroFeel.Finance\MicroFeel.Finance.csproj" />
     <ProjectReference Include="..\MicroFeel.YongYou.Models\MicroFeel.YongYou.Models.csproj" />
-    <ProjectReference Include="..\MicroFeel.Yonyou.Api\MicroFeel.Yonyou.OpenApi.csproj" />
     <ProjectReference Include="..\MicroFeel.Yonyou.OpenApi\MicroFeel.Yonyou.OpenApi.csproj" />
   </ItemGroup>
 
