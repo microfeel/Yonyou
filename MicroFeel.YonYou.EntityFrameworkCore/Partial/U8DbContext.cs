@@ -1,4 +1,5 @@
-﻿using MicroFeel.Finance.Models.DbDto;
+﻿using MicroFeel.Finance;
+using MicroFeel.Finance.Models.DbDto;
 using MicroFeel.YonYou.EntityFrameworkCore.Data;
 using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -216,7 +217,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return order;
         }
 
-        public List<PuArrHead> GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
+        public PagedResult<PuArrHead> GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize = U8Consts.DefaultPagesize)
         {
             var tmp_datas = PuArrHead.Where(t => t.Cdefine8 == brand
                             && t.Cbustype == ordertype
@@ -225,13 +226,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             && (starttime == null || t.Ddate >= starttime)
                             && (endtime == null || t.Ddate <= endtime)
                             && (string.IsNullOrEmpty(supplier) || t.Cvenname.Contains(supplier)));
-            total = tmp_datas.Count();
-            var orders = tmp_datas.Skip(pageindex * pagesize).Take(pagesize == 0 ? 200000 : pagesize).ToList();
+            var total = tmp_datas.Count();
+            var orders = tmp_datas.Skip(pageindex * pagesize).Take(pagesize).ToList();
             orders.ForEach(e =>
             {
                 e.Details = PuArrbody.Where(t => t.Id == e.Id).ToList();
             });
-            return orders;
+            return new PagedResult<PuArrHead>(total, orders);
         }
 
         /// <summary>
@@ -1756,7 +1757,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {
                 o.OutWhName = Warehouse.FirstOrDefault(w => w.CWhCode == o.CWhCode)?.CWhName ?? "";
                 o.Details = Rdrecords09.Where(d => d.Id == o.Id).ToList();
-                o.Details.ForEach(d=> {
+                o.Details.ForEach(d =>
+                {
                     var inv = GetInventory(d.CInvCode);
                     d.ProductModel = inv.CInvStd;
                     d.ProductName = inv.CInvName;
@@ -1782,10 +1784,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         public PagedResult<RdRecord08> GetAllotInRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
         {
             CheckPageSize(pagesize);
-            var tmp_orders = RdRecord08.Where(t => t.CDefine8 == brand 
-                                && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) 
-                                && (starttime == null || t.DDate >= starttime) 
-                                && (endtime == null || t.DDate <= endtime) 
+            var tmp_orders = RdRecord08.Where(t => t.CDefine8 == brand
+                                && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
+                                && (starttime == null || t.DDate >= starttime)
+                                && (endtime == null || t.DDate <= endtime)
                                 && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
 
             var total = tmp_orders.Count();
@@ -1794,7 +1796,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {
                 o.WhName = Warehouse.FirstOrDefault(w => w.CWhCode == o.CWhCode)?.CWhName ?? "";
                 o.Details = Rdrecords08.Where(d => d.Id == o.Id).ToList();
-                o.Details.ForEach(d => {
+                o.Details.ForEach(d =>
+                {
                     var inv = GetInventory(d.CInvCode);
                     d.ProductModel = inv.CInvStd;
                     d.ProductName = inv.CInvName;
@@ -1803,7 +1806,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 });
             });
 
-            return new PagedResult<RdRecord08>(total,datas);
+            return new PagedResult<RdRecord08>(total, datas);
         }
 
 

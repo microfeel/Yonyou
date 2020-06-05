@@ -2,11 +2,13 @@
 using MicroFeel.Finance.Interfaces;
 using MicroFeel.Finance.Models;
 using MicroFeel.Finance.Models.DbDto;
+using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using Sugar.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -331,14 +333,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             throw new NotImplementedException();
         }
 
-        List<DtoPurchaseOrder> IDbOperation.GetPurchaseOrders(string ordertype, string brand, string orderno, string state)
+        DtoPurchaseOrder IDbOperation.GetPurchaseOrder(string ordertype, string brand, string orderno, string state)
         {
             throw new NotImplementedException();
+
         }
 
-        List<DtoPurchaseOrder> IDbOperation.GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
+        PagedResult<DtoPurchaseOrder> IDbOperation.GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
-            throw new NotImplementedException();
+            var list = db.GetPurchaseOrders(ordertype, brand, key, supplier, state, starttime, endtime, 1, 20);
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(p => p.GetDtoPurchaseOrder()));
         }
 
         List<DtoSellOrder> IDbOperation.GetSellOrders(string brand, string orderno, bool isclose)
