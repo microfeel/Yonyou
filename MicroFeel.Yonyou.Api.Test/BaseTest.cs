@@ -13,7 +13,7 @@ namespace MicroFeel.Yonyou.Api.Test
         public BaseTest()
         {
             var options = new DbContextOptionsBuilder<U8DbContext>()
-                .UseSqlServer("server=192.168.12.19;user id=sa;password=123.com;database=UFDATA_001_2019;", b => b.UseRowNumberForPaging()).Options;
+                .UseSqlServer("server=192.168.12.19;user id=sa;password=123.com;database=UFDATA_001_2019;").Options;
             db = new U8DbContext(options);
         }
     }
