@@ -46,7 +46,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public async Task<Customer> GetCustomersAsync(string code)
         {
-            return await GetFirstAsync<Customer>(c => c.CCusCode == code);
+            return await GetFirstAsync<Customer>(c => c.CCusCode == code).ConfigureAwait(false);
         }
 
         public (string, string) GetCustomersByDispatch(string orderno)
@@ -95,24 +95,24 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return await GetFirstAsync<Person>(t => t.CPersonPhone == phonecode);
         }
 
-        public async Task<Person> GetPerson(string code)
+        public async Task<Person> GetPersonAsync(string code)
         {
-            return await GetFirstAsync<Person>(t => t.CPersonCode == code);
+            return await GetFirstAsync<Person>(t => t.CPersonCode == code).ConfigureAwait(false);
         }
 
         public async Task<Person> GetPersonByNameAsync(string name)
         {
-            return await GetFirstAsync<Person>(t => t.CPersonName == name);
+            return await GetFirstAsync<Person>(t => t.CPersonName == name).ConfigureAwait(false);
         }
 
         public async Task<Vendor> GetSupplierByPhoneAsync(string phonecode)
         {
-            return await GetFirstAsync<Vendor>(t => t.CVenPhone == phonecode);
+            return await GetFirstAsync<Vendor>(t => t.CVenPhone == phonecode).ConfigureAwait(false);
         }
 
-        public async Task<Vendor> GetSupplier(string code)
+        public async Task<Vendor> GetSupplierAsync(string code)
         {
-            return await GetFirstAsync<Vendor>(t => t.CVenCode == code);
+            return await GetFirstAsync<Vendor>(t => t.CVenCode == code).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="pagesize"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public PagedResult<OmModetails> GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
+        public PagedResult<OmModetails> GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
             var tmp_datas = OmMomain.Where(t => t.CState > 0 && t.CDefine8 == brand &&
                                                         (string.IsNullOrEmpty(key) || t.CCode.Contains(key)) &&
@@ -152,7 +152,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                                                         (endtime == null || t.DDate <= endtime))
                 .Join(OmModetails, t => t.Moid, d => d.Moid, (t, d) => new { t, d })
                 .Where(t => (t.d.IQuantity - (t.d.IArrQty ?? t.d.IReceivedQty ?? t.d.Freceivedqty ?? 0)) > 0);
-            total = tmp_datas.Count();
+            var total = tmp_datas.Count();
             var datas = tmp_datas.Skip(pageindex * pagesize).Take(pagesize).ToList().Select(t =>
             {
                 var product = Inventory.FirstOrDefault(i => i.CInvCode == t.d.CInvCode);
@@ -264,7 +264,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="pagesize"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public PagedResult<OmMomain> GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
+        public PagedResult<OmMomain> GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
             var tmp_orders = OmMomain
                 .Join(OmMomaterialshead, main => main.Moid, head => head.Moid, (main, head) => new { main, head })
@@ -272,7 +272,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             && (starttime == null || t.main.DDate >= starttime)
                             && (endtime == null || t.main.DDate <= endtime)
                             && (string.IsNullOrEmpty(key) || t.head.Cinvstd.Contains(key)));
-            total = tmp_orders.Count();
+            var total = tmp_orders.Count();
             var orders = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
             orders.ForEach(o =>
             {
@@ -1810,34 +1810,48 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         }
 
 
-        public List<DtoAllotRecord> GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
+        public PagedResult<Rdrecords09> GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
         {
-            var tmp_orders = RdRecord09.Where(t => t.CBusType == "调拨出库" && t.CDefine8 == brand && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno)) && (starttime == null || t.DDate >= starttime) && (endtime == null || t.DDate <= endtime) && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)))
-                .Join(TransVouch, t => t.CBusCode, d => d.CTvcode, (t, d) => new { t, d }).Join(Rdrecords09.Where(t => t.CDefine29 != "checked"), t => t.t.Id, d => d.Id, (t, d) => new { t = t.t, d });
+            //var tmp_orders = RdRecord09.Where(t => t.CBusType == "调拨出库"
+            //                    && t.CDefine8 == brand
+            //                    && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
+            //                    && (starttime == null || t.DDate >= starttime)
+            //                    && (endtime == null || t.DDate <= endtime)
+            //                    && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)))
+            //    //.Join(TransVouch, r => r.CBusCode, tv => tv.CTvcode, (r, tv) => new { r, tv })
+            //    .Join(Rdrecords09.Where(rs => rs.CDefine29 != "checked"), r => r.Id, rs => rs.Id, (r, rs) => new { r, rs });
+            var orders = RdRecord09.Where(t => t.CBusType == "调拨出库"
+                    && t.CDefine8 == brand
+                    && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
+                    && (starttime == null || t.DDate >= starttime)
+                    && (endtime == null || t.DDate <= endtime)
+                    && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)))
+                .Join(Rdrecords09.Where(rs => rs.CDefine29 != "checked"), r => r.Id, rs => rs.Id, (r, rs) => new { r, rs });
 
-            total = tmp_orders.Count();
-            var datas = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
-            return datas.Select(t =>
+            var total = orders.Count();
+            var datas = orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
+            var list = new List<Rdrecords09>();
+
+            var results = datas.Select(v =>
             {
-                var storename = Warehouse.FirstOrDefault(w => w.CWhCode == t.t.CWhCode)?.CWhName ?? "";
-                var inventory = Inventory.FirstOrDefault(i => i.CInvCode == t.d.CInvCode);
+                var storename = Warehouse.FirstOrDefault(w => w.CWhCode == v.r.CWhCode)?.CWhName ?? "";
+                var inventory = Inventory.FirstOrDefault(i => i.CInvCode == v.rs.CInvCode);
                 var unitcode = inventory?.CComUnitCode ?? "";
-                return new DtoAllotRecord()
+                return new Rdrecords09
                 {
-                    AutoId = t.d.AutoId,
-                    OrderNo = t.t.CCode,
-                    CreateTime = t.t.DDate,
-                    Remark = t.t.CMemo,
-                    Brand = t.t.CDefine8,
-                    StoreName = storename,
-                    ProductBathcNo = t.d.CBatch,
-                    ProductName = inventory?.CInvName,
-                    ProductNumbers = t.d.CInvCode,
-                    Numbers = t.d.IQuantity.HasValue ? t.d.IQuantity.Value : 0,
+                    AutoId = v.rs.AutoId,
+                    OrderNo = v.r.CCode,
+                    CreateTime = v.r.DDate,
+                    Remark = v.r.CMemo,
+                    Brand = v.r.CDefine8,
                     ProductModel = inventory?.CInvStd,
+                    ProductName = inventory?.CInvName,
+                    ProductNumbers = v.rs.CInvCode,
+                    Numbers = v.rs.IQuantity ?? 0,
                     UnitName = ComputationUnit.FirstOrDefault(u => u.CComunitCode == unitcode)?.CComUnitName ?? ""
                 };
-            }).ToList();
+            });
+            return new PagedResult<Rdrecords09>(total, results);
         }
 
 

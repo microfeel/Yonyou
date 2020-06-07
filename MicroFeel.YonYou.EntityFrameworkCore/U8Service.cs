@@ -5,10 +5,12 @@ using MicroFeel.Finance.Models.DbDto;
 using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Serialization;
 using Sugar.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +23,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         public U8Service(U8DbContext dbcontext)
         {
             db = dbcontext;
+        }
+
+        void IDisposable.Dispose()
+        {
+            throw new NotImplementedException();
         }
 
         Customer IBasicService.AddCustomer(Customer customer)
@@ -58,42 +65,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             throw new NotImplementedException();
         }
 
-        bool IDbOperation.AddMaterialOrder(DtoStockOrder order, ref string errmsg)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.AddMetarialApply(DtoStockOrder order)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.AddPuarrivalVouch(DtoStockOrder order)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.AddPurchaseArrivalVouch(DtoStockOrder order)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.AddPurchaseOrder(DtoStockOrder order)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.AddReturnMetarialApply(DtoStockOrder order)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.AddSellOrder(DtoStockOrder order, ref string errmsg)
-        {
-            throw new NotImplementedException();
-        }
-
         Supplier IBasicService.AddSupplier(Supplier supplier)
+        {
+            throw new NotImplementedException();
+        }
+        IList<Account> IVoucherService.GetAccount()
         {
             throw new NotImplementedException();
         }
@@ -108,259 +84,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             throw new NotImplementedException();
         }
 
-        IDbContextTransaction IDbOperation.BeginTransaction()
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.CheckAllotInRecord(string orderno)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.CheckAllotOutRecord(string orderno)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.CheckAllotOutRecord(string orderno, string autoid)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.ClosePurarrivalOrderTransaction(string orderno, string closer, Func<bool, bool> action)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IDisposable.Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
-        {
-            throw new NotImplementedException();
-        }
-
-        IList<Account> IVoucherService.GetAccount()
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoPurchaseOrder> IDbOperation.GetAffirmPOs(string brand, string suppliercode, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoAllotInRecord> IDbOperation.GetAllotInRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoAllotOrder> IDbOperation.GetAllotOrders(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoAllotOutRecord> IDbOperation.GetAllotOutRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoAllotRecord> IDbOperation.GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        string IDbOperation.GetAllotTargetWHCode(string outorderno)
-        {
-            throw new NotImplementedException();
-        }
-
         Task<IEnumerable<Datasource>> IPlatformService.GetBatchDatasourceAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoPurchaseOrder> IDbOperation.GetCheckedPOs(string brand, string suppliercode, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        Dictionary<string, string> IDbOperation.GetCustomers()
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoCustomer IDbOperation.GetCustomers(string code)
-        {
-            throw new NotImplementedException();
-        }
-
-        (string, string) IDbOperation.GetCustomersByDispatch(string orderno)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoCustomer IDbOperation.GetCustomersByOrderNo(string orderno)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoPurchaseOrder> IDbOperation.GetDeliverPOs(string brand, string suppliercode, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        Dictionary<string, string> IDbOperation.GetDepartments()
-        {
-            throw new NotImplementedException();
-        }
-
-        Dictionary<string, string> IDbOperation.GetDepartments(string departmentcode)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoInventory IDbOperation.GetInventory(string productcode)
-        {
-            throw new NotImplementedException();
-        }
-
-        (int, List<DtoInventory>) IDbOperation.GetInventory(string brand, string classcode, string stroecode, string key, int pageindex, int pagesize)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoInventory> IDbOperation.GetInventory(string brand, string classcode, string storecode, string key, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoProductClass> IDbOperation.GetInventoryClass(string cwhcode)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoProductClass> IDbOperation.GetInventoryClass()
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoMaterialOrderDetail> IDbOperation.GetMaterialDetails(string orderno)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoMaterialOrder> IDbOperation.GetMaterialOrders(string brand, string departmentcode)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoMaterialOrder> IDbOperation.GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoMaterialOrder IDbOperation.GetMaterials(string orderno)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<OrderStatus> IPlatformService.GetOrderStatusAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        SingleObjectResult<Outsourcing> IOutsourcingService.GetOutsourcing(string orderno, string productnumbers)
-        {
-            throw new NotImplementedException();
-        }
-
-        SingleObjectResult<Outsourcing> IOutsourcingService.GetOutsourcing(string orderno)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoOutsourcingOrder> IDbOperation.GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        DataResult<Outsourcing> IOutsourcingService.GetOutsourcings(int pageindex, int pagesize, Action<Outsourcing> wherecodition)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoPurchaseOrder> IDbOperation.GetOverPOs(string brand, string suppliercode, int pageindex, int pagesize, out int total)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoPerson IDbOperation.GetPerson(string code)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoPerson IDbOperation.GetPersonByName(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoPerson IDbOperation.GetPersonByPhone(string phonecode)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<Store> IBasicService.GetPlaces(string storecode)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<DtoPurchaseOrderDetail> IDbOperation.GetPODetails(string orderno)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoPurchaseOrder IDbOperation.GetPurchaseOrder(string ordertype, string brand, string orderno, string state)
-        {
-            throw new NotImplementedException();
-
-        }
-
-        PagedResult<DtoPurchaseOrder> IDbOperation.GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
-        {
-            var list = db.GetPurchaseOrders(ordertype, brand, key, supplier, state, starttime, endtime, 1, 20);
-            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(p => p.GetDtoPurchaseOrder()));
-        }
-
-        List<DtoSellOrder> IDbOperation.GetSellOrders(string brand, string orderno, bool isclose)
-        {
-            throw new NotImplementedException();
-        }
-
-        List<Store> IBasicService.GetStores(string brand)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoSupplier IDbOperation.GetSupplier(string code)
-        {
-            throw new NotImplementedException();
-        }
-
-        DtoSupplier IDbOperation.GetSupplierByPhone(string phonecode)
         {
             throw new NotImplementedException();
         }
@@ -373,11 +97,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         IList<VoucherTemplate> IVoucherService.GetVoucherTemplate()
         {
             throw new NotImplementedException();
-        }
-
-        Dictionary<string, string> IDbOperation.GetWarehouses()
-        {
-            return db.GetWarehouses();
         }
 
         List<Store> IBasicService.GetWorkShops(string brand)
@@ -440,9 +159,312 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             throw new NotImplementedException();
         }
 
-        bool IDbOperation.UpdatePurchaseOrderState(string orderno, string state)
+        Task<OrderStatus> IPlatformService.GetOrderStatusAsync()
         {
             throw new NotImplementedException();
         }
+
+        SingleObjectResult<Outsourcing> IOutsourcingService.GetOutsourcing(string orderno, string productnumbers)
+        {
+            throw new NotImplementedException();
+        }
+
+        SingleObjectResult<Outsourcing> IOutsourcingService.GetOutsourcing(string orderno)
+        {
+            throw new NotImplementedException();
+        }
+
+        List<Store> IBasicService.GetPlaces(string storecode)
+        {
+            throw new NotImplementedException();
+        }
+
+        DataResult<Outsourcing> IOutsourcingService.GetOutsourcings(int pageindex, int pagesize, Action<Outsourcing> wherecodition)
+        {
+            throw new NotImplementedException();
+        }
+        List<Store> IBasicService.GetStores(string brand)
+        {
+            throw new NotImplementedException();
+        }
+
+        #region DB
+        bool IDbOperation.AddMaterialOrder(DtoStockOrder order, ref string errmsg)
+        {
+            return db.AddMaterialOrder(order, ref errmsg);
+        }
+
+        bool IDbOperation.AddMetarialApply(DtoStockOrder order)
+        {
+            return db.AddMetarialApply(order);
+        }
+
+        bool IDbOperation.AddPuarrivalVouch(DtoStockOrder order)
+        {
+            return db.AddPuarrivalVouch(order);
+        }
+
+        bool IDbOperation.AddPurchaseArrivalVouch(DtoStockOrder order)
+        {
+            return db.AddPurchaseArrivalVouch(order);
+        }
+
+        bool IDbOperation.AddPurchaseOrder(DtoStockOrder order)
+        {
+            return db.AddPurchaseOrder(order);
+        }
+
+        bool IDbOperation.AddReturnMetarialApply(DtoStockOrder order)
+        {
+            return db.AddReturnMetarialApply(order);
+        }
+
+        bool IDbOperation.AddSellOrder(DtoStockOrder order, ref string errmsg)
+        {
+            return db.AddSellOrder(order, ref errmsg);
+        }
+
+        IDbContextTransaction IDbOperation.BeginTransaction()
+        {
+            return db.Database.BeginTransaction();
+        }
+
+        bool IDbOperation.CheckAllotInRecord(string orderno)
+        {
+            return db.CheckAllotInRecord(orderno);
+        }
+
+        bool IDbOperation.CheckAllotOutRecord(string orderno)
+        {
+            return db.CheckAllotOutRecord(orderno);
+        }
+
+        bool IDbOperation.CheckAllotOutRecord(string orderno, string autoid)
+        {
+            return db.CheckAllotOutRecord(orderno, autoid);
+        }
+
+        bool IDbOperation.ClosePurarrivalOrderTransaction(string orderno, string closer, Func<bool, bool> action)
+        {
+            return db.ClosePurarrivalOrderTransaction(orderno, closer, action);
+        }
+
+        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo)
+        {
+            return db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo);
+        }
+
+        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs)
+        {
+            return db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, batchs);
+        }
+
+        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
+        {
+            return db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, sendOrderNo);
+        }
+
+        PagedResult<DtoPurchaseOrder> IDbOperation.GetAffirmPOs(string brand, string suppliercode, int pageindex, int pagesize)
+        {
+            var list = db.GetAffirmPOs(brand, suppliercode, pageindex, pagesize);
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
+        }
+
+        PagedResult<DtoAllotInRecord> IDbOperation.GetAllotInRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        {
+            var list = db.GetAllotInRecords(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
+            return new PagedResult<DtoAllotInRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotInOrder()));
+        }
+
+        PagedResult<DtoAllotOrder> IDbOperation.GetAllotOrders(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        {
+            var list = db.GetAllotOrders(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
+            return new PagedResult<DtoAllotOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotOrder()));
+        }
+
+        PagedResult<DtoAllotOutRecord> IDbOperation.GetAllotOutRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        {
+            var list = db.GetAllotOutRecords(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
+            return new PagedResult<DtoAllotOutRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotOutOrder()));
+        }
+
+        PagedResult<DtoAllotRecord> IDbOperation.GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        {
+            var list = db.GetAllotRecords(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
+            return new PagedResult<DtoAllotRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotRecord()));
+        }
+
+        string IDbOperation.GetAllotTargetWHCode(string outorderno)
+        {
+            return db.GetAllotTargetWHCode(outorderno);
+        }
+
+        PagedResult<DtoPurchaseOrder> IDbOperation.GetCheckedPOs(string brand, string suppliercode, int pageindex, int pagesize)
+        {
+            var list = db.GetCheckedPOs(brand, suppliercode, pageindex, pagesize);
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
+        }
+
+        Dictionary<string, string> IDbOperation.GetCustomers()
+        {
+            return db.GetCustomers();
+        }
+
+        DtoCustomer IDbOperation.GetCustomers(string code)
+        {
+            return db.GetCustomersAsync(code).GetAwaiter().GetResult().ToDtoCustomer();
+        }
+
+        (string, string) IDbOperation.GetCustomersByDispatch(string orderno)
+        {
+            throw new NotImplementedException();
+        }
+
+        DtoCustomer IDbOperation.GetCustomersByOrderNo(string orderno)
+        {
+            return db.GetCustomersByOrderNoAsync(orderno).GetAwaiter().GetResult().ToDtoCustomer();
+        }
+
+        PagedResult<DtoPurchaseOrder> IDbOperation.GetDeliverPOs(string brand, string suppliercode, int pageindex, int pagesize)
+        {
+            var list = db.GetDeliverPOs(brand, suppliercode, pageindex, pagesize);
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
+        }
+
+        Dictionary<string, string> IDbOperation.GetDepartments()
+        {
+            return db.GetDepartments();
+        }
+
+        Dictionary<string, string> IDbOperation.GetDepartments(string departmentcode)
+        {
+            return db.GetDepartments(departmentcode);
+        }
+
+        DtoInventory IDbOperation.GetInventory(string productcode)
+        {
+            return db.GetInventory(productcode).GetDtoInventory();
+        }
+
+        PagedResult<DtoInventory> IDbOperation.GetInventory(string brand, string classcode, string storecode, string key, int pageindex, int pagesize)
+        {
+            var list = db.GetInventory(brand, classcode, storecode, key, pageindex, pagesize);
+            return new PagedResult<DtoInventory>(list.TotalCount, list.Results.Select(v => v.GetDtoInventory()));
+        }
+
+        List<DtoProductClass> IDbOperation.GetInventoryClass(string cwhcode)
+        {
+            return db.GetInventoryClass(cwhcode).Select(v => v.ToDtoProductClass()).ToList();
+        }
+
+        List<DtoProductClass> IDbOperation.GetInventoryClass()
+        {
+            return db.GetInventoryClass().Select(v => v.ToDtoProductClass()).ToList();
+        }
+
+        List<DtoMaterialOrderDetail> IDbOperation.GetMaterialDetails(string orderno)
+        {
+            return db.GetMaterialDetails(orderno).Select(v => v.GetDtoMaterialOrderDetail()).ToList();
+        }
+
+        List<DtoMaterialOrder> IDbOperation.GetMaterialOrders(string brand, string departmentcode)
+        {
+            return db.GetMaterialOrders(brand, departmentcode).Select(v => v.GetDtoMaterialOrder()).ToList();
+        }
+
+        PagedResult<DtoMaterialOrder> IDbOperation.GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
+        {
+            var list = db.GetMaterials(departmentcode, key, starttime, endtime, pageindex, pagesize);
+            return new PagedResult<DtoMaterialOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoMaterialOrder()));
+        }
+
+        DtoMaterialOrder IDbOperation.GetMaterials(string orderno)
+        {
+            return db.GetMaterials(orderno).GetDtoMaterialOrder();
+        }
+
+        PagedResult<DtoOutsourcingOrder> IDbOperation.GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
+        {
+            var list = db.GetOutsourcingOrders(brand, key, supplier, starttime, endtime, pageindex, pagesize);
+            return new PagedResult<DtoOutsourcingOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoOutsourcingOrder()));
+        }
+
+        PagedResult<DtoPurchaseOrder> IDbOperation.GetOverPOs(string brand, string suppliercode, int pageindex, int pagesize)
+        {
+            var list = db.GetOverPOs(brand, suppliercode, pageindex, pagesize);
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
+        }
+
+        DtoPerson IDbOperation.GetPerson(string code)
+        {
+            return db.GetPersonAsync(code).GetAwaiter().GetResult().ToDtoPerson();
+        }
+
+        DtoPerson IDbOperation.GetPersonByName(string name)
+        {
+            return db.GetPersonByNameAsync(name).GetAwaiter().GetResult().ToDtoPerson();
+        }
+
+        DtoPerson IDbOperation.GetPersonByPhone(string phonecode)
+        {
+            return db.GetPersonByPhoneAsync(phonecode).GetAwaiter().GetResult().ToDtoPerson();
+        }
+
+        List<DtoPurchaseOrderDetail> IDbOperation.GetPODetails(string orderno)
+        {
+            return db.GetPODetails(orderno).Select(v => v.GetDtoPurchaseOrderDetail()).ToList();
+        }
+
+        DtoPurchaseOrder IDbOperation.GetPurchaseOrder(string ordertype, string brand, string orderno, string state)
+        {
+            return db.GetPurchaseOrders(ordertype, brand, orderno, state).GetDtoPurchaseOrder();
+
+        }
+
+        /// <summary>
+        /// 获取采购订单
+        /// </summary>
+        /// <param name="ordertype"></param>
+        /// <param name="brand"></param>
+        /// <param name="key"></param>
+        /// <param name="supplier"></param>
+        /// <param name="state"></param>
+        /// <param name="starttime"></param>
+        /// <param name="endtime"></param>
+        /// <param name="pageindex"></param>
+        /// <param name="pagesize"></param>
+        /// <returns></returns>
+        PagedResult<DtoPurchaseOrder> IDbOperation.GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
+        {
+            var list = db.GetPurchaseOrders(ordertype, brand, key, supplier, state, starttime, endtime, 1, 20);
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(p => p.GetDtoPurchaseOrder()));
+        }
+
+        List<DtoSellOrder> IDbOperation.GetSellOrders(string brand, string orderno, bool isclose)
+        {
+            return db.GetSellOrders(brand, orderno, isclose).Select(v => v.GetDtoSellOrder()).ToList();
+        }
+
+        DtoSupplier IDbOperation.GetSupplier(string code)
+        {
+            return db.GetSupplierAsync(code).GetAwaiter().GetResult().GetDtoSupplier();
+        }
+
+        DtoSupplier IDbOperation.GetSupplierByPhone(string phonecode)
+        {
+            return db.GetSupplierByPhoneAsync(phonecode).GetAwaiter().GetResult().GetDtoSupplier();
+        }
+
+        Dictionary<string, string> IDbOperation.GetWarehouses()
+        {
+            return db.GetWarehouses();
+        }
+
+        bool IDbOperation.UpdatePurchaseOrderState(string orderno, string state)
+        {
+            return db.UpdatePurchaseOrderState(orderno, state);
+        }
+        #endregion
+
     }
 }

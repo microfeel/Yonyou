@@ -2,6 +2,7 @@
 using MicroFeel.Finance.Models.DbDto;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 
@@ -49,7 +50,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 PhoneCode = vendor.CVenPhone
             };
         }
-        public static DtoOutsourcingOrder GetDtoSupplier(this Data.OmModetails t)
+        public static DtoOutsourcingOrder GetDtoOutsourcingOrder(this Data.OmModetails t)
         {
             return new DtoOutsourcingOrder()
             {
@@ -102,6 +103,21 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 ReceiveTel = dispatchList.ReceiveTel,
                 RecevieAddress = dispatchList.RecevieAddress,
                 Remark = dispatchList.CMemo
+            };
+        }
+        public static DtoSellOrder GetDtoSellOrder(this Data.SaDispatchlist dispatchList)
+        {
+            return new DtoSellOrder()
+            {
+                Id = dispatchList.Dlid,
+                CreateDate = DateTime.Parse(dispatchList.Ddate),
+                Maker = dispatchList.Cmaker,
+                OrderNo = dispatchList.Cdlcode,
+                ReceiveCompany = dispatchList.Ccusname,
+                Receiver = dispatchList.Receiver,
+                ReceiveTel = dispatchList.ReceiveTel,
+                RecevieAddress = dispatchList.RecevieAddress,
+                Remark = dispatchList.Cmemo
             };
         }
         public static DtoSellOrderDetail GetSellOrderDetail(this Data.DispatchLists dispatchLists)
@@ -304,7 +320,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 CreateTime = rdRecord.DDate,
                 Remark = rdRecord.CMemo,
                 Brand = rdRecord.CDefine8,
-                StoreName =rdRecord.WhName ,
+                StoreName = rdRecord.WhName,
             };
         }
 
@@ -317,6 +333,25 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Numbers = rdrecords.IQuantity ?? 0,
                 ProductModel = rdrecords.ProductModel,
                 UnitName = rdrecords.UnitName,
+            };
+        }
+
+        public static DtoAllotRecord GetDtoAllotRecord(this Data.Rdrecords09 t)
+        {
+            return new DtoAllotRecord()
+            {
+                AutoId = t.AutoId,
+                OrderNo = t.OrderNo,
+                CreateTime = t.CreateTime,
+                Remark = t.Remark,
+                Brand = t.Brand,
+                StoreName = ,
+                ProductBathcNo = t.d.CBatch,
+                ProductName = inventory?.CInvName,
+                ProductNumbers = t.d.CInvCode,
+                Numbers = t.d.IQuantity.HasValue ? t.d.IQuantity.Value : 0,
+                ProductModel = inventory?.CInvStd,
+                UnitName = ComputationUnit.FirstOrDefault(u => u.CComunitCode == unitcode)?.CComUnitName ?? ""
             };
         }
 
