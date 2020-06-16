@@ -670,7 +670,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, DtoStockOrder order, ref long id, ref long detailid)
         {
-            id = id == 0 ? (RdRecord01.Max(t => t.Id) + 1): id + 1;
+            id = id == 0 ? (RdRecord01.Max(t => t.Id) + 1) : id + 1;
             string code = $"MFIN{DateTime.Now:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
             var rdrecord = new RdRecord01()
             {
@@ -818,10 +818,47 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {"普通采购","采购订单" },
             { "委外加工","委外订单"}
         };
+
+        /// <summary>
+        /// 获取流水号
+        /// </summary>
+        /// <param name="cardName">单据类型名称</param>
+        /// <returns>流水号属性</returns>
+        private CodeProperty GetCode(string cardName)
+        {
+            var vn = VoucherNumber.FirstOrDefault(v => v.CardName == cardName);
+            if (vn is null)
+            {
+                throw new FinancialException($"无法找到单据类型{cardName}");
+            }
+
+            var prefix2 = vn.Prefix2Rule.Replace("年", "yyyy").Replace("月", "MM").Replace("日", "dd");
+            var p2mask = prefix2.Substring(prefix2.Length - vn.Prefix2Len);
+            //TODO support prefix3
+            return new CodeProperty
+            {
+                Prefix = $"{vn.Prefix1Rule}{DateTime.Today.ToString(p2mask)}",
+                GlideLen = vn.GlideLen,
+                ResetOn = vn.GlideRule ?? "",
+                Start = vn.IStartNumber,
+                Step = vn.IGlideStep
+            };
+        }
+
         private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid)
         {
             id = (id == 0) ? (RdRecord01.Max(t => t.Id) + 1) : (id + 1);
-            string code = $"MFIN{DateTime.Now:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
+            //string code = $"MFIN{DateTime.:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
+            var codePrefix = $"CR{DateTime.Today:yyMM}";
+            var cp = GetCode("采购入库单");
+            var code = $"{cp.Prefix}{"1".PadLeft(cp.GlideLen, '0')}";
+            var maxCode = RdRecord01.AsNoTracking().LastOrDefault(r => r.CCode.StartsWith(codePrefix));
+            if (maxCode != null)
+            {
+                var currentCode = maxCode.CCode;
+                var newCodeNumber = int.Parse(code.Substring(code.Length - cp.GlideLen)) + 1;
+                code = $"{cp.Prefix}{newCodeNumber.ToString().PadLeft(cp.GlideLen, '0')}";
+            }
             var rdrecord = new RdRecord01
             {
                 Id = id,
@@ -872,7 +909,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 Csysbarcode = $"||st01|{code}",
                 Details = new List<Rdrecords01>()
             };
-            detailid = detailid == 0 ? (Rdrecords01.Max(t => t.AutoId) + 1): detailid;
+            detailid = detailid == 0 ? (Rdrecords01.Max(t => t.AutoId) + 1) : detailid;
             foreach (var item in puArrival.Details)
             {
                 detailid += 1;
@@ -933,7 +970,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     Iordertype = item.Iordertype,
                     Iorderseq = item.Iorderseq,
                     Irowno = item.Irowno ?? item.Ivouchrowno,
-                    Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
+                    //Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
                     Cbsysbarcode = $"||st01|{rdrecord.CCode}|{item.Iorderseq}",
                     Iorderdid = item.Iorderdid,
                     Iordercode = item.Csoordercode
@@ -1452,7 +1489,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             if (apply == null) return false;
             var applydetails = OmMomaterials.Where(t => t.Moid == apply.Moid).ToList();
             #region Create
-            var id = MaterialAppVouch.Any() ? (MaterialAppVouch.Max(t => t.Id) + 1): 1;
+            var id = MaterialAppVouch.Any() ? (MaterialAppVouch.Max(t => t.Id) + 1) : 1;
             var code = $"MFAPP{DateTime.Now.ToString("yyyyMMdd")}{(id > 10000 ? id.ToString().Substring(id.ToString().Length - 5) : id.ToString().PadLeft(5, '0'))}";
             MaterialAppVouch vouch = new MaterialAppVouch()
             {
@@ -1592,7 +1629,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             };
             #endregion
             #region Create Detail
-            var autoid = MaterialAppVouchs.Max(t => t.AutoId) + 1 ;
+            var autoid = MaterialAppVouchs.Max(t => t.AutoId) + 1;
             foreach (var item in order.StoreStockDetail)
             {
                 var detail = applydetails.FirstOrDefault(t => t.CInvCode == item.ProductNumbers);
@@ -2153,4 +2190,32 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         #endregion
 
     }
+
+    /// <summary>
+    /// 流水号属性
+    /// </summary>
+    public class CodeProperty
+    {
+        /// <summary>
+        /// 前缀
+        /// </summary>
+        public string Prefix { get; set; }
+        /// <summary>
+        /// 流水号长度
+        /// </summary>
+        public int GlideLen { get; set; }
+        /// <summary>
+        /// 重置规则
+        /// </summary>
+        public string ResetOn { get; set; }
+        /// <summary>
+        /// 起始编号
+        /// </summary>
+        public int Start { get; set; }
+        /// <summary>
+        /// 步进
+        /// </summary>
+        public int Step { get; set; }
+    }
+
 }

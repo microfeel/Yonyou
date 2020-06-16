@@ -64,6 +64,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         public virtual DbSet<Vendor> Vendor { get; set; }
         public virtual DbSet<Warehouse> Warehouse { get; set; }
         public virtual DbSet<Zpurpotail> Zpurpotail { get; set; }
+        /// <summary>
+        /// 单据设置
+        /// </summary>
+        public virtual DbSet<VoucherNumber> VoucherNumber { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19491,6 +19495,92 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     .HasColumnName("yyc_invname")
                     .HasMaxLength(255);
             });
+
+            modelBuilder.Entity<VoucherNumber>(entity =>
+            {
+                entity.HasKey(e => e.CardNumber)
+                    .HasName("PK__VoucherNumber__2913691A");
+
+                entity.Property(e => e.CardNumber).HasMaxLength(100);
+
+                entity.Property(e => e.AppName).HasMaxLength(20);
+
+                entity.Property(e => e.BAllowHandWork)
+                    .IsRequired()
+                    .HasColumnName("bAllowHandWork")
+                    .HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.BGlideByContraCode)
+                    .IsRequired()
+                    .HasColumnName("bGlideByContraCode")
+                    .HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.BRdFlag)
+                    .IsRequired()
+                    .HasColumnName("bRdFlag")
+                    .HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.BRepeatReDo)
+                    .IsRequired()
+                    .HasColumnName("bRepeatReDo")
+                    .HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.BUnfixLen)
+                    .IsRequired()
+                    .HasColumnName("bUnfixLen")
+                    .HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.CSubId)
+                    .HasColumnName("cSub_id")
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CardName).HasMaxLength(50);
+
+                entity.Property(e => e.DStartDate)
+                    .HasColumnName("dStartDate")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Glide).HasMaxLength(20);
+
+                entity.Property(e => e.GlideLen).HasDefaultValueSql("(10)");
+
+                entity.Property(e => e.GlideRule).HasMaxLength(20);
+
+                entity.Property(e => e.IGlideStep)
+                    .HasColumnName("iGlideStep")
+                    .HasDefaultValueSql("(1)");
+
+                entity.Property(e => e.IIsRdVoucher)
+                    .HasColumnName("iIsRdVoucher")
+                    .HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.ISize)
+                    .HasColumnName("iSize")
+                    .HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.IStartNumber)
+                    .HasColumnName("iStartNumber")
+                    .HasDefaultValueSql("(1)");
+
+                entity.Property(e => e.Prefix1).HasMaxLength(20);
+
+                entity.Property(e => e.Prefix1Len).HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.Prefix1Rule).HasMaxLength(20);
+
+                entity.Property(e => e.Prefix2).HasMaxLength(20);
+
+                entity.Property(e => e.Prefix2Len).HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.Prefix2Rule).HasMaxLength(20);
+
+                entity.Property(e => e.Prefix3).HasMaxLength(20);
+
+                entity.Property(e => e.Prefix3Len).HasDefaultValueSql("(0)");
+
+                entity.Property(e => e.Prefix3Rule).HasMaxLength(20);
+            });
+
 
             OnModelCreatingPartial(modelBuilder);
         }
