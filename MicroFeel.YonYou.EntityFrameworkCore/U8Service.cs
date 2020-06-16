@@ -3,6 +3,7 @@ using MicroFeel.Finance.Interfaces;
 using MicroFeel.Finance.Models;
 using MicroFeel.Finance.Models.DbDto;
 using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
@@ -19,15 +20,26 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
     public class U8Service : IFinanceService
     {
         private U8DbContext db;
+        public U8Service() { }
 
         public U8Service(U8DbContext dbcontext)
         {
             db = dbcontext;
         }
 
+        /// <summary>
+        /// 给测试或老系统使用的构造函数
+        /// </summary>
+        /// <param name="connectionString"></param>
+        public U8Service(string connectionString)
+        {
+            var options = new DbContextOptionsBuilder<U8DbContext>().UseSqlServer(connectionString).Options;
+            db = new U8DbContext(options);
+        }
+
         void IDisposable.Dispose()
         {
-            throw new NotImplementedException();
+            db.Dispose();
         }
 
         Customer IBasicService.AddCustomer(Customer customer)
@@ -189,39 +201,39 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         }
 
         #region DB
-        bool IDbOperation.AddMaterialOrder(DtoStockOrder order, ref string errmsg)
+        void IDbOperation.AddMaterialOrder(DtoStockOrder order)
         {
-            return db.AddMaterialOrder(order, ref errmsg);
+            db.AddMaterialOrder(order);
         }
 
-        bool IDbOperation.AddMetarialApply(DtoStockOrder order)
+        void IDbOperation.AddMetarialApply(DtoStockOrder order)
         {
-            return db.AddMetarialApply(order);
+            db.AddMetarialApply(order);
         }
 
-        bool IDbOperation.AddPuarrivalVouch(DtoStockOrder order)
+        void IDbOperation.AddPuarrivalVouch(DtoStockOrder order)
         {
-            return db.AddPuarrivalVouch(order);
+            db.AddPuarrivalVouch(order);
         }
 
-        bool IDbOperation.AddPurchaseArrivalVouch(DtoStockOrder order)
+        void IDbOperation.AddPurchaseArrivalVouch(DtoStockOrder order)
         {
-            return db.AddPurchaseArrivalVouch(order);
+            db.AddPurchaseArrivalVouch(order);
         }
 
-        bool IDbOperation.AddPurchaseOrder(DtoStockOrder order)
+        void IDbOperation.AddPurchaseOrder(DtoStockOrder order)
         {
-            return db.AddPurchaseOrder(order);
+            db.AddPurchaseOrder(order);
         }
 
-        bool IDbOperation.AddReturnMetarialApply(DtoStockOrder order)
+        void IDbOperation.AddReturnMetarialApply(DtoStockOrder order)
         {
-            return db.AddReturnMetarialApply(order);
+            db.AddReturnMetarialApply(order);
         }
 
-        bool IDbOperation.AddSellOrder(DtoStockOrder order, ref string errmsg)
+        void IDbOperation.AddSellOrder(DtoStockOrder order)
         {
-            return db.AddSellOrder(order, ref errmsg);
+            db.AddSellOrder(order);
         }
 
         IDbContextTransaction IDbOperation.BeginTransaction()
@@ -244,24 +256,24 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return db.CheckAllotOutRecord(orderno, autoid);
         }
 
-        bool IDbOperation.ClosePurarrivalOrderTransaction(string orderno, string closer, Func<bool, bool> action)
+        void IDbOperation.ClosePurarrivalOrderTransaction(string orderno, string closer, Func<bool, bool> action)
         {
-            return db.ClosePurarrivalOrderTransaction(orderno, closer, action);
+            db.ClosePurarrivalOrderTransaction(orderno, closer, action);
         }
 
-        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo)
+        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo)
         {
-            return db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo);
         }
 
-        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs)
+        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs)
         {
-            return db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, batchs);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, batchs);
         }
 
-        bool IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
+        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
         {
-            return db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, sendOrderNo);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, sendOrderNo);
         }
 
         PagedResult<DtoPurchaseOrder> IDbOperation.GetAffirmPOs(string brand, string suppliercode, int pageindex, int pagesize)
@@ -270,19 +282,39 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
         }
 
-        PagedResult<DtoAllotInRecord> IDbOperation.GetAllotInRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        PagedResult<DtoAllotInRecord> IDbOperation.GetAllotInRecords(string brand,
+            string orderno,
+            DateTime? starttime,
+            DateTime? endtime,
+            bool isChecked,
+            int pageindex,
+            int pagesize)
         {
             var list = db.GetAllotInRecords(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
             return new PagedResult<DtoAllotInRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotInOrder()));
         }
 
-        PagedResult<DtoAllotOrder> IDbOperation.GetAllotOrders(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        PagedResult<DtoAllotOrder> IDbOperation.GetAllotOrders(
+            string brand,
+            string orderno,
+            DateTime? starttime,
+            DateTime? endtime,
+            bool isChecked,
+            int pageindex,
+            int pagesize)
         {
             var list = db.GetAllotOrders(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
             return new PagedResult<DtoAllotOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotOrder()));
         }
 
-        PagedResult<DtoAllotOutRecord> IDbOperation.GetAllotOutRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        PagedResult<DtoAllotOutRecord> IDbOperation.GetAllotOutRecords(
+            string brand,
+            string orderno,
+            DateTime? starttime,
+            DateTime? endtime,
+            bool isChecked,
+            int pageindex,
+            int pagesize)
         {
             var list = db.GetAllotOutRecords(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
             return new PagedResult<DtoAllotOutRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotOutOrder()));
@@ -436,7 +468,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         PagedResult<DtoPurchaseOrder> IDbOperation.GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
-            var list = db.GetPurchaseOrders(ordertype, brand, key, supplier, state, starttime, endtime, 1, 20);
+            var list = db.GetPurchaseOrders(ordertype, brand, key, supplier, state, starttime, endtime, pageindex, pagesize);
             return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(p => p.GetDtoPurchaseOrder()));
         }
 
@@ -460,9 +492,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return db.GetWarehouses();
         }
 
-        bool IDbOperation.UpdatePurchaseOrderState(string orderno, string state)
+        void IDbOperation.UpdatePurchaseOrderState(string orderno, string state)
         {
-            return db.UpdatePurchaseOrderState(orderno, state);
+            db.UpdatePurchaseOrderState(orderno, state);
         }
         #endregion
 

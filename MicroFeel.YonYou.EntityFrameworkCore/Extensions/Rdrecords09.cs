@@ -24,6 +24,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Data
         [NotMapped]
         public string Brand { get; set; }
         [NotMapped]
+        public string StoreName { get; set; }
+        [NotMapped]
         public string Remark { get; set; }
     }
 }

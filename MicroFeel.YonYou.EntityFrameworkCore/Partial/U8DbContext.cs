@@ -1,4 +1,5 @@
 ﻿using MicroFeel.Finance;
+using MicroFeel.Finance.Models;
 using MicroFeel.Finance.Models.DbDto;
 using MicroFeel.YonYou.EntityFrameworkCore.Data;
 using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
@@ -44,9 +45,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return Customer.ToDictionary(t => t.CCusCode, t => t.CCusName);
         }
 
-        public async Task<Customer> GetCustomersAsync(string code)
+        public async Task<Data.Customer> GetCustomersAsync(string code)
         {
-            return await GetFirstAsync<Customer>(c => c.CCusCode == code).ConfigureAwait(false);
+            return await GetFirstAsync<Data.Customer>(c => c.CCusCode == code).ConfigureAwait(false);
         }
 
         public (string, string) GetCustomersByDispatch(string orderno)
@@ -57,10 +58,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return ($"{c.CProvince + c.CCity}", c.CCusAddress);
         }
 
-        public async Task<Customer> GetCustomersByOrderNoAsync(string orderno)
+        public async Task<Data.Customer> GetCustomersByOrderNoAsync(string orderno)
         {
             var code = (await GetFirstAsync<DispatchList>(d => d.CDlcode == orderno))?.CCusCode ?? throw new Exception($"无法找到orderno为{orderno}的DispatchList。");
-            return await GetFirstAsync<Customer>(t => t.CCusCode == code);
+            return await GetFirstAsync<Data.Customer>(t => t.CCusCode == code);
         }
 
         /// <summary>
@@ -145,6 +146,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public PagedResult<OmModetails> GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
+            CheckPageSize(pagesize);
+            pageindex--;
             var tmp_datas = OmMomain.Where(t => t.CState > 0 && t.CDefine8 == brand &&
                                                         (string.IsNullOrEmpty(key) || t.CCode.Contains(key)) &&
                                                         (string.IsNullOrEmpty(supplier) || t.CVenPerson.Contains(supplier)) &&
@@ -187,7 +191,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             orders.ForEach(
                 async o =>
                 {
-                    var customer = await GetFirstAsync<Customer>(c => c.CCusCode == o.Ccuscode);
+                    var customer = await GetFirstAsync<Data.Customer>(c => c.CCusCode == o.Ccuscode);
                     o.Receiver = customer.CCusPerson;
                     o.ReceiveTel = customer.CCusPhone;
                     o.RecevieAddress = customer.CCusAddress;
@@ -219,6 +223,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public PagedResult<PuArrHead> GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize = U8Consts.DefaultPagesize)
         {
+            CheckPageIndex(pageindex);
+            CheckPageSize(pagesize);
+            pageindex--;
             var tmp_datas = PuArrHead.Where(t => t.Cdefine8 == brand
                             && t.Cbustype == ordertype
                             && t.Cvoucherstate == state
@@ -266,6 +273,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public PagedResult<OmMomain> GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
+            CheckPageSize(pagesize);
+            pageindex--;
             var tmp_orders = OmMomain
                 .Join(OmMomaterialshead, main => main.Moid, head => head.Moid, (main, head) => new { main, head })
                 .Where(t => t.main.CDepCode == departmentcode
@@ -349,7 +359,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public PagedResult<Inventory> GetInventory(string brand, string classcode, string storecode, string key, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
             CheckPageSize(pagesize);
+            pageindex--;
             var products = Inventory
                             .Where(t => t.CInvDefine1 == brand && t.CInvCcode == classcode && (string.IsNullOrEmpty(key) || t.CInvName.Contains(key)))
                             .Join(CurrentStock.Where(t => t.CWhCode == storecode && t.IQuantity.HasValue && t.IQuantity.Value > 0)
@@ -363,6 +375,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 p.UnitName = ComputationUnit.FirstOrDefault(u => u.CComunitCode == p.CShopUnit)?.CComUnitName;
             });
             return new PagedResult<Inventory>(total, result);
+        }
+
+        private static void CheckPageIndex(int pageIndex)
+        {
+            if (pageIndex <= 0)
+            {
+                throw new Exception($"页码为{pageIndex}，值应该大于0");
+            }
         }
 
         private static void CheckPageSize(int pagesize)
@@ -390,6 +410,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     //回填到货数量
                     foreach (var item in result.Details)
                     {
+                        //TODO replace with linq
                         UpdateModetailsArrQtyNumber(item);
                     }
                     // OmModetails.UpdateRange(momain.OmModetails);
@@ -407,9 +428,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         }
 
+        /// <summary>
+        /// 创建到货单
+        /// </summary>
+        /// <param name="momain"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
         private PuArrivalVouch CreatePuarrivalVouch(OmMomain momain, DtoStockOrder order)
         {
-            var id = (PuArrivalVouch.Max(t => t.Id) + 1) % 1000000000 + 2000000000;
+            var id = PuArrivalVouch.Max(t => t.Id) + 1;
             string code = $"OMWIN{DateTime.Now:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
             PuArrivalVouch puArrivalVouch = new PuArrivalVouch()
             {
@@ -446,7 +473,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 Csysbarcode = $"||omdh|{code}",
                 Details = new List<PuArrivalVouchs>()
             };
-            int autoid = (PuArrivalVouchs.Max(t => t.Autoid) + 1) % 1000000000 + 2000000000;
+            int autoid = PuArrivalVouchs.Max(t => t.Autoid);
             foreach (var orderitem in order.StoreStockDetail)
             {
                 var item = momain.OmModetails.First(t => t.CInvCode == orderitem.ProductNumbers);
@@ -518,7 +545,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         private PuArrivalVouch CreatePurchaseArrivalVouch(PoPomain pomain, DtoStockOrder order)
         {
-            var id = (PuArrivalVouch.Max(t => t.Id) + 1) % 1000000000 + 2000000000;
+            var id = PuArrivalVouch.Max(t => t.Id) + 1;
             string code = $"PuWIN{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
             PuArrivalVouch puArrivalVouch = new PuArrivalVouch()
             {
@@ -554,7 +581,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 Cpocode = pomain.CPoid,
                 Csysbarcode = $"||pudh|{code}",
             };
-            int autoid = (PuArrivalVouchs.Max(t => t.Autoid) + 1) % 1000000000 + 2000000000;
+            int autoid = PuArrivalVouchs.Max(t => t.Autoid) + 1;
             foreach (var orderitem in order.StoreStockDetail)
             {
                 var item = pomain.Details.First(t => t.CInvCode == orderitem.ProductNumbers);
@@ -643,8 +670,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, DtoStockOrder order, ref long id, ref long detailid)
         {
-            id = id == 0 ? (RdRecord01.Max(t => t.Id) + 1) % 1000000000 + 2000000000 : id + 1;
-            string code = $"MFIN{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
+            id = id == 0 ? (RdRecord01.Max(t => t.Id) + 1): id + 1;
+            string code = $"MFIN{DateTime.Now:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
             var rdrecord = new RdRecord01()
             {
 
@@ -695,7 +722,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CExchName = puArrival.CexchName,
                 Csysbarcode = $"||st01|{code}",
             };
-            detailid = detailid == 0 ? (Rdrecords01.Max(t => t.AutoId) + 1) % 1000000000 + 2000000000 : detailid;
+            detailid = detailid == 0 ? (Rdrecords01.Max(t => t.AutoId) + 1) : detailid;
             foreach (var item in puArrival.Details)
             {
                 var orderitem = order.StoreStockDetail.First(t => t.ProductNumbers == item.CInvCode);
@@ -793,9 +820,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         };
         private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid)
         {
-            id = (id == 0 ? (RdRecord01.Max(t => t.Id) + 1) % 1000000000 + 2000000000 : id) + 1;
-            string code = $"MFIN{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
-            var rdrecord = new RdRecord01()
+            id = (id == 0) ? (RdRecord01.Max(t => t.Id) + 1) : (id + 1);
+            string code = $"MFIN{DateTime.Now:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
+            var rdrecord = new RdRecord01
             {
                 Id = id,
                 BRdFlag = 1,
@@ -845,7 +872,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 Csysbarcode = $"||st01|{code}",
                 Details = new List<Rdrecords01>()
             };
-            detailid = detailid == 0 ? (Rdrecords01.Max(t => t.AutoId) + 1) % 1000000000 + 2000000000 : detailid;
+            detailid = detailid == 0 ? (Rdrecords01.Max(t => t.AutoId) + 1): detailid;
             foreach (var item in puArrival.Details)
             {
                 detailid += 1;
@@ -962,8 +989,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 try
                 {
                     var puarrival = PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
-                    if (puarrival == null) return false;
+                    if (puarrival is null)
+                    {
+                        throw new FinancialException($"找不到单号为{puarrivalOrderNo}的到货单。");
+                    }
                     puarrival.Details = PuArrivalVouchs.Where(t => t.Id == puarrival.Id).ToList();
+                    //创建入库单
                     var records = CreateRdrecord01s(puarrival);
                     action?.Invoke(records);
                     bool commitResult = SaveRdRecords(puarrival, records);
@@ -1048,16 +1079,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public bool AddSellOrder(DtoStockOrder order, ref string errmsg)
+        public void AddSellOrder(DtoStockOrder order)
         {
             using (var tran = Database.BeginTransaction())
             {
                 try
                 {
-                    if (!UpdateStore(order, (s, t) => { return s - t; }, ref errmsg)) throw new Finance.FinancialException(errmsg);
+                    UpdateStore(order, (s, t) => s - t);
 
                     var dispatch = DispatchList.AsNoTracking().FirstOrDefault(t => t.CDlcode == order.SourceOrderNo);
-                    if (dispatch == null) throw new Finance.FinancialException($"无法查询当前发货单[{order.SourceOrderNo}]");
+                    if (dispatch == null) throw new FinancialException($"无法查询当前发货单[{order.SourceOrderNo}]");
                     dispatch.Details = DispatchLists.AsNoTracking().Where(t => t.Dlid == dispatch.Dlid).ToList();
                     var results = CreateRdrecord32s(dispatch, order);
                     results.ForEach(result =>
@@ -1081,23 +1112,20 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     results.ForEach(t =>
                     {
                         if (!AddUnAccountRdrecord(t.Id, t.Details.Select(d => d.AutoId).ToList(), "32", t.CBusType))
-                            throw new Finance.FinancialException($"添加未记账数据时发生异常");
+                            throw new FinancialException($"添加未记账数据时发生异常");
 
                     });
                     DispatchLists.UpdateRange(dispatch.Details);
                     var commitResult = SaveChanges() > 0;
                     if (commitResult) tran.Commit();
                     else tran.Rollback();
-                    return commitResult;
                 }
                 catch (Exception ex)
                 {
-                    errmsg = ex.Message;
                     tran.Rollback();
-                    return false;
+                    throw ex;
                 }
             }
-
         }
         private List<Rdrecord32> CreateRdrecord32s(DispatchList dispatch, DtoStockOrder order)
         {
@@ -1230,13 +1258,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public bool AddMaterialOrder(DtoStockOrder order, ref string errmsg)
+        public bool AddMaterialOrder(DtoStockOrder order)
         {
             using (var tran = Database.BeginTransaction())
             {
                 try
                 {
-                    if (!UpdateStore(order, (s, t) => { return s - t; }, ref errmsg)) throw new Finance.FinancialException(errmsg);
+                    UpdateStore(order, (s, t) => s - t);
                     var materialApp = MaterialAppVouch.AsNoTracking().FirstOrDefault(t => t.CCode == order.SourceOrderNo);
                     if (materialApp == null) return false;
                     materialApp.MaterialAppVouchs = MaterialAppVouchs.AsNoTracking().Where(t => t.Id == materialApp.Id).ToList();
@@ -1278,13 +1306,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 }
                 catch (Exception ex)
                 {
-                    errmsg = ex.Message;
                     tran.Rollback();
-                    return false;
+                    throw ex;
                 }
-
             }
-
         }
 
         private List<Rdrecord11> CreateRdrecord11s(MaterialAppVouch materialApp, DtoStockOrder order)
@@ -1304,7 +1329,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             var momain = OmMomain.FirstOrDefault(t => t.CCode == materialApp.MaterialAppVouchs.FirstOrDefault().Comcode);
             if (momain == null)
                 throw new Finance.FinancialException($"申请单（{materialApp.CCode})明细中关联的委外订单单号（{materialApp.MaterialAppVouchs.FirstOrDefault()?.Comcode}）没有对应的委外单据");
-            id = id == 0 ? (Rdrecord11.Max(t => t.Id) + 1) % 1000000000 + 2000000000 : id + 1;
+            id = id == 0 ? (Rdrecord11.Max(t => t.Id) + 1) : id + 1;
             string code = $"MFMA{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
             var rdrecord = new Rdrecord11()
             {
@@ -1358,7 +1383,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 Csysbarcode = $"||st11|{materialApp.CCode}",
                 Details = new List<Rdrecords11>()
             };
-            detailid = detailid == 0 ? (Rdrecords11.Max(t => t.AutoId) + 1) % 1000000000 + 2000000000 : detailid;
+            detailid = detailid == 0 ? (Rdrecords11.Max(t => t.AutoId) + 1) : detailid;
             foreach (var item in materialApp.MaterialAppVouchs)
             {
                 var orderitem = order.StoreStockDetail.First(t => t.ProductNumbers == item.CInvCode);
@@ -1427,7 +1452,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             if (apply == null) return false;
             var applydetails = OmMomaterials.Where(t => t.Moid == apply.Moid).ToList();
             #region Create
-            var id = MaterialAppVouch.Any() ? (MaterialAppVouch.Max(t => t.Id) + 1) % 1000000000 + 2000000000 : 1;
+            var id = MaterialAppVouch.Any() ? (MaterialAppVouch.Max(t => t.Id) + 1): 1;
             var code = $"MFAPP{DateTime.Now.ToString("yyyyMMdd")}{(id > 10000 ? id.ToString().Substring(id.ToString().Length - 5) : id.ToString().PadLeft(5, '0'))}";
             MaterialAppVouch vouch = new MaterialAppVouch()
             {
@@ -1465,7 +1490,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             };
             #endregion
             #region Create Detail
-            var autoid = MaterialAppVouchs.Any() ? (MaterialAppVouchs.Max(t => t.AutoId) + 1) % 1000000000 + 2000000000 : 1;
+            var autoid = MaterialAppVouchs.Any() ? (MaterialAppVouchs.Max(t => t.AutoId) + 1) : 2000000001;
             foreach (var item in order.StoreStockDetail)
             {
                 var detail = applydetails.FirstOrDefault(t => t.CInvCode == item.ProductNumbers);
@@ -1529,11 +1554,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             if (apply == null) return false;
             var applydetails = OmMomaterials.Where(t => t.Moid == apply.Moid).ToList();
             #region Create
-            var id = (MaterialAppVouch.Max(t => t.Id) + 1) % 1000000000 + 2000000000;
+            var id = MaterialAppVouch.Max(t => t.Id) + 1;
             var code = $"MFAPP{DateTime.Now.ToString("yyyyMMdd")}{(id > 10000 ? id.ToString().Substring(id.ToString().Length - 5) : id.ToString().PadLeft(5, '0'))}";
             MaterialAppVouch vouch = new MaterialAppVouch()
             {
-                Id = (MaterialAppVouch.Max(t => t.Id) + 1) % 1000000000 + 2000000000,
+                Id = MaterialAppVouch.Max(t => t.Id) + 1,
                 DDate = DateTime.Now.Date,
                 CCode = code,
                 CDepCode = apply.CDepCode,
@@ -1567,7 +1592,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             };
             #endregion
             #region Create Detail
-            var autoid = (MaterialAppVouchs.Max(t => t.AutoId) + 1) % 1000000000 + 2000000000;
+            var autoid = MaterialAppVouchs.Max(t => t.AutoId) + 1 ;
             foreach (var item in order.StoreStockDetail)
             {
                 var detail = applydetails.FirstOrDefault(t => t.CInvCode == item.ProductNumbers);
@@ -1629,28 +1654,40 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         private double ConvertTimestamp(DateTime time)
         {
-            return (time - new System.DateTime(1970, 1, 1)).TotalMilliseconds;
+            return (time - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
 
 
         #region 查询采购
         public PagedResult<PoPomain> GetCheckedPOs(string brand, string suppliercode, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
+            CheckPageSize(pagesize);
+            pageindex--;
             return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && (t.Iverifystateex == 1 || t.Iverifystateex == 2) && string.IsNullOrEmpty(t.CDefine9) && string.IsNullOrEmpty(t.CCloser), pageindex, pagesize);
         }
 
         public PagedResult<PoPomain> GetAffirmPOs(string brand, string suppliercode, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
+            CheckPageSize(pagesize);
+            pageindex--;
             return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && t.CDefine9 == "已确认" && !string.IsNullOrEmpty(t.CVerifier), pageindex, pagesize);
         }
 
         public PagedResult<PoPomain> GetDeliverPOs(string brand, string suppliercode, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
+            CheckPageSize(pagesize);
+            pageindex--;
             return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && t.CDefine9 == "已发货" && !string.IsNullOrEmpty(t.CVerifier), pageindex, pagesize);
         }
 
         public PagedResult<PoPomain> GetOverPOs(string brand, string suppliercode, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
+            CheckPageSize(pagesize);
+            pageindex--;
             return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && !string.IsNullOrEmpty(t.CCloser), pageindex, pagesize);
         }
 
@@ -1672,13 +1709,23 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
             CheckPageSize(pagesize);
+            pageindex--;
             var tmp_orders = PoPomain.Where(expression);
             var total = tmp_orders.Count();
             var orders = tmp_orders.OrderBy(t => t.DPodate).Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
             orders.ForEach(o =>
             {
                 o.MaxArriveDate = PoPodetails.Where(d => d.Poid == o.Poid).Max(d => d.DArriveDate ?? DateTime.MinValue);
+                o.Details.ForEach(d =>
+                {
+                    var inventory = GetInventory(d.CInvCode);
+                    d.ProductName = inventory.CInvName;
+                    d.ProductModel = inventory.CInvStd;
+                    d.ProductNumbers = d.CInvCode;
+                    d.UnitName = inventory.UnitName;
+                });
             });
             return new PagedResult<PoPomain>(total, orders);
         }
@@ -1700,7 +1747,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public PagedResult<RdRecord09> GetAllotOrders(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
             CheckPageSize(pagesize);
+            pageindex--;
             var tmp_orders = RdRecord09.Where(t => t.CBusType == "调拨出库"
                                 && t.CDefine8 == brand
                                 && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
@@ -1744,7 +1793,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public PagedResult<RdRecord09> GetAllotOutRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
             CheckPageSize(pagesize);
+            pageindex--;
             var tmp_orders = RdRecord09.Where(t => t.CDefine8 == brand
                         && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
                         && (starttime == null || t.DDate >= starttime)
@@ -1783,7 +1834,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public PagedResult<RdRecord08> GetAllotInRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
             CheckPageSize(pagesize);
+            pageindex--;
             var tmp_orders = RdRecord08.Where(t => t.CDefine8 == brand
                                 && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
                                 && (starttime == null || t.DDate >= starttime)
@@ -1812,6 +1865,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public PagedResult<Rdrecords09> GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
         {
+            CheckPageIndex(pageindex);
+            CheckPageSize(pagesize);
+            pageindex--;
             //var tmp_orders = RdRecord09.Where(t => t.CBusType == "调拨出库"
             //                    && t.CDefine8 == brand
             //                    && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
@@ -1844,6 +1900,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     CreateTime = v.r.DDate,
                     Remark = v.r.CMemo,
                     Brand = v.r.CDefine8,
+                    StoreName = storename,
                     ProductModel = inventory?.CInvStd,
                     ProductName = inventory?.CInvName,
                     ProductNumbers = v.rs.CInvCode,
@@ -1947,12 +2004,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 if (stock != null)
                 {
                     stock.IQuantity = action(stock.IQuantity ?? 0, item.Numbers ?? 0);
-                    Database.ExecuteSqlCommand("update currentstock set iQuantity =" + stock.IQuantity + " where cInvCode = '" + item.ProductNumbers + "' and cBatch = '" + item.ProductBatch + "' and cWhCode = " + item.StoreId);
+                    Database.ExecuteSqlRaw("update currentstock set iQuantity =" + stock.IQuantity + " where cInvCode = '" + item.ProductNumbers + "' and cBatch = '" + item.ProductBatch + "' and cWhCode = " + item.StoreId);
                     continue;
                 }
 
                 //新增
-                Database.ExecuteSqlCommand(string.Format("insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{0}','{1}',{2},'{3}','',0,'',{4},{5},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);",
+                Database.ExecuteSqlRaw(string.Format("insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{0}','{1}',{2},'{3}','',0,'',{4},{5},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);",
                                                                     item.StoreId, item.ProductNumbers, itemid, item.ProductBatch, item.Numbers, 0));
 
             }
@@ -1965,15 +2022,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="order"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        private bool UpdateStore(DtoStockOrder order, Func<decimal, decimal, decimal> action, ref string errmsg)
+        private void UpdateStore(DtoStockOrder order, Func<decimal, decimal, decimal> action)
         {
             foreach (var item in order.StoreStockDetail)
             {
                 var tmp_stocks = CurrentStock.Where(t => t.CInvCode == item.ProductNumbers);
                 if (tmp_stocks.Count() == 0)
                 {
-                    errmsg = $"{item.ProductNumbers}不存在任何库存记录";
-                    return false;
+                    throw new Exception($"{item.ProductNumbers}不存在任何库存记录");
                 }
                 var itemid = tmp_stocks.First().ItemId;
                 var stocks = tmp_stocks.Where(t => t.CWhCode == item.StoreId);
@@ -2002,12 +2058,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     }//所有批号的都进行了递减后还是无法满足要出库/入库的数量
                     if (needNumber != 0)
                     {
-                        errmsg = $"{item.ProductNumbers}在仓库{item.StoreId}库存不足";
-                        return false;
+                        throw new Exception($"{item.ProductNumbers}在仓库{item.StoreId}库存不足");
                     }
                 }
             }
-            return true;
         }
 
         private void UpdateModetailsReceiveNumber(PuArrivalVouchs item)
@@ -2023,7 +2077,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         [Obsolete]
         private void UpdateModetailsArrQtyNumber(PuArrivalVouchs item)
         {
-            Database.ExecuteSqlCommand($"update OM_MODetails set iArrQty= isnull(iArrQty,0)+{item.IQuantity } where ModetailsId = {item.IPosId ?? 0} ");
+            Database.ExecuteSqlRaw($"update OM_MODetails set iArrQty= isnull(iArrQty,0)+{item.IQuantity } where ModetailsId = {item.IPosId ?? 0} ");
         }
 
         private void UpdatePoDetailsReceiveNumber(PuArrivalVouchs item)
@@ -2055,7 +2109,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         private bool AddUnAccountRdrecord(long mid, long did, string vouchType, string busType)
         {
             var sql = "insert IA_ST_UnAccountVouch" + vouchType + " (IDUN,IDSUN,cVouTypeUN,cBustypeUN) values (" + mid + "," + did + ",'" + vouchType + "','" + busType + "')";
-            return Database.ExecuteSqlCommand(sql) > 0;
+            return Database.ExecuteSqlRaw(sql) > 0;
         }
 
         /// <summary>
@@ -2073,7 +2127,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {
                 sql.Append("insert IA_ST_UnAccountVouch" + vouchType + " (IDUN,IDSUN,cVouTypeUN,cBustypeUN) values (" + mid + "," + did + ",'" + vouchType + "','" + busType + "');");
             }
-            return Database.ExecuteSqlCommand(sql.ToString()) > 0;
+            return Database.ExecuteSqlRaw(sql.ToString()) > 0;
         }
 
         #region close

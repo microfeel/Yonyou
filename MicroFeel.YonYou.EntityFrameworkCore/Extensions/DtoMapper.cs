@@ -73,7 +73,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 OrderNo = materialappm.Ccode,
                 Remark = materialappm.Cmemo,
                 CreateDate = materialappm.Ddate,
-                DepartmentName = materialappm.Cdepname
+                DepartmentName = materialappm.Cdepname,
+                Brand = materialappm.Cdefine8,
+                MaterialOrderDetails = materialappm.Details.Select(d => d.GetDtoMaterialOrderDetail()).ToList()
             };
         }
         public static DtoMaterialOrderDetail GetDtoMaterialOrderDetail(this Data.Materialappd t)
@@ -102,7 +104,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Receiver = dispatchList.Receiver,
                 ReceiveTel = dispatchList.ReceiveTel,
                 RecevieAddress = dispatchList.RecevieAddress,
-                Remark = dispatchList.CMemo
+                Remark = dispatchList.CMemo,
+                SellOrderDetails = dispatchList.Details.Select(d => d.GetSellOrderDetail()).ToList()
             };
         }
         public static DtoSellOrder GetDtoSellOrder(this Data.SaDispatchlist dispatchList)
@@ -117,7 +120,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Receiver = dispatchList.Receiver,
                 ReceiveTel = dispatchList.ReceiveTel,
                 RecevieAddress = dispatchList.RecevieAddress,
-                Remark = dispatchList.Cmemo
+                Remark = dispatchList.Cmemo,
+                SellOrderDetails = dispatchList.Details.Select(d => d.GetSellOrderDetail()).ToList()
             };
         }
         public static DtoSellOrderDetail GetSellOrderDetail(this Data.DispatchLists dispatchLists)
@@ -146,7 +150,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Remark = puArrHead.Cmemo,
                 Supplier = puArrHead.Cvenname,
                 SupplierCode = puArrHead.Cvencode,
-                CreateDate = puArrHead.Ddate
+                CreateDate = puArrHead.Ddate,
+                PurchaseOrderDetails = puArrHead.Details.Select(v => v.GetDtoPurchaseOrderDetail()).ToList()
             };
         }
         public static DtoPurchaseOrderDetail GetDtoPurchaseOrderDetail(this Data.PuArrbody puArrbody)
@@ -167,7 +172,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
         }
         public static DtoMaterialOrder GetDtoMaterialOrder(this Data.OmMomain ommain)
         {
-            return new DtoMaterialOrder()
+            return new DtoMaterialOrder
             {
                 Maker = ommain.CMaker,
                 Id = ommain.Moid,
@@ -177,7 +182,24 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 DepartmentName = "",
                 ProductModel = ommain.ProductModel,
                 ProductName = ommain.ProductName,
-                Brand = ommain.CDefine8
+                Brand = ommain.CDefine8,
+                MaterialOrderDetails = ommain.Details.Select(d => d.GetDtoMaterialOrderDetail()).ToList()
+
+            };
+        }
+        public static DtoMaterialOrderDetail GetDtoMaterialOrderDetail(this Data.OmModetails omModetails)
+        {
+            return new DtoMaterialOrderDetail
+            {
+                Id = omModetails.ModetailsId,
+                Numbers = omModetails.INum ?? 0,
+                ProductNumbers = omModetails.ProductNumbers,
+                ProductBatch = "",
+                ProductModel = omModetails.ProductModel,
+                ProductName = omModetails.ProductName,
+                StoreCode = "",
+                StoreName = "",
+                UnitName = ""
             };
         }
         public static DtoMaterialOrderDetail GetDtoMaterialOrderDetail(this Data.OmMomaterialsbody omMomaterialsbody)
@@ -234,7 +256,27 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 OrderType = t.CBusType,
                 SupplierCode = t.SupplierCode,
                 Remark = t.CMemo,
-                State = string.IsNullOrEmpty(t.CDefine9) ? "待处理" : t.CDefine9
+                State = string.IsNullOrEmpty(t.CDefine9) ? "待处理" : t.CDefine9,
+                PurchaseOrderNo = t.CPoid,
+                Supplier = t.CVenAccount,
+                PurchaseOrderDetails = t.Details.Select(d => d.GetDtoPurchaseOrderDetail()).ToList()
+            };
+        }
+
+        public static DtoPurchaseOrderDetail GetDtoPurchaseOrderDetail(this Data.PoPodetails t)
+        {
+            return new DtoPurchaseOrderDetail()
+            {
+                AutoId = t.Id,
+                ArriveDate = t.DArriveDate,
+                //Id = t.Id,
+                Numbers = t.IQuantity.Value - (t.IReceivedQty ?? 0),
+                ProductModel = t.ProductModel,
+                ProductName = t.ProductName,
+                ProductNumbers = t.CInvCode,
+                UnitName = t.UnitName,
+                Price = t.INatUnitPrice,
+                Rate = 0m
             };
         }
 
@@ -267,7 +309,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 TargetBrand = rdRecord.TargetBrand,
                 TargetStoreName = rdRecord.InWhName,
                 SourceStoreName = rdRecord.OutWhName,
-                AllotOrderDetails = rdRecord.Details.Select(d => d.GetDtoAllotOrderDetail()).ToList()
+                AllotOrderDetails = rdRecord.Details.Select(d => d.GetDtoAllotOrderDetail()).ToList(),
             };
         }
 
@@ -321,6 +363,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Remark = rdRecord.CMemo,
                 Brand = rdRecord.CDefine8,
                 StoreName = rdRecord.WhName,
+                AllotInRecordDetails = rdRecord.Details.Select(d => d.GetDtoAllotInRecordDetail()).ToList()
             };
         }
 
@@ -336,24 +379,23 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
             };
         }
 
-        public static DtoAllotRecord GetDtoAllotRecord(this Data.Rdrecords09 t)
+        public static DtoAllotRecord GetDtoAllotRecord(this Data.Rdrecords09 rdrecords09)
         {
             return new DtoAllotRecord()
             {
-                AutoId = t.AutoId,
-                OrderNo = t.OrderNo,
-                CreateTime = t.CreateTime,
-                Remark = t.Remark,
-                Brand = t.Brand,
-                StoreName = ,
-                ProductBathcNo = t.d.CBatch,
-                ProductName = inventory?.CInvName,
-                ProductNumbers = t.d.CInvCode,
-                Numbers = t.d.IQuantity.HasValue ? t.d.IQuantity.Value : 0,
-                ProductModel = inventory?.CInvStd,
-                UnitName = ComputationUnit.FirstOrDefault(u => u.CComunitCode == unitcode)?.CComUnitName ?? ""
+                AutoId = rdrecords09.AutoId,
+                OrderNo = rdrecords09.OrderNo,
+                CreateTime = rdrecords09.CreateTime,
+                Remark = rdrecords09.Remark,
+                Brand = rdrecords09.Brand,
+                StoreName = rdrecords09.StoreName,
+                ProductBathcNo = rdrecords09.CBatch,
+                ProductName = rdrecords09.ProductName,
+                ProductNumbers = rdrecords09.ProductNumbers,
+                Numbers = rdrecords09.IQuantity ?? 0,
+                ProductModel = rdrecords09.ProductModel,
+                UnitName = rdrecords09.UnitName
             };
         }
-
     }
 }
