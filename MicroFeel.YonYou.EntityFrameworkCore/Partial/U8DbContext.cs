@@ -852,10 +852,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             var codePrefix = $"CR{DateTime.Today:yyMM}";
             var cp = GetCode("采购入库单");
             var code = $"{cp.Prefix}{"1".PadLeft(cp.GlideLen, '0')}";
-            var maxCode = RdRecord01.AsNoTracking().LastOrDefault(r => r.CCode.StartsWith(codePrefix));
+            var maxCode = RdRecord01.AsNoTracking().Where(r => EF.Functions.Like(r.CCode, codePrefix + "%")).OrderByDescending(r=>r.CCode).FirstOrDefault();
             if (maxCode != null)
             {
-                var currentCode = maxCode.CCode;
+                code = maxCode.CCode;
                 var newCodeNumber = int.Parse(code.Substring(code.Length - cp.GlideLen)) + 1;
                 code = $"{cp.Prefix}{newCodeNumber.ToString().PadLeft(cp.GlideLen, '0')}";
             }
@@ -1017,12 +1017,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
         {
+            sendOrderNo = sendOrderNo.Substring(0,55);
             return SaveRdRecordsTran(puarrivalOrderNo, t => { t.ForEach(item => item.CDefine10 = sendOrderNo); });
         }
         private bool SaveRdRecordsTran(string puarrivalOrderNo, Action<List<RdRecord01>> action)
         {
-            using (var tran = Database.BeginTransaction())
-            {
+            //using (var tran = Database.BeginTransaction())
+            //{
                 try
                 {
                     var puarrival = PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
@@ -1035,16 +1036,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     var records = CreateRdrecord01s(puarrival);
                     action?.Invoke(records);
                     bool commitResult = SaveRdRecords(puarrival, records);
-                    if (commitResult) tran.Commit();
-                    else tran.Rollback();
+                    //if (commitResult) tran.Commit();
+                    //else tran.Rollback();
                     return commitResult;
                 }
                 catch (Exception ex)
                 {
-                    tran.Rollback();
+                    //tran.Rollback();
                     throw ex;
                 }
-            }
+            //}
         }
         private bool SaveRdRecords(PuArrivalVouch puarrival, List<RdRecord01> records)
         {

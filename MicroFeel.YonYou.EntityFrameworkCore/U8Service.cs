@@ -236,10 +236,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             db.AddSellOrder(order);
         }
 
-        IDbContextTransaction IDbOperation.BeginTransaction()
-        {
-            return db.Database.BeginTransaction();
-        }
+        //IDbContextTransaction IDbOperation.BeginTransaction()
+        //{
+        //    return db.Database.BeginTransaction();
+        //}
 
         bool IDbOperation.CheckAllotInRecord(string orderno)
         {
