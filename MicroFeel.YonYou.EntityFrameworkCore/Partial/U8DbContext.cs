@@ -410,8 +410,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     //回填到货数量
                     foreach (var item in result.Details)
                     {
-                        //TODO replace with linq
-                        UpdateModetailsArrQtyNumber(item);
+                        UpdateModetailsReceiveNumber(item);
+                        //UpdateModetailsArrQtyNumber(item);
                     }
                     // OmModetails.UpdateRange(momain.OmModetails);
                     var commitResult = (SaveChanges() > 0);
@@ -476,9 +476,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             int autoid = PuArrivalVouchs.Max(t => t.Autoid);
             foreach (var orderitem in order.StoreStockDetail)
             {
-                var item = momain.OmModetails.First(t => t.CInvCode == orderitem.ProductNumbers);
+                //TODO 如果存在合并到货，这里将出现问题
+                //找到未到货的明细
+                var item = momain.OmModetails
+                    .FirstOrDefault(t => t.CInvCode == orderitem.ProductNumbers
+                            && t.IQuantity - (t.IArrQty ?? 0) > orderitem.Numbers) ?? throw new FinancialException("是否存在合并到货?");
+
                 autoid += 1;
-                puArrivalVouch.Details.Add(new PuArrivalVouchs()
+                puArrivalVouch.Details.Add(new PuArrivalVouchs
                 {
                     Autoid = autoid,
                     Id = id,
@@ -852,7 +857,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             var codePrefix = $"CR{DateTime.Today:yyMM}";
             var cp = GetCode("采购入库单");
             var code = $"{cp.Prefix}{"1".PadLeft(cp.GlideLen, '0')}";
-            var maxCode = RdRecord01.AsNoTracking().Where(r => EF.Functions.Like(r.CCode, codePrefix + "%")).OrderByDescending(r=>r.CCode).FirstOrDefault();
+            var maxCode = RdRecord01.AsNoTracking().Where(r => EF.Functions.Like(r.CCode, codePrefix + "%")).OrderByDescending(r => r.CCode).FirstOrDefault();
             if (maxCode != null)
             {
                 code = maxCode.CCode;
@@ -1017,34 +1022,41 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
         {
-            sendOrderNo = sendOrderNo.Substring(0,55);
+            sendOrderNo = sendOrderNo.Substring(0, 55);
             return SaveRdRecordsTran(puarrivalOrderNo, t => { t.ForEach(item => item.CDefine10 = sendOrderNo); });
         }
+
+        /// <summary>
+        /// 生成入库单
+        /// </summary>
+        /// <param name="puarrivalOrderNo"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
         private bool SaveRdRecordsTran(string puarrivalOrderNo, Action<List<RdRecord01>> action)
         {
             //using (var tran = Database.BeginTransaction())
             //{
-                try
+            try
+            {
+                var puarrival = PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
+                if (puarrival is null)
                 {
-                    var puarrival = PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
-                    if (puarrival is null)
-                    {
-                        throw new FinancialException($"找不到单号为{puarrivalOrderNo}的到货单。");
-                    }
-                    puarrival.Details = PuArrivalVouchs.Where(t => t.Id == puarrival.Id).ToList();
-                    //创建入库单
-                    var records = CreateRdrecord01s(puarrival);
-                    action?.Invoke(records);
-                    bool commitResult = SaveRdRecords(puarrival, records);
-                    //if (commitResult) tran.Commit();
-                    //else tran.Rollback();
-                    return commitResult;
+                    throw new FinancialException($"找不到单号为{puarrivalOrderNo}的到货单。");
                 }
-                catch (Exception ex)
-                {
-                    //tran.Rollback();
-                    throw ex;
-                }
+                puarrival.Details = PuArrivalVouchs.Where(t => t.Id == puarrival.Id).ToList();
+                //创建入库单
+                var records = CreateRdrecord01s(puarrival);
+                action?.Invoke(records);
+                bool commitResult = SaveRdRecords(puarrival, records);
+                //if (commitResult) tran.Commit();
+                //else tran.Rollback();
+                return commitResult;
+            }
+            catch (Exception ex)
+            {
+                //tran.Rollback();
+                throw ex;
+            }
             //}
         }
         private bool SaveRdRecords(PuArrivalVouch puarrival, List<RdRecord01> records)
@@ -1079,7 +1091,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     }
                 }
                 // 实际入库数量应该在审核后赋值
-                item.FValidQuantity = item.FValidInQuan = item.IQuantity;
+                item.FValidInQuan = item.IQuantity;
+                item.FValidQuantity = 0m;
+                //2020.6.20 validquantity 在手工业务中没有值
+                //item.FValidQuantity = item.FValidInQuan = item.IQuantity;
             }
             puarrival.Ccloser = puarrival.CMaker;
             puarrival.Cverifier = puarrival.CMaker;
@@ -2102,29 +2117,39 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             }
         }
 
+        /// <summary>
+        /// 更新委外订单明细的到货数量
+        /// </summary>
+        /// <param name="item"></param>
         private void UpdateModetailsReceiveNumber(PuArrivalVouchs item)
         {
-            var detail = OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId);
-            if (detail == null) return;
+            var detail = OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId)
+                ?? throw new FinancialException($"无法找到委外订单明细：{item.IPosId}");
             //运算符优先级BUG
-            detail.IReceivedQty = (detail.IReceivedQty ?? 0) + item.IQuantity;
-            if (detail.IArrQty.HasValue)
-                detail.IArrQty = detail.IArrQty > item.IQuantity ? (detail.IArrQty - item.IQuantity) : 0;
+            //detail.IReceivedQty = (detail.IReceivedQty ?? 0) + item.IQuantity;
+            //累计合格入库数
+            detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
+            //累计到货数
+            detail.IArrQty = (detail.IArrQty ?? 0) + item.IQuantity;
         }
 
-        [Obsolete]
-        private void UpdateModetailsArrQtyNumber(PuArrivalVouchs item)
-        {
-            Database.ExecuteSqlRaw($"update OM_MODetails set iArrQty= isnull(iArrQty,0)+{item.IQuantity } where ModetailsId = {item.IPosId ?? 0} ");
-        }
+        //[Obsolete]
+        //private void UpdateModetailsArrQtyNumber(PuArrivalVouchs item)
+        //{
+        //    Database.ExecuteSqlRaw($"update OM_MODetails set iArrQty= isnull(iArrQty,0)+{item.IQuantity } where ModetailsId = {item.IPosId ?? 0} ");
+        //}
 
+        /// <summary>
+        /// 更新采购订单收货数量
+        /// </summary>
+        /// <param name="item"></param>
         private void UpdatePoDetailsReceiveNumber(PuArrivalVouchs item)
         {
             var detail = PoPodetails.FirstOrDefault(t => t.Id == item.IPosId);
             if (detail == null) return;
-            detail.IReceivedQty = (detail.IReceivedQty ?? 0) + item.IQuantity;
-            if (detail.IArrQty.HasValue)
-                detail.IArrQty = detail.IArrQty > item.IQuantity ? (detail.IArrQty - item.IQuantity) : 0;
+            //detail.IReceivedQty = (detail.IReceivedQty ?? 0) + item.IQuantity;
+            detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
+            detail.IArrQty = (detail.IArrQty ?? 0) + item.IQuantity;
         }
 
         private void UpdatePoDetailsArrQtyNumber(PuArrivalVouchs item)
