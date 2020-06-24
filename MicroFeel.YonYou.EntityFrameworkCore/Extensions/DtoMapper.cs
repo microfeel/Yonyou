@@ -2,6 +2,7 @@
 using MicroFeel.Finance.Models.DbDto;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -397,5 +398,36 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 UnitName = rdrecords09.UnitName
             };
         }
+
+        public static DispatchBill GetDispatchBill(this Data.DispatchList dispatchList)
+        {
+            return new DispatchBill
+            {
+                BillNo = dispatchList.CDlcode,
+                Brand = dispatchList.CDefine8,
+                Customer = dispatchList.CCusName,
+                Date = dispatchList.DDate,
+                Maker = dispatchList.CMaker,
+                SoBillNo = dispatchList.CSocode,
+                OutNos = dispatchList.CSaleOut,
+            };
+        }
+
+        public static DispatchBillDetail GetDispatchBillDetail(this Data.DispatchLists dispatchLists)
+        {
+            return new DispatchBillDetail
+            {
+                BillNo = dispatchLists.CbSysBarCode,
+                Batch = dispatchLists.CBatch,
+                Id = dispatchLists.AutoId.ToString(),
+                InvCode = dispatchLists.CInvCode,
+                InvName = dispatchLists.CInvName,
+                TotalQty = dispatchLists.IQuantity ?? 0,
+                Qty = (dispatchLists.IQuantity ?? 0) - (dispatchLists.FOutQuantity ?? 0),
+                WhCode = dispatchLists.CWhCode,
+                WhName = dispatchLists.CWhCodeNavigation?.CWhName ?? ""
+            };
+        }
+
     }
 }

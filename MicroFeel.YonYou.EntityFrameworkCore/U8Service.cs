@@ -4,15 +4,10 @@ using MicroFeel.Finance.Models;
 using MicroFeel.Finance.Models.DbDto;
 using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Serialization;
 using Sugar.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MicroFeel.YonYou.EntityFrameworkCore
@@ -495,6 +490,29 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         void IDbOperation.UpdatePurchaseOrderState(string orderno, string state)
         {
             db.UpdatePurchaseOrderState(orderno, state);
+        }
+
+        /// <summary>
+        /// 获取发货单列表
+        /// </summary>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="billState"></param>
+        /// <returns></returns>
+        public PagedResult<DispatchBill> GetDispatchBills(int pageIndex, int pageSize, DispatchBillState billState)
+        {
+            var list = db.GetDispatchBills(pageIndex, pageSize, billState);
+            return new PagedResult<DispatchBill>(list.TotalCount, list.Results.Select(dl => dl.GetDispatchBill()));
+        }
+
+        /// <summary>
+        /// 获取指定单号的发货单明细
+        /// </summary>
+        /// <param name="billNo">单号</param>
+        /// <returns></returns>
+        public IList<DispatchBillDetail> GetDispatchBillDetail(string billNo)
+        {
+            return db.GetDispatchBillDetail(billNo).Select(v => v.GetDispatchBillDetail()).ToList();
         }
         #endregion
 

@@ -4,6 +4,7 @@ using MicroFeel.Finance.Models.DbDto;
 using MicroFeel.YonYou.EntityFrameworkCore.Data;
 using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Sugar.Utils;
 using System;
 using System.Collections.Generic;
@@ -357,13 +358,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         //}
 
 
-        public PagedResult<Inventory> GetInventory(string brand, string classcode, string storecode, string key, int pageindex, int pagesize)
+        public PagedResult<Inventory> GetInventory(string brand, string classCode, string storecode, string key, int pageindex, int pagesize)
         {
             CheckPageIndex(pageindex);
             CheckPageSize(pagesize);
             pageindex--;
             var products = Inventory
-                            .Where(t => t.CInvDefine1 == brand && t.CInvCcode == classcode && (string.IsNullOrEmpty(key) || t.CInvName.Contains(key)))
+                            .Where(t => t.CInvDefine1 == brand && t.CInvCcode == classCode && (string.IsNullOrEmpty(key) || t.CInvName.Contains(key)))
                             .Join(CurrentStock.Where(t => t.CWhCode == storecode && t.IQuantity.HasValue && t.IQuantity.Value > 0)
                             .Select(t => t.CInvCode).Distinct(), t => t.CInvCode, d => d, (t, d) => t);
             var total = products.Count();
@@ -426,6 +427,48 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
             }
 
+        }
+
+        internal PagedResult<DispatchList> GetDispatchBills(int pageIndex, int pageSize, DispatchBillState billState)
+        {
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
+
+            IEnumerable<DispatchList> dispatchbills = DispatchList.Where(dl => dl.CSocode != "");
+            switch (billState)
+            {
+                case DispatchBillState.Processing:
+                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue);
+                    break;
+                case DispatchBillState.Checked:
+                    dispatchbills = dispatchbills.Where(d => d.Dverifysystime.HasValue);
+                    break;
+                default:
+                    break;
+            }
+            var total = dispatchbills.Count();
+            var result = dispatchbills.OrderByDescending(dl => dl.DDate)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToList();
+            return new PagedResult<DispatchList>(total, result);
+        }
+
+        /// <summary>
+        /// 获取指定发货单号的明细
+        /// </summary>
+        /// <param name="billNo">发货单号</param>
+        /// <returns></returns>
+        internal IList<DispatchLists> GetDispatchBillDetail(string billNo)
+        {
+            if (string.IsNullOrWhiteSpace(billNo))
+            {
+                throw new FinancialException("发货单号不能为空。");
+            }
+            var id = DispatchList.FirstOrDefault(v => v.CDlcode == billNo)?.Dlid
+                ?? throw new FinancialException($"找不到发货单:{billNo}");
+            return DispatchLists.Where(dls => dls.Dlid == id).OrderBy(dls => dls.AutoId).ToList();
         }
 
         /// <summary>
@@ -1022,7 +1065,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
         {
-            sendOrderNo = sendOrderNo.Substring(0, 55);
+            if (sendOrderNo.Length > 55)
+            {
+                sendOrderNo = sendOrderNo.Substring(0, 55);
+            }
             return SaveRdRecordsTran(puarrivalOrderNo, t => { t.ForEach(item => item.CDefine10 = sendOrderNo); });
         }
 
@@ -1034,30 +1080,30 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         private bool SaveRdRecordsTran(string puarrivalOrderNo, Action<List<RdRecord01>> action)
         {
-            //using (var tran = Database.BeginTransaction())
-            //{
-            try
+            using (var tran = Database.BeginTransaction())
             {
-                var puarrival = PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
-                if (puarrival is null)
+                try
                 {
-                    throw new FinancialException($"找不到单号为{puarrivalOrderNo}的到货单。");
+                    var puarrival = PuArrivalVouch.AsNoTracking().FirstOrDefault(t => t.CCode == puarrivalOrderNo);
+                    if (puarrival is null)
+                    {
+                        throw new FinancialException($"找不到单号为{puarrivalOrderNo}的到货单。");
+                    }
+                    puarrival.Details = PuArrivalVouchs.Where(t => t.Id == puarrival.Id).ToList();
+                    //创建入库单
+                    var records = CreateRdrecord01s(puarrival);
+                    action?.Invoke(records);
+                    bool commitResult = SaveRdRecords(puarrival, records);
+                    if (commitResult) tran.Commit();
+                    else tran.Rollback();
+                    return commitResult;
                 }
-                puarrival.Details = PuArrivalVouchs.Where(t => t.Id == puarrival.Id).ToList();
-                //创建入库单
-                var records = CreateRdrecord01s(puarrival);
-                action?.Invoke(records);
-                bool commitResult = SaveRdRecords(puarrival, records);
-                //if (commitResult) tran.Commit();
-                //else tran.Rollback();
-                return commitResult;
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    throw ex;
+                }
             }
-            catch (Exception ex)
-            {
-                //tran.Rollback();
-                throw ex;
-            }
-            //}
         }
         private bool SaveRdRecords(PuArrivalVouch puarrival, List<RdRecord01> records)
         {
@@ -2130,14 +2176,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             //累计合格入库数
             detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
             //累计到货数
-            detail.IArrQty = (detail.IArrQty ?? 0) + item.IQuantity;
+            var arrQty = (detail.IArrQty ?? 0) + item.IQuantity;
+            //TODO 数据不对应的情况应该直接用异常处理
+            detail.IArrQty = Math.Min(detail.IQuantity ?? 0, arrQty);
         }
-
-        //[Obsolete]
-        //private void UpdateModetailsArrQtyNumber(PuArrivalVouchs item)
-        //{
-        //    Database.ExecuteSqlRaw($"update OM_MODetails set iArrQty= isnull(iArrQty,0)+{item.IQuantity } where ModetailsId = {item.IPosId ?? 0} ");
-        //}
 
         /// <summary>
         /// 更新采购订单收货数量
@@ -2156,10 +2198,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             var detail = PoPodetails.FirstOrDefault(t => t.Id == item.IPosId);
             if (detail == null) return;
-            detail.IArrQty = (detail.IArrQty ?? 0) + item.IQuantity;
+            //累计到货数量
+            var arrQty = (detail.IArrQty ?? 0) + item.IQuantity;
+            ///不能超过订单明细数量
+            //TODO 使用异常处理此处
+            detail.IArrQty = Math.Min(detail.IQuantity ?? 0, arrQty);
         }
-
-
 
         /// <summary>
         /// 添加未记账数据
