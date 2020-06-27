@@ -145,11 +145,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="pagesize"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public PagedResult<OmModetails> GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
+        public PagedResult<OmModetails> GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             var tmp_datas = OmMomain.Where(t => t.CState > 0 && t.CDefine8 == brand &&
                                                         (string.IsNullOrEmpty(key) || t.CCode.Contains(key)) &&
                                                         (string.IsNullOrEmpty(supplier) || t.CVenPerson.Contains(supplier)) &&
@@ -158,7 +158,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 .Join(OmModetails, t => t.Moid, d => d.Moid, (t, d) => new { t, d })
                 .Where(t => (t.d.IQuantity - (t.d.IArrQty ?? t.d.IReceivedQty ?? t.d.Freceivedqty ?? 0)) > 0);
             var total = tmp_datas.Count();
-            var datas = tmp_datas.Skip(pageindex * pagesize).Take(pagesize).ToList().Select(t =>
+            var datas = tmp_datas.Skip(pageIndex * pageSize).Take(pageSize).ToList().Select(t =>
             {
                 var product = Inventory.FirstOrDefault(i => i.CInvCode == t.d.CInvCode);
                 return new OmModetails()
@@ -170,7 +170,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     ProductNumbers = t.d.CInvCode
                 };
             }).ToList();
-            return new PagedResult<OmModetails>(total, datas);
+            return new PagedResult<OmModetails>(total, datas, pageIndex + 1, pageSize);
         }
 
         /// <summary>
@@ -222,11 +222,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return order;
         }
 
-        public PagedResult<PuArrHead> GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize = U8Consts.DefaultPagesize)
+        public PagedResult<PuArrHead> GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageIndex, int pageSize = U8Consts.DefaultPagesize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             var tmp_datas = PuArrHead.Where(t => t.Cdefine8 == brand
                             && t.Cbustype == ordertype
                             && t.Cvoucherstate == state
@@ -235,12 +235,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             && (endtime == null || t.Ddate <= endtime)
                             && (string.IsNullOrEmpty(supplier) || t.Cvenname.Contains(supplier)));
             var total = tmp_datas.Count();
-            var orders = tmp_datas.Skip(pageindex * pagesize).Take(pagesize).ToList();
+            var orders = tmp_datas.Skip(pageIndex * pageSize).Take(pageSize).ToList();
             orders.ForEach(e =>
             {
                 e.Details = PuArrbody.Where(t => t.Id == e.Id).ToList();
             });
-            return new PagedResult<PuArrHead>(total, orders);
+            return new PagedResult<PuArrHead>(total, orders, pageIndex + 1, pageSize);
         }
 
         /// <summary>
@@ -272,11 +272,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="pagesize"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public PagedResult<OmMomain> GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
+        public PagedResult<OmMomain> GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             var tmp_orders = OmMomain
                 .Join(OmMomaterialshead, main => main.Moid, head => head.Moid, (main, head) => new { main, head })
                 .Where(t => t.main.CDepCode == departmentcode
@@ -284,13 +284,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             && (endtime == null || t.main.DDate <= endtime)
                             && (string.IsNullOrEmpty(key) || t.head.Cinvstd.Contains(key)));
             var total = tmp_orders.Count();
-            var orders = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
+            var orders = tmp_orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
             orders.ForEach(o =>
             {
                 o.main.ProductModel = o.head.Cinvstd;
                 o.main.ProductName = o.head.Cinvname;
             });
-            return new PagedResult<OmMomain>(total, tmp_orders.Select(v => v.main));
+            return new PagedResult<OmMomain>(total, tmp_orders.Select(v => v.main), pageIndex + 1, pageSize);
         }
 
         /// <summary>
@@ -351,31 +351,31 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return stocks.Select(s => s.inv).ToList();
         }
 
-        //public PagedResult<Inventory> GetInventory(string brand, string classcode, string storecode, string key, int pageindex, int pagesize)
+        //public PagedResult<Inventory> GetInventory(string brand, string classcode, string storecode, string key, int pageIndex, int pageSize)
         //{
-        //    var result = GetInventory(brand, classcode, storecode, key, pageindex, pagesize, out int total);
+        //    var result = GetInventory(brand, classcode, storecode, key, pageIndex, pageSize, out int total);
         //    return (total, result);
         //}
 
 
-        public PagedResult<Inventory> GetInventory(string brand, string classCode, string storecode, string key, int pageindex, int pagesize)
+        public PagedResult<Inventory> GetInventory(string brand, string classCode, string storecode, string key, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             var products = Inventory
                             .Where(t => t.CInvDefine1 == brand && t.CInvCcode == classCode && (string.IsNullOrEmpty(key) || t.CInvName.Contains(key)))
                             .Join(CurrentStock.Where(t => t.CWhCode == storecode && t.IQuantity.HasValue && t.IQuantity.Value > 0)
                             .Select(t => t.CInvCode).Distinct(), t => t.CInvCode, d => d, (t, d) => t);
             var total = products.Count();
-            var result = products.Skip(pageindex * pagesize).Take(pagesize).ToList();
+            var result = products.Skip(pageIndex * pageSize).Take(pageSize).ToList();
             result.ForEach(p =>
             {
                 p.InvClassName = InventoryClass.FirstOrDefault(c => c.CInvCcode == p.CInvCcode)?.CInvCname;
                 p.Stock = GetInventoryStock(p.CInvCode);
                 p.UnitName = ComputationUnit.FirstOrDefault(u => u.CComunitCode == p.CShopUnit)?.CComUnitName;
             });
-            return new PagedResult<Inventory>(total, result);
+            return new PagedResult<Inventory>(total, result, pageIndex + 1, pageSize);
         }
 
         private static void CheckPageIndex(int pageIndex)
@@ -386,11 +386,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             }
         }
 
-        private static void CheckPageSize(int pagesize)
+        private static void CheckPageSize(int pageSize)
         {
-            if (pagesize <= 0)
+            if (pageSize <= 0)
             {
-                throw new Exception($"{pagesize} 不是有效的页大小");
+                throw new Exception($"{pageSize} 不是有效的页大小");
             }
         }
 
@@ -452,7 +452,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
                 .ToList();
-            return new PagedResult<DispatchList>(total, result);
+            return new PagedResult<DispatchList>(total, result, pageIndex + 1, pageSize);
         }
 
         /// <summary>
@@ -692,7 +692,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 RdRecord01.Add(result);
                 Rdrecords01.AddRange(result.Details);
             });
-            if (!InsertOrUpdateStore(order, (s, t) => { return s + t; })) return false;
+            InsertOrUpdateStore(order, (s, t) => { return s + t; });
             //UpdateModetailsReceiveNumber(puarrival.PuArrivalVouchs);
             var commitResult = SaveChanges() > 0;
             if (commitResult)
@@ -1148,18 +1148,18 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             puarrival.Caudittime = DateTime.Now;
             PuArrivalVouch.Update(puarrival);
             //更新库存
-            if (!InsertOrUpdateStore(new DtoStockOrder()
+            InsertOrUpdateStore(new DtoStockOrder
             {
                 Brand = puarrival.CDefine8,
                 SourceOrderNo = puarrival.CCode,
-                StoreStockDetail = puarrival.Details.Select(t => new DtoStoreStockDetail()
+                StoreStockDetail = puarrival.Details.Select(t => new DtoStoreStockDetail
                 {
                     Numbers = t.IQuantity,
                     ProductBatch = t.CBatch,
                     ProductNumbers = t.CInvCode,
                     StoreId = t.CWhCode
                 })
-            }, (s, t) => { return s + t; })) throw new Exception("更新库存时发生异常");
+            }, (s, t) => { return s + t; });
             records.ForEach(result =>
             {
                 //添加未记账数据
@@ -1758,36 +1758,36 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
 
         #region 查询采购
-        public PagedResult<PoPomain> GetCheckedPOs(string brand, string suppliercode, int pageindex, int pagesize)
+        public PagedResult<PoPomain> GetCheckedPOs(string brand, string suppliercode, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
-            return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && (t.Iverifystateex == 1 || t.Iverifystateex == 2) && string.IsNullOrEmpty(t.CDefine9) && string.IsNullOrEmpty(t.CCloser), pageindex, pagesize);
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
+            return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && (t.Iverifystateex == 1 || t.Iverifystateex == 2) && string.IsNullOrEmpty(t.CDefine9) && string.IsNullOrEmpty(t.CCloser), pageIndex, pageSize);
         }
 
-        public PagedResult<PoPomain> GetAffirmPOs(string brand, string suppliercode, int pageindex, int pagesize)
+        public PagedResult<PoPomain> GetAffirmPOs(string brand, string suppliercode, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
-            return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && t.CDefine9 == "已确认" && !string.IsNullOrEmpty(t.CVerifier), pageindex, pagesize);
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
+            return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && t.CDefine9 == "已确认" && !string.IsNullOrEmpty(t.CVerifier), pageIndex, pageSize);
         }
 
-        public PagedResult<PoPomain> GetDeliverPOs(string brand, string suppliercode, int pageindex, int pagesize)
+        public PagedResult<PoPomain> GetDeliverPOs(string brand, string suppliercode, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
-            return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && t.CDefine9 == "已发货" && !string.IsNullOrEmpty(t.CVerifier), pageindex, pagesize);
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
+            return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && t.CDefine9 == "已发货" && !string.IsNullOrEmpty(t.CVerifier), pageIndex, pageSize);
         }
 
-        public PagedResult<PoPomain> GetOverPOs(string brand, string suppliercode, int pageindex, int pagesize)
+        public PagedResult<PoPomain> GetOverPOs(string brand, string suppliercode, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
-            return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && !string.IsNullOrEmpty(t.CCloser), pageindex, pagesize);
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
+            return GetPos(t => t.CDefine8 == brand && t.CVenCode == suppliercode && !string.IsNullOrEmpty(t.CCloser), pageIndex, pageSize);
         }
 
         public List<Zpurpotail> GetPODetails(string orderno)
@@ -1806,14 +1806,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return SaveChanges() > 0;
         }
 
-        private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageindex, int pagesize)
+        private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             var tmp_orders = PoPomain.Where(expression);
             var total = tmp_orders.Count();
-            var orders = tmp_orders.OrderBy(t => t.DPodate).Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
+            var orders = tmp_orders.OrderBy(t => t.DPodate).Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
             orders.ForEach(o =>
             {
                 o.MaxArriveDate = PoPodetails.Where(d => d.Poid == o.Poid).Max(d => d.DArriveDate ?? DateTime.MinValue);
@@ -1826,7 +1826,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     d.UnitName = inventory.UnitName;
                 });
             });
-            return new PagedResult<PoPomain>(total, orders);
+            return new PagedResult<PoPomain>(total, orders, pageIndex + 1, pageSize);
         }
         #endregion
 
@@ -1841,14 +1841,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="starttime"></param>
         /// <param name="endtime"></param>
         /// <param name="isChecked"></param>
-        /// <param name="pageindex"></param>
-        /// <param name="pagesize"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
         /// <returns></returns>
-        public PagedResult<RdRecord09> GetAllotOrders(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        public PagedResult<RdRecord09> GetAllotOrders(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             var tmp_orders = RdRecord09.Where(t => t.CBusType == "调拨出库"
                                 && t.CDefine8 == brand
                                 && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
@@ -1858,7 +1858,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             .OrderByDescending(t => t.DDate);
 
             var total = tmp_orders.Count();
-            var result = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
+            var result = tmp_orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
 
             result.ForEach(o =>
             {
@@ -1876,7 +1876,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     d.UnitName = inventory.UnitName;
                 });
             });
-            return new PagedResult<RdRecord09>(total, result);
+            return new PagedResult<RdRecord09>(total, result, pageIndex + 1, pageSize);
         }
 
         /// <summary>
@@ -1890,18 +1890,18 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="pageindex"></param>
         /// <param name="pagesize"></param>
         /// <returns></returns>
-        public PagedResult<RdRecord09> GetAllotOutRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        public PagedResult<RdRecord09> GetAllotOutRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             var tmp_orders = RdRecord09.Where(t => t.CDefine8 == brand
                         && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
                         && (starttime == null || t.DDate >= starttime)
                         && (endtime == null || t.DDate <= endtime)
                         && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
             var total = tmp_orders.Count();
-            var datas = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
+            var datas = tmp_orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
 
             datas.ForEach(o =>
             {
@@ -1917,7 +1917,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 });
             });
 
-            return new PagedResult<RdRecord09>(total, datas);
+            return new PagedResult<RdRecord09>(total, datas, pageIndex + 1, pageSize);
         }
 
         /// <summary>
@@ -1931,11 +1931,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="pageindex"></param>
         /// <param name="pagesize"></param>
         /// <returns></returns>
-        public PagedResult<RdRecord08> GetAllotInRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        public PagedResult<RdRecord08> GetAllotInRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             var tmp_orders = RdRecord08.Where(t => t.CDefine8 == brand
                                 && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
                                 && (starttime == null || t.DDate >= starttime)
@@ -1943,7 +1943,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                                 && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
 
             var total = tmp_orders.Count();
-            var datas = tmp_orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
+            var datas = tmp_orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
             datas.ForEach(o =>
             {
                 o.WhName = Warehouse.FirstOrDefault(w => w.CWhCode == o.CWhCode)?.CWhName ?? "";
@@ -1958,15 +1958,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 });
             });
 
-            return new PagedResult<RdRecord08>(total, datas);
+            return new PagedResult<RdRecord08>(total, datas, pageIndex + 1, pageSize);
         }
 
 
-        public PagedResult<Rdrecords09> GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
+        public PagedResult<Rdrecords09> GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageIndex, int pageSize)
         {
-            CheckPageIndex(pageindex);
-            CheckPageSize(pagesize);
-            pageindex--;
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
             //var tmp_orders = RdRecord09.Where(t => t.CBusType == "调拨出库"
             //                    && t.CDefine8 == brand
             //                    && (string.IsNullOrEmpty(orderno) || t.CCode.Contains(orderno))
@@ -1984,7 +1984,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 .Join(Rdrecords09.Where(rs => rs.CDefine29 != "checked"), r => r.Id, rs => rs.Id, (r, rs) => new { r, rs });
 
             var total = orders.Count();
-            var datas = orders.Skip(pageindex * pagesize - pagesize).Take(pagesize).ToList();
+            var datas = orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
             var list = new List<Rdrecords09>();
 
             var results = datas.Select(v =>
@@ -2007,7 +2007,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     UnitName = ComputationUnit.FirstOrDefault(u => u.CComunitCode == unitcode)?.CComUnitName ?? ""
                 };
             });
-            return new PagedResult<Rdrecords09>(total, results);
+            return new PagedResult<Rdrecords09>(total, results, pageIndex + 1, pageSize);
         }
 
 
@@ -2092,27 +2092,32 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="order"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        private bool InsertOrUpdateStore(DtoStockOrder order, Func<decimal, decimal, decimal> action)
+        private void InsertOrUpdateStore(DtoStockOrder order, Func<decimal, decimal, decimal> action)
         {
             foreach (var item in order.StoreStockDetail)
             {
-                var scmItems = ScmItem.FirstOrDefault(t => t.CInvCode == item.ProductNumbers);
-                if (scmItems == null) return false;
-                var itemid = scmItems.Id;
-                var stock = CurrentStock.FirstOrDefault(t => t.CInvCode == item.ProductNumbers && t.CBatch == item.ProductBatch && t.CWhCode == item.StoreId);
+                var scmItem = ScmItem.FirstOrDefault(t => t.CInvCode == item.ProductNumbers);
+                if (scmItem == null)
+                {
+                    scmItem = new ScmItem(item.ProductNumbers);
+                    ScmItem.Add(scmItem);
+                    SaveChanges();
+                }
+                //?? throw new FinancialException($"scmitem(库存管理)中无法找到编码为{item.ProductNumbers}的存货");
+                var itemid = scmItem.Id;
+                var stock = CurrentStock.FirstOrDefault(t => t.CInvCode == item.ProductNumbers
+                    && t.CBatch == item.ProductBatch
+                    && t.CWhCode == item.StoreId);
                 if (stock != null)
                 {
                     stock.IQuantity = action(stock.IQuantity ?? 0, item.Numbers ?? 0);
-                    Database.ExecuteSqlRaw("update currentstock set iQuantity =" + stock.IQuantity + " where cInvCode = '" + item.ProductNumbers + "' and cBatch = '" + item.ProductBatch + "' and cWhCode = " + item.StoreId);
+                    Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity } where cInvCode = '{item.ProductNumbers}' and cBatch = '{item.ProductBatch}' and cWhCode = '{item.StoreId}'");
                     continue;
                 }
 
                 //新增
-                Database.ExecuteSqlRaw(string.Format("insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{0}','{1}',{2},'{3}','',0,'',{4},{5},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);",
-                                                                    item.StoreId, item.ProductNumbers, itemid, item.ProductBatch, item.Numbers, 0));
-
+                Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{item.StoreId}','{item.ProductNumbers}',{itemid},'{item.ProductBatch}','',0,'',{item.Numbers},{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
             }
-            return true;
         }
 
         /// <summary>

@@ -274,7 +274,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         PagedResult<DtoPurchaseOrder> IDbOperation.GetAffirmPOs(string brand, string suppliercode, int pageindex, int pagesize)
         {
             var list = db.GetAffirmPOs(brand, suppliercode, pageindex, pagesize);
-            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()), list.PageIndex, list.PageSize);
         }
 
         PagedResult<DtoAllotInRecord> IDbOperation.GetAllotInRecords(string brand,
@@ -286,7 +286,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             int pagesize)
         {
             var list = db.GetAllotInRecords(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
-            return new PagedResult<DtoAllotInRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotInOrder()));
+            return new PagedResult<DtoAllotInRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotInOrder()), list.PageIndex, list.PageSize);
         }
 
         PagedResult<DtoAllotOrder> IDbOperation.GetAllotOrders(
@@ -299,7 +299,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             int pagesize)
         {
             var list = db.GetAllotOrders(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
-            return new PagedResult<DtoAllotOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotOrder()));
+            return new PagedResult<DtoAllotOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotOrder()), list.PageIndex, list.PageSize);
         }
 
         PagedResult<DtoAllotOutRecord> IDbOperation.GetAllotOutRecords(
@@ -312,13 +312,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             int pagesize)
         {
             var list = db.GetAllotOutRecords(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
-            return new PagedResult<DtoAllotOutRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotOutOrder()));
+            return new PagedResult<DtoAllotOutRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotOutOrder()), list.PageIndex, list.PageSize);
         }
 
         PagedResult<DtoAllotRecord> IDbOperation.GetAllotRecords(string brand, string orderno, DateTime? starttime, DateTime? endtime, bool isChecked, int pageindex, int pagesize)
         {
             var list = db.GetAllotRecords(brand, orderno, starttime, endtime, isChecked, pageindex, pagesize);
-            return new PagedResult<DtoAllotRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotRecord()));
+            return new PagedResult<DtoAllotRecord>(list.TotalCount, list.Results.Select(v => v.GetDtoAllotRecord()), list.PageIndex, list.PageSize);
         }
 
         string IDbOperation.GetAllotTargetWHCode(string outorderno)
@@ -329,7 +329,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         PagedResult<DtoPurchaseOrder> IDbOperation.GetCheckedPOs(string brand, string suppliercode, int pageindex, int pagesize)
         {
             var list = db.GetCheckedPOs(brand, suppliercode, pageindex, pagesize);
-            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()), list.PageIndex, list.PageSize);
         }
 
         Dictionary<string, string> IDbOperation.GetCustomers()
@@ -355,7 +355,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         PagedResult<DtoPurchaseOrder> IDbOperation.GetDeliverPOs(string brand, string suppliercode, int pageindex, int pagesize)
         {
             var list = db.GetDeliverPOs(brand, suppliercode, pageindex, pagesize);
-            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()), list.PageIndex, list.PageSize);
         }
 
         Dictionary<string, string> IDbOperation.GetDepartments()
@@ -376,7 +376,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         PagedResult<DtoInventory> IDbOperation.GetInventory(string brand, string classcode, string storecode, string key, int pageindex, int pagesize)
         {
             var list = db.GetInventory(brand, classcode, storecode, key, pageindex, pagesize);
-            return new PagedResult<DtoInventory>(list.TotalCount, list.Results.Select(v => v.GetDtoInventory()));
+            return new PagedResult<DtoInventory>(list.TotalCount, list.Results.Select(v => v.GetDtoInventory()), list.PageIndex, list.PageSize);
         }
 
         List<DtoProductClass> IDbOperation.GetInventoryClass(string cwhcode)
@@ -402,7 +402,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         PagedResult<DtoMaterialOrder> IDbOperation.GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
             var list = db.GetMaterials(departmentcode, key, starttime, endtime, pageindex, pagesize);
-            return new PagedResult<DtoMaterialOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoMaterialOrder()));
+            return new PagedResult<DtoMaterialOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoMaterialOrder()), list.PageIndex, list.PageSize);
         }
 
         DtoMaterialOrder IDbOperation.GetMaterials(string orderno)
@@ -413,13 +413,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         PagedResult<DtoOutsourcingOrder> IDbOperation.GetOutsourcingOrders(string brand, string key, string supplier, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
             var list = db.GetOutsourcingOrders(brand, key, supplier, starttime, endtime, pageindex, pagesize);
-            return new PagedResult<DtoOutsourcingOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoOutsourcingOrder()));
+            return new PagedResult<DtoOutsourcingOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoOutsourcingOrder()), list.PageIndex, list.PageSize);
         }
 
         PagedResult<DtoPurchaseOrder> IDbOperation.GetOverPOs(string brand, string suppliercode, int pageindex, int pagesize)
         {
             var list = db.GetOverPOs(brand, suppliercode, pageindex, pagesize);
-            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()));
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoPurchaseOrder()), list.PageIndex, list.PageSize);
         }
 
         DtoPerson IDbOperation.GetPerson(string code)
@@ -464,7 +464,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         PagedResult<DtoPurchaseOrder> IDbOperation.GetPurchaseOrders(string ordertype, string brand, string key, string supplier, string state, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
             var list = db.GetPurchaseOrders(ordertype, brand, key, supplier, state, starttime, endtime, pageindex, pagesize);
-            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(p => p.GetDtoPurchaseOrder()));
+            return new PagedResult<DtoPurchaseOrder>(list.TotalCount, list.Results.Select(p => p.GetDtoPurchaseOrder()), list.PageIndex, list.PageSize);
         }
 
         List<DtoSellOrder> IDbOperation.GetSellOrders(string brand, string orderno, bool isclose)
@@ -502,7 +502,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         public PagedResult<DispatchBill> GetDispatchBills(int pageIndex, int pageSize, DispatchBillState billState)
         {
             var list = db.GetDispatchBills(pageIndex, pageSize, billState);
-            return new PagedResult<DispatchBill>(list.TotalCount, list.Results.Select(dl => dl.GetDispatchBill()));
+            return new PagedResult<DispatchBill>(list.TotalCount, list.Results.Select(dl => dl.GetDispatchBill()), list.PageIndex, list.PageSize);
         }
 
         /// <summary>
