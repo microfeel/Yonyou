@@ -495,13 +495,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <summary>
         /// 获取发货单列表
         /// </summary>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="billState"></param>
+        /// <param name="brand">品牌</param>
+        /// <param name="pageIndex">页码</param>
+        /// <param name="pageSize">每页记录数</param>
+        /// <param name="billState">单据状态</param>
         /// <returns></returns>
-        public PagedResult<DispatchBill> GetDispatchBills(int pageIndex, int pageSize, DispatchBillState billState)
+        public PagedResult<DispatchBill> GetDispatchBills(string brand, int pageIndex, int pageSize, DispatchBillState billState)
         {
-            var list = db.GetDispatchBills(pageIndex, pageSize, billState);
+            var list = db.GetDispatchBills(brand, pageIndex, pageSize, billState);
             return new PagedResult<DispatchBill>(list.TotalCount, list.Results.Select(dl => dl.GetDispatchBill()), list.PageIndex, list.PageSize);
         }
 

@@ -429,19 +429,27 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         }
 
-        internal PagedResult<DispatchList> GetDispatchBills(int pageIndex, int pageSize, DispatchBillState billState)
+        internal PagedResult<DispatchList> GetDispatchBills(string brand, int pageIndex, int pageSize, DispatchBillState billState)
         {
             CheckPageIndex(pageIndex);
             CheckPageSize(pageSize);
             pageIndex--;
 
-            IEnumerable<DispatchList> dispatchbills = DispatchList.Where(dl => dl.CSocode != "");
+            IEnumerable<DispatchList> dispatchbills = DispatchList
+                .Where(dl => (!dl.BReturnFlag) && (dl.CDefine2 != "柜台") && (dl.CSocode != ""));
+            if (!string.IsNullOrWhiteSpace(brand))
+            {
+                dispatchbills = dispatchbills.Where(dl => dl.CDefine8 == brand);
+            }
             switch (billState)
             {
                 case DispatchBillState.Processing:
-                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue);
+                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue && d  .CDefine14 is null);
                     break;
-                case DispatchBillState.Checked:
+                case DispatchBillState.Sending:
+                    dispatchbills = dispatchbills.Where(d => d.CDefine14 == "待发货");
+                    break;
+                case DispatchBillState.Completed:
                     dispatchbills = dispatchbills.Where(d => d.Dverifysystime.HasValue);
                     break;
                 default:
@@ -521,9 +529,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {
                 //TODO 如果存在合并到货，这里将出现问题
                 //找到未到货的明细
+
                 var item = momain.OmModetails
-                    .FirstOrDefault(t => t.CInvCode == orderitem.ProductNumbers
-                            && t.IQuantity - (t.IArrQty ?? 0) > orderitem.Numbers) ?? throw new FinancialException("是否存在合并到货?");
+                    .FirstOrDefault(t => (t.CInvCode == orderitem.ProductNumbers))
+                    ?? throw new FinancialException($"无法找到单据stockDto:{order.OrderNo},{order.SourceOrderNo},{orderitem.ProductNumbers},mainid.ccode :{momain.CCode}");
+
+                //var item = momain.OmModetails
+                //    .FirstOrDefault(t => (t.CInvCode == orderitem.ProductNumbers)
+                //            && ((t.IQuantity - (t.IArrQty ?? 0)) >= orderitem.Numbers)) ?? throw new FinancialException($"是否存在合并到货?");
 
                 autoid += 1;
                 puArrivalVouch.Details.Add(new PuArrivalVouchs

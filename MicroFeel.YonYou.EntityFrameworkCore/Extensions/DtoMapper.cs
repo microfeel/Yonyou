@@ -235,7 +235,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 ProductName = product.CInvName,
                 ProductNumbers = product.CInvCode,
                 ProductModel = product.CInvStd,
-                Rate = product.ITaxRate.Value,
+                Rate = product.ITaxRate.GetValueOrDefault(),
                 InventoryClassCode = product.CInvCcode,
                 InventoryClassName = product.InvClassName,
                 UnitName = product.UnitName,
@@ -401,6 +401,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
 
         public static DispatchBill GetDispatchBill(this Data.DispatchList dispatchList)
         {
+            var state = DispatchBillState.Completed;
+            if (dispatchList.Dverifysystime.HasValue && dispatchList.CDefine14 is null)
+            {
+                state = DispatchBillState.Processing;
+            }
+            else if (dispatchList.CDefine14 == "待发货")
+            {
+                state = DispatchBillState.Sending;
+            }
+
             return new DispatchBill
             {
                 BillNo = dispatchList.CDlcode,
@@ -410,6 +420,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Maker = dispatchList.CMaker,
                 SoBillNo = dispatchList.CSocode,
                 OutNos = dispatchList.CSaleOut,
+                State = state
             };
         }
 
