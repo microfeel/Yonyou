@@ -492,6 +492,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             db.UpdatePurchaseOrderState(orderno, state);
         }
 
+        void IDbOperation.UpdateStatusBills(string billNo, string statusName)
+        {
+            db.UpdateStatusBills(billNo, statusName);
+        }
         /// <summary>
         /// 获取发货单列表
         /// </summary>
@@ -506,6 +510,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return new PagedResult<DispatchBill>(list.TotalCount, list.Results.Select(dl => dl.GetDispatchBill()), list.PageIndex, list.PageSize);
         }
 
+        
         /// <summary>
         /// 获取指定单号的发货单明细
         /// </summary>

@@ -444,13 +444,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             switch (billState)
             {
                 case DispatchBillState.Processing:
-                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue && d  .CDefine14 is null);
+                    dispatchbills = dispatchbills.Where(d => d.Dverifysystime.HasValue);
                     break;
                 case DispatchBillState.Sending:
                     dispatchbills = dispatchbills.Where(d => d.CDefine14 == "待发货");
                     break;
                 case DispatchBillState.Completed:
-                    dispatchbills = dispatchbills.Where(d => d.Dverifysystime.HasValue);
+                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue && d.CDefine14 is null);
                     break;
                 default:
                     break;
@@ -1816,6 +1816,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             var po = PoPomain.FirstOrDefault(t => t.CPoid == orderno);
             po.CDefine9 = state;
+            return SaveChanges() > 0;
+        }
+
+        public bool UpdateStatusBills(string billNo, string statusName)
+        {
+            var model = DispatchList.FirstOrDefault(m => m.CDlcode == billNo);
+            model.CDefine14 = statusName;                        
             return SaveChanges() > 0;
         }
 
