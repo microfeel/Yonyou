@@ -402,11 +402,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
         public static DispatchBill GetDispatchBill(this Data.DispatchList dispatchList)
         {
             var state = DispatchBillState.Completed;
-            if (dispatchList.Dverifysystime.HasValue && dispatchList.CDefine14 is null)
+            if (dispatchList.Dverifysystime.HasValue && dispatchList.CChangeMemo is null)
             {
                 state = DispatchBillState.Processing;
             }
-            else if (dispatchList.CDefine14 == "待发货")
+            else if (dispatchList.CChangeMemo != null && dispatchList.CChangeMemo.StartsWith("待发货"))
             {
                 state = DispatchBillState.Sending;
             }

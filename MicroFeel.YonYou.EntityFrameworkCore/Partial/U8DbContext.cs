@@ -444,13 +444,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             switch (billState)
             {
                 case DispatchBillState.Processing:
-                    dispatchbills = dispatchbills.Where(d => d.Dverifysystime.HasValue);
+                    dispatchbills = dispatchbills.Where(d => d.CChangeMemo is null && d.Dverifysystime.HasValue);
                     break;
                 case DispatchBillState.Sending:
-                    dispatchbills = dispatchbills.Where(d => d.CDefine14 == "待发货");
+                    dispatchbills = dispatchbills.Where(d => d.CChangeMemo != null && d.CChangeMemo.StartsWith("待发货"));
                     break;
                 case DispatchBillState.Completed:
-                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue && d.CDefine14 is null);
+                    //dispatchbills = dispatchbills.Where(d => d.CChangeMemo != null && !d.Dverifysystime.HasValue);
+                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue);
                     break;
                 default:
                     break;
@@ -1821,9 +1822,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public bool UpdateStatusBills(string billNo, string statusName)
         {
-            var model = DispatchList.FirstOrDefault(m => m.CDlcode == billNo);
-            model.CDefine14 = statusName;                        
-            return SaveChanges() > 0;
+            //var model = DispatchList.FirstOrDefault(m => m.CDlcode == billNo);
+            //model.CDefine14 = statusName;
+            //var result = SaveChanges() > 0;
+            //return result;
+
+            var result = Database.ExecuteSqlRaw($"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'");
+            return result > 0;
         }
 
         private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageIndex, int pageSize)
