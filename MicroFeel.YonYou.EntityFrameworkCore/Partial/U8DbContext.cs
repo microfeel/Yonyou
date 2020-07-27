@@ -235,9 +235,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             && (endtime == null || t.Ddate <= endtime)
                             && (string.IsNullOrEmpty(supplier) || t.Cvenname.Contains(supplier)));
             var total = tmp_datas.Count();
-            var orders = tmp_datas.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+            var orders = tmp_datas
+                .OrderByDescending(v => v.Ddate)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToList();
             orders.ForEach(e =>
             {
+                //填充对应的入库单号和明细
+                e.RdRecordNo = RdRecord01.FirstOrDefault(r => r.Ipurarriveid == e.Id)?.CCode ?? "";
                 e.Details = PuArrbody.Where(t => t.Id == e.Id).ToList();
             });
             return new PagedResult<PuArrHead>(total, orders, pageIndex + 1, pageSize);
@@ -396,6 +402,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         #region Add
         #region 委外加工到货单
+        /// <summary>
+        /// 创建委外到货单
+        /// </summary>
+        /// <param name="order"></param>
+        /// <returns></returns>
         public bool AddPuarrivalVouch(DtoStockOrder order)
         {
             using (var tran = Database.BeginTransaction())
@@ -411,11 +422,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     //回填到货数量
                     foreach (var item in result.Details)
                     {
-                        UpdateModetailsReceiveNumber(item);
-                        //UpdateModetailsArrQtyNumber(item);
+                        UpdateModetailsArrQty(item);
                     }
                     // OmModetails.UpdateRange(momain.OmModetails);
-                    var commitResult = (SaveChanges() > 0);
+                    var commitResult = SaveChanges() > 0;
                     tran.Commit();
                     return commitResult;
                 }
@@ -444,7 +454,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             switch (billState)
             {
                 case DispatchBillState.Processing:
-                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue && d  .CDefine14 is null);
+                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue && d.CDefine14 is null);
                     break;
                 case DispatchBillState.Sending:
                     dispatchbills = dispatchbills.Where(d => d.CDefine14 == "待发货");
@@ -507,7 +517,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 ITaxRate = momain.ITaxRate.HasValue ? (decimal)(momain.ITaxRate.Value) : 0,
                 CMemo = momain.CMemo + $"(车间系统自动生成单据:{DateTime.Now:yyyy-MM-dd HH:mm:ss})",
                 CBusType = "委外加工",
-                CMaker = "陈晓兰",
+                CMaker = order.Maker,
                 BNegative = 0,
                 CDefine4 = DateTime.Now.Date,
                 CDefine8 = momain.CDefine8,
@@ -858,8 +868,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// 根据到货单生成入库记录
         /// </summary>
         /// <param name="puArrival"></param>
+        /// <param name="maker">制单人</param>
         /// <returns></returns>
-        private List<RdRecord01> CreateRdrecord01s(PuArrivalVouch puArrival)
+        private List<RdRecord01> CreateRdrecord01(PuArrivalVouch puArrival, string maker)
         {
             List<RdRecord01> list = new List<RdRecord01>();
             var warehouses = puArrival.Details.GroupBy(t => t.CWhCode).ToDictionary(t => t.Key, t => t.ToList());
@@ -867,7 +878,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             foreach (var whcode in warehouses.Keys)
             {
                 puArrival.Details = warehouses[whcode];
-                list.Add(CreateRdrecord01(whcode, puArrival, ref id, ref detailid));
+                list.Add(CreateRdrecord01(whcode, puArrival, ref id, ref detailid,maker));
             }
             return list;
         }
@@ -906,7 +917,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             };
         }
 
-        private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid)
+        /// <summary>
+        /// 创建入库记录
+        /// </summary>
+        /// <param name="cwhcode">仓库编码</param>
+        /// <param name="puArrival">到货单</param>
+        /// <param name="id">入库单ID</param>
+        /// <param name="detailid">明细ID</param>
+        /// <param name="maker">制单人</param>
+        /// <returns></returns>
+        private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid,string maker)
         {
             id = (id == 0) ? (RdRecord01.Max(t => t.Id) + 1) : (id + 1);
             //string code = $"MFIN{DateTime.:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
@@ -941,7 +961,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CHandler = puArrival.CMaker,
                 CMemo = puArrival.CMemo,
                 BTransFlag = false,
-                CMaker = puArrival.CMaker,
+                CMaker = maker,
                 CDefine1 = puArrival.CDefine1,
                 CDefine2 = puArrival.CDefine2,
                 CDefine10 = puArrival.CDefine10,
@@ -1047,9 +1067,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// </summary>
         /// <param name="puarrivalOrderNo"></param>
         /// <returns></returns>
-        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo)
+        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo,string maker)
         {
-            return SaveRdRecordsTran(puarrivalOrderNo, null);
+            return SaveRdRecordsTran(puarrivalOrderNo, null,maker);
         }
 
         /// <summary>
@@ -1058,7 +1078,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="puarrivalOrderNo"></param>
         /// <param name="batch"></param>
         /// <returns></returns>
-        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs)
+        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs, string maker)
         {
             return SaveRdRecordsTran(puarrivalOrderNo, t =>
             {
@@ -1067,7 +1087,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     if (batchs.ContainsKey(d.CInvCode))
                         d.CBatch = batchs[d.CInvCode];
                 }));
-            });
+            },
+            maker);
         }
 
         /// <summary>
@@ -1076,13 +1097,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="puarrivalOrderNo"></param>
         /// <param name="sendOrderNo"></param>
         /// <returns></returns>
-        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
+        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo, string maker)
         {
             if (sendOrderNo.Length > 55)
             {
                 sendOrderNo = sendOrderNo.Substring(0, 55);
             }
-            return SaveRdRecordsTran(puarrivalOrderNo, t => { t.ForEach(item => item.CDefine10 = sendOrderNo); });
+            return SaveRdRecordsTran(puarrivalOrderNo, t => { t.ForEach(item => item.CDefine10 = sendOrderNo); },maker);
         }
 
         /// <summary>
@@ -1090,8 +1111,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// </summary>
         /// <param name="puarrivalOrderNo"></param>
         /// <param name="action"></param>
+        /// <param name="maker">制单人</param>
         /// <returns></returns>
-        private bool SaveRdRecordsTran(string puarrivalOrderNo, Action<List<RdRecord01>> action)
+        private bool SaveRdRecordsTran(string puarrivalOrderNo, Action<List<RdRecord01>> action, string maker)
         {
             using (var tran = Database.BeginTransaction())
             {
@@ -1104,7 +1126,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     }
                     puarrival.Details = PuArrivalVouchs.Where(t => t.Id == puarrival.Id).ToList();
                     //创建入库单
-                    var records = CreateRdrecord01s(puarrival);
+                    var records = CreateRdrecord01(puarrival,maker);
                     action?.Invoke(records);
                     bool commitResult = SaveRdRecords(puarrival, records);
                     if (commitResult) tran.Commit();
@@ -1127,7 +1149,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 {
                     var detail = PoPodetails.FirstOrDefault(t => t.Id == item.IPosId);
                     if (detail == null) continue;
-                    //detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
                     UpdatePoDetailsReceiveNumber(item);
                 }
                 else if (puarrival.CBusType == "委外加工")
@@ -1135,7 +1156,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     //更新委外单据入库数量 
                     var detail = OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId);
                     if (detail == null) continue;
-                    //detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
                     UpdateModetailsReceiveNumber(item);
                     // 更新加工费用
                     var rds = records.Where(t => t.Details.Any(d => d.IOmoDid == detail.ModetailsId)).Select(t => t.Details.FirstOrDefault(d => d.IOmoDid == detail.ModetailsId))?.FirstOrDefault();
@@ -2182,22 +2202,29 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         }
 
         /// <summary>
-        /// 更新委外订单明细的到货数量
+        /// 更新委外订单明细的收货数量
         /// </summary>
         /// <param name="item"></param>
         private void UpdateModetailsReceiveNumber(PuArrivalVouchs item)
         {
             var detail = OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId)
                 ?? throw new FinancialException($"无法找到委外订单明细：{item.IPosId}");
-            //运算符优先级BUG
-            //detail.IReceivedQty = (detail.IReceivedQty ?? 0) + item.IQuantity;
             //累计合格入库数
             detail.Freceivedqty = (detail.Freceivedqty ?? 0) + item.IQuantity;
-            //累计到货数
-            var arrQty = (detail.IArrQty ?? 0) + item.IQuantity;
-            //TODO 数据不对应的情况应该直接用异常处理
-            detail.IArrQty = Math.Min(detail.IQuantity ?? 0, arrQty);
         }
+
+        /// <summary>
+        /// 更新到货数
+        /// </summary>
+        /// <param name="item"></param>
+        private void UpdateModetailsArrQty(PuArrivalVouchs item)
+        {
+            var detail = OmModetails.FirstOrDefault(t => t.ModetailsId == item.IPosId)
+                ?? throw new FinancialException($"无法找到委外订单明细：{item.IPosId}");
+            //累计到货数
+            detail.IArrQty = (detail.IArrQty ?? 0) + item.IQuantity;
+        }
+
 
         /// <summary>
         /// 更新采购订单收货数量

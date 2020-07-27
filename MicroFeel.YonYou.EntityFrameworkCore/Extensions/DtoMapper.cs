@@ -152,6 +152,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Supplier = puArrHead.Cvenname,
                 SupplierCode = puArrHead.Cvencode,
                 CreateDate = puArrHead.Ddate,
+                StockOrderCode = puArrHead.RdRecordNo,
                 PurchaseOrderDetails = puArrHead.Details.Select(v => v.GetDtoPurchaseOrderDetail()).ToList()
             };
         }

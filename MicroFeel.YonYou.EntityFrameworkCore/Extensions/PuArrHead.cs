@@ -8,6 +8,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Data
     partial class PuArrHead
     {
         [NotMapped]
+        public string RdRecordNo { get; set; }
+
+        [NotMapped]
         public List<PuArrbody> Details { get; set; }
     }
 }

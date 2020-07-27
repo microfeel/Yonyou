@@ -256,19 +256,19 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             db.ClosePurarrivalOrderTransaction(orderno, closer, action);
         }
 
-        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo)
+        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string maker)
         {
-            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo,maker);
         }
 
-        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs)
+        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs, string maker)
         {
-            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, batchs);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, batchs,maker);
         }
 
-        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo)
+        void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo, string maker)
         {
-            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, sendOrderNo);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, sendOrderNo,maker);
         }
 
         PagedResult<DtoPurchaseOrder> IDbOperation.GetAffirmPOs(string brand, string suppliercode, int pageindex, int pagesize)
@@ -514,6 +514,18 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         public IList<DispatchBillDetail> GetDispatchBillDetail(string billNo)
         {
             return db.GetDispatchBillDetail(billNo).Select(v => v.GetDispatchBillDetail()).ToList();
+        }
+
+        /// <summary>
+        /// 获取到货单
+        /// </summary>
+        /// <param name="orderno">到货单号</param>
+        /// <returns></returns>
+        public DtoPurchaseOrder GetPuArrVoucherOrder(string orderno)
+        {
+            return db.PuArrHead
+                .FirstOrDefault(v=>v.Ccode == orderno)
+                .GetDtoPurchaseOrder();
         }
         #endregion
 
