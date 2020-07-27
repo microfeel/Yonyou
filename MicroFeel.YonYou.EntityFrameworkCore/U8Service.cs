@@ -258,17 +258,17 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string maker)
         {
-            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo,maker);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, maker);
         }
 
         void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, Dictionary<string, string> batchs, string maker)
         {
-            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, batchs,maker);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, batchs, maker);
         }
 
         void IDbOperation.FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string sendOrderNo, string maker)
         {
-            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, sendOrderNo,maker);
+            db.FromPuArrivalVouchToStoreRecord(puarrivalOrderNo, sendOrderNo, maker);
         }
 
         PagedResult<DtoPurchaseOrder> IDbOperation.GetAffirmPOs(string brand, string suppliercode, int pageindex, int pagesize)
@@ -510,7 +510,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return new PagedResult<DispatchBill>(list.TotalCount, list.Results.Select(dl => dl.GetDispatchBill()), list.PageIndex, list.PageSize);
         }
 
-        
+
         /// <summary>
         /// 获取指定单号的发货单明细
         /// </summary>
@@ -529,8 +529,27 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         public DtoPurchaseOrder GetPuArrVoucherOrder(string orderno)
         {
             return db.PuArrHead
-                .FirstOrDefault(v=>v.Ccode == orderno)
+                .FirstOrDefault(v => v.Ccode == orderno)
                 .GetDtoPurchaseOrder();
+        }
+
+        /// <summary>
+        /// 获取委外订单原材料领用数据
+        /// </summary>
+        /// <param name="ommainBillNo">委外单号</param>
+        /// <returns></returns>
+        public IEnumerable<OmMaterialRecord> GetOmMaterialRecords(string ommainBillNo)
+        {
+            var ommain = db.GetFirstOrDefault<Data.OmMomain>(v => v.CCode == ommainBillNo)
+                ?? throw new FinancialException($"无法找到单号为{ommainBillNo}的委外订单");
+            return db.OmMomaterials.Where(v => v.Moid == ommain.Moid).Select(m => new OmMaterialRecord
+            {
+                MoDetailId = m.MoDetailsId,
+                CInvCode = m.CInvCode,
+                IQuantity = m.IQuantity,
+                IUnitQuantity = m.IUnitQuantity,
+                ISendQty = m.ISendQty,
+            });
         }
         #endregion
 

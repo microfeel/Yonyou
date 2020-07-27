@@ -36,6 +36,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return await Set<TEntity>().FirstOrDefaultAsync(expression);
         }
 
+        public TEntity GetFirstOrDefault<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class
+        {
+            return Set<TEntity>().FirstOrDefault(expression);
+        }
+
         public IEnumerable<TEntity> GetAll<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class
         {
             return Set<TEntity>().Where(expression);
@@ -556,7 +561,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     Id = id,
                     CWhCode = orderitem.StoreId,
                     CInvCode = item.CInvCode,
-                    IQuantity = orderitem.Numbers.Value,
+                    IQuantity = orderitem.Numbers ?? 0,
                     INum = orderitem.Numbers.Value,
                     IOriCost = item.IUnitPrice,
                     IOriTaxCost = item.IUnitPrice + item.ITax,
@@ -879,7 +884,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             foreach (var whcode in warehouses.Keys)
             {
                 puArrival.Details = warehouses[whcode];
-                list.Add(CreateRdrecord01(whcode, puArrival, ref id, ref detailid,maker));
+                list.Add(CreateRdrecord01(whcode, puArrival, ref id, ref detailid, maker));
             }
             return list;
         }
@@ -927,7 +932,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="detailid">明细ID</param>
         /// <param name="maker">制单人</param>
         /// <returns></returns>
-        private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid,string maker)
+        private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid, string maker)
         {
             id = (id == 0) ? (RdRecord01.Max(t => t.Id) + 1) : (id + 1);
             //string code = $"MFIN{DateTime.:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
@@ -1068,9 +1073,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// </summary>
         /// <param name="puarrivalOrderNo"></param>
         /// <returns></returns>
-        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo,string maker)
+        public bool FromPuArrivalVouchToStoreRecord(string puarrivalOrderNo, string maker)
         {
-            return SaveRdRecordsTran(puarrivalOrderNo, null,maker);
+            return SaveRdRecordsTran(puarrivalOrderNo, null, maker);
         }
 
         /// <summary>
@@ -1104,7 +1109,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {
                 sendOrderNo = sendOrderNo.Substring(0, 55);
             }
-            return SaveRdRecordsTran(puarrivalOrderNo, t => { t.ForEach(item => item.CDefine10 = sendOrderNo); },maker);
+            return SaveRdRecordsTran(puarrivalOrderNo, t => { t.ForEach(item => item.CDefine10 = sendOrderNo); }, maker);
         }
 
         /// <summary>
@@ -1127,7 +1132,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     }
                     puarrival.Details = PuArrivalVouchs.Where(t => t.Id == puarrival.Id).ToList();
                     //创建入库单
-                    var records = CreateRdrecord01(puarrival,maker);
+                    var records = CreateRdrecord01(puarrival, maker);
                     action?.Invoke(records);
                     bool commitResult = SaveRdRecords(puarrival, records);
                     if (commitResult) tran.Commit();
