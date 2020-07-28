@@ -421,7 +421,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Maker = dispatchList.CMaker,
                 SoBillNo = dispatchList.CSocode,
                 OutNos = dispatchList.CSaleOut,
-                State = state
+                State = state,
+                CusPerson = dispatchList.Ccusperson,
+                ShipAddress = dispatchList.CShipAddress,
             };
         }
 
