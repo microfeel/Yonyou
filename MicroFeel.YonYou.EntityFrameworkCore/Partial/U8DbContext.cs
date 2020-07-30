@@ -758,7 +758,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CBusType = "普通采购",
                 CSource = "采购订单",
                 CCode = code,
-                CBusCode = puArrival.CCode,
+                //CBusCode = puArrival.CCode,
                 CWhCode = cwhcode,
                 DDate = DateTime.Now.Date,
                 CRdCode = "101",
@@ -768,7 +768,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CVenCode = puArrival.CVenCode,
                 COrderCode = puArrival.Cpocode,
                 CArvcode = puArrival.CCode,
-                CHandler = puArrival.CMaker,
+                //CHandler = puArrival.CMaker,
                 CMemo = puArrival.CMemo,
                 BTransFlag = false,
                 CMaker = puArrival.CMaker,
@@ -935,7 +935,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid, string maker)
         {
             id = (id == 0) ? (RdRecord01.Max(t => t.Id) + 1) : (id + 1);
-            //string code = $"MFIN{DateTime.:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
             var codePrefix = $"CR{DateTime.Today:yyMM}";
             var cp = GetCode("采购入库单");
             var code = $"{cp.Prefix}{"1".PadLeft(cp.GlideLen, '0')}";
@@ -954,7 +953,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CBusType = puArrival.CBusType,
                 CSource = source.ContainsKey(puArrival.CBusType) ? source[puArrival.CBusType] : "微感服务",
                 CCode = code,
-                CBusCode = puArrival.CCode,
+                //CBusCode = puArrival.CCode,
                 CWhCode = cwhcode,
                 DDate = DateTime.Now.Date,
                 CRdCode = rdcode.ContainsKey(puArrival.CBusType) ? rdcode[puArrival.CBusType] : "103",
@@ -964,7 +963,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CVenCode = puArrival.CVenCode,
                 COrderCode = puArrival.Cpocode,
                 CArvcode = puArrival.CCode,
-                CHandler = puArrival.CMaker,
                 CMemo = puArrival.CMemo,
                 BTransFlag = false,
                 CMaker = maker,
