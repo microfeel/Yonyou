@@ -450,8 +450,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             CheckPageSize(pageSize);
             pageIndex--;
 
-            IEnumerable<DispatchList> dispatchbills = DispatchList
-                .Where(dl => (!dl.BReturnFlag) && (dl.CDefine2 != "柜台") && (dl.CSocode != ""));
+            DateTime startDate = Convert.ToDateTime("2020-07-28 00:00:00");
+            IEnumerable<DispatchList> dispatchbills = DispatchList.Where(dl => (!dl.BReturnFlag) && (dl.CDefine2 != "柜台") && (dl.CSocode != "") && dl.DDate >= startDate);
             if (!string.IsNullOrWhiteSpace(brand))
             {
                 dispatchbills = dispatchbills.Where(dl => dl.CDefine8 == brand);
@@ -459,14 +459,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             switch (billState)
             {
                 case DispatchBillState.Processing:
-                    dispatchbills = dispatchbills.Where(d => d.CChangeMemo is null && d.Dverifysystime.HasValue);
+                    dispatchbills = dispatchbills.Where(d => d.CChangeMemo is null && !d.Dverifysystime.HasValue);
                     break;
                 case DispatchBillState.Sending:
                     dispatchbills = dispatchbills.Where(d => d.CChangeMemo != null && d.CChangeMemo.StartsWith("待发货"));
                     break;
                 case DispatchBillState.Completed:
-                    //dispatchbills = dispatchbills.Where(d => d.CChangeMemo != null && !d.Dverifysystime.HasValue);
-                    dispatchbills = dispatchbills.Where(d => !d.Dverifysystime.HasValue);
+                    dispatchbills = dispatchbills.Where(d => d.Dverifysystime.HasValue);
                     break;
                 default:
                     break;
