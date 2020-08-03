@@ -482,19 +482,24 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return db.GetSupplierByPhoneAsync(phonecode).GetAwaiter().GetResult().GetDtoSupplier();
         }
 
-        Dictionary<string, string> IDbOperation.GetWarehouses()
+        public Dictionary<string, string> GetWarehouses()
         {
             return db.GetWarehouses();
         }
 
-        void IDbOperation.UpdatePurchaseOrderState(string orderno, string state)
+        public void UpdatePurchaseOrderState(string orderno, string state)
         {
             db.UpdatePurchaseOrderState(orderno, state);
         }
 
-        void IDbOperation.UpdateStatusBills(string billNo, string statusName)
+        /// <summary>
+        /// 更新发货单状态
+        /// </summary>
+        /// <param name="billNo"></param>
+        /// <param name="statusName"></param>
+        public void UpdateDispatchBillState(string billNo, string statusName)
         {
-            db.UpdateStatusBills(billNo, statusName);
+            db.UpdateDispatchBillState(billNo, statusName);
         }
         /// <summary>
         /// 获取发货单列表
@@ -550,6 +555,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 IUnitQuantity = m.IUnitQuantity,
                 ISendQty = m.ISendQty,
             });
+        }
+
+        public DispatchBill GetDispatchBillByCode(string billNo)
+        {
+            var bill = db.GetDispatchBillByCode(billNo);
+            return bill.GetDispatchBill();
         }
         #endregion
 

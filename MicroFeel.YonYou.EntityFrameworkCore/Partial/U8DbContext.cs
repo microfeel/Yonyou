@@ -490,9 +490,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {
                 throw new FinancialException("发货单号不能为空。");
             }
-            var id = DispatchList.FirstOrDefault(v => v.CDlcode == billNo)?.Dlid
-                ?? throw new FinancialException($"找不到发货单:{billNo}");
+            var id = GetDispatchBillByCode(billNo).Dlid;
             return DispatchLists.Where(dls => dls.Dlid == id).OrderBy(dls => dls.AutoId).ToList();
+        }
+
+        internal DispatchList GetDispatchBillByCode(string billNo)
+        {
+            return DispatchList.AsNoTracking().FirstOrDefault(v => v.CDlcode == billNo)
+                ?? throw new FinancialException($"找不到发货单:{billNo}");
         }
 
         /// <summary>
@@ -1223,8 +1228,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 {
                     UpdateStore(order, (s, t) => s - t);
 
-                    var dispatch = DispatchList.AsNoTracking().FirstOrDefault(t => t.CDlcode == order.SourceOrderNo);
-                    if (dispatch == null) throw new FinancialException($"无法查询当前发货单[{order.SourceOrderNo}]");
+                    var dispatch = GetDispatchBillByCode(order.SourceOrderNo);
                     dispatch.Details = DispatchLists.AsNoTracking().Where(t => t.Dlid == dispatch.Dlid).ToList();
                     var results = CreateRdrecord32s(dispatch, order);
                     results.ForEach(result =>
@@ -1843,15 +1847,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return SaveChanges() > 0;
         }
 
-        public bool UpdateStatusBills(string billNo, string statusName)
+        public void UpdateDispatchBillState(string billNo, string statusName)
         {
-            //var model = DispatchList.FirstOrDefault(m => m.CDlcode == billNo);
-            //model.CDefine14 = statusName;
-            //var result = SaveChanges() > 0;
-            //return result;
+            var dispatch = GetDispatchBillByCode(billNo);
+            dispatch.CChangeMemo = statusName;
+            SaveChanges();
 
-            var result = Database.ExecuteSqlRaw($"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'");
-            return result > 0;
+            //var result = Database.ExecuteSqlRaw($"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'");
+            //return result > 0;
         }
 
         private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageIndex, int pageSize)
