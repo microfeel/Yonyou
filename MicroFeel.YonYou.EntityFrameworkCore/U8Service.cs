@@ -533,9 +533,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public DtoPurchaseOrder GetPuArrVoucherOrder(string orderno)
         {
-            return db.PuArrHead
-                .FirstOrDefault(v => v.Ccode == orderno)
-                .GetDtoPurchaseOrder();
+            var order = db.PuArrHead.FirstOrDefault(v => v.Ccode == orderno);
+            order.Details = db.PuArrbody.Where(t => t.Id == order.Id).ToList();
+            return order.GetDtoPurchaseOrder();
         }
 
         /// <summary>
@@ -554,6 +554,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 IQuantity = m.IQuantity,
                 IUnitQuantity = m.IUnitQuantity,
                 ISendQty = m.ISendQty,
+                FBaseQtyN = m.FBaseQtyN ?? 1,
+                FBaseQtyD = m.FBaseQtyD ?? 1
             });
         }
 
