@@ -1225,9 +1225,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {
                 try
                 {
-                    UpdateStore(order, (s, t) => s - t);
-
                     var dispatch = GetDispatchBillByCode(order.SourceOrderNo);
+                    if (Rdrecord32.Any(r => r.CDlcode == dispatch.Dlid))
+                    {
+                        //已经生成过入库单,不再重复生成
+                        return;
+                    }
+
+                    //UpdateStore(order, (s, t) => s - t);
                     dispatch.Details = DispatchLists.Where(t => t.Dlid == dispatch.Dlid).ToList();
                     var results = CreateRdrecord32s(dispatch, order);
                     results.ForEach(result =>
@@ -1256,8 +1261,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     });
                     DispatchLists.UpdateRange(dispatch.Details);
                     var commitResult = SaveChanges() > 0;
-                    if (commitResult) tran.Commit();
-                    else tran.Rollback();
+                    if (commitResult)
+                        tran.Commit();
+                    else
+                        tran.Rollback();
                 }
                 catch (Exception ex)
                 {
@@ -1397,7 +1404,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     Iordercode = item.CSoCode,
                     Iorderseq = soDetailrow?.IRowNo ?? null,
                     Ipesodid = item.ISosId.ToString(),
-                    Ipesoseq = soDetailrow?.IRowNo??null,
+                    Ipesoseq = soDetailrow?.IRowNo ?? null,
                     Irowno = rowNumber,
                     Cbsysbarcode = $"||st32|{rdrecord.CCode}|{rowNumber}"
                 });
@@ -1863,12 +1870,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public void UpdateDispatchBillState(string billNo, string statusName)
         {
-            var dispatch = GetDispatchBillByCode(billNo);
+            var dispatch = DispatchList.FirstOrDefault(v => v.CDlcode == billNo)
+                ?? throw new FinancialException($"找不到发货单:{billNo}");
             dispatch.CChangeMemo = statusName;
+            Update(dispatch);
             SaveChanges();
 
-            //var result = Database.ExecuteSqlRaw($"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'");
-            //return result > 0;
+            //TODO remove this usage
+            //Database.ExecuteSqlRaw($"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'");
         }
 
         private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageIndex, int pageSize)
