@@ -14633,13 +14633,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
                 entity.Property(e => e.ISendNum)
                     .HasColumnName("iSendNum")
-                    .HasColumnType("decimal(30, 10)")
-                    .HasDefaultValueSql("(0)");
+                    .HasColumnType("decimal(30, 10)");
 
                 entity.Property(e => e.ISendQuantity)
                     .HasColumnName("iSendQuantity")
-                    .HasColumnType("decimal(30, 10)")
-                    .HasDefaultValueSql("(0)");
+                    .HasColumnType("decimal(30, 10)");
 
                 entity.Property(e => e.ISoutNum)
                     .HasColumnName("iSOutNum")
@@ -14663,13 +14661,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
                 entity.Property(e => e.IVmisettleNum)
                     .HasColumnName("iVMISettleNum")
-                    .HasColumnType("decimal(30, 10)")
-                    .HasDefaultValueSql("(0)");
+                    .HasColumnType("decimal(30, 10)");
 
                 entity.Property(e => e.IVmisettleQuantity)
                     .HasColumnName("iVMISettleQuantity")
-                    .HasColumnType("decimal(30, 10)")
-                    .HasDefaultValueSql("(0)");
+                    .HasColumnType("decimal(30, 10)");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
@@ -14698,8 +14694,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 entity.Property(e => e.Ipesotype).HasColumnName("ipesotype");
 
                 entity.Property(e => e.Iposflag)
-                    .HasColumnName("iposflag")
-                    .HasDefaultValueSql("(0)");
+                    .HasColumnName("iposflag");
 
                 entity.Property(e => e.Ipreuseinum)
                     .HasColumnName("ipreuseinum")
@@ -14985,8 +14980,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
                 entity.Property(e => e.Cbaccounter)
                     .HasColumnName("cbaccounter")
-                    .HasMaxLength(30)
-                    .HasDefaultValueSql("(N'')");
+                    .HasMaxLength(30);
 
                 entity.Property(e => e.Cbdlcode)
                     .HasColumnName("cbdlcode")
@@ -15020,8 +15014,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 entity.Property(e => e.Corufts)
                     .HasColumnName("corufts")
                     .HasMaxLength(12)
-                    .IsUnicode(false)
-                    .HasDefaultValueSql("('')");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Coutvouchid).HasColumnName("coutvouchid");
 

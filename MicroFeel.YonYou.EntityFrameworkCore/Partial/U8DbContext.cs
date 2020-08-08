@@ -1228,7 +1228,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     UpdateStore(order, (s, t) => s - t);
 
                     var dispatch = GetDispatchBillByCode(order.SourceOrderNo);
-                    dispatch.Details = DispatchLists.AsNoTracking().Where(t => t.Dlid == dispatch.Dlid).ToList();
+                    dispatch.Details = DispatchLists.Where(t => t.Dlid == dispatch.Dlid).ToList();
                     var results = CreateRdrecord32s(dispatch, order);
                     results.ForEach(result =>
                     {
@@ -1270,41 +1270,42 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             List<Rdrecord32> list = new List<Rdrecord32>();
             var dic = dispatch.Details.GroupBy(t => t.CWhCode).ToDictionary(t => t.Key, t => t.ToList());
-            long id = 0, detailid = 0;
             foreach (var key in dic.Keys)
             {
                 dispatch.Details = dic[key];
-                list.Add(CreateRdrecord32(key, dispatch, order, ref id, ref detailid));
+                list.Add(CreateRdrecord32(key, dispatch, order));
             }
             return list;
         }
-        private Rdrecord32 CreateRdrecord32(string cwhcode, DispatchList dispatch, DtoStockOrder order, ref long id, ref long detailid)
+        private Rdrecord32 CreateRdrecord32(string cwhcode, DispatchList dispatch, DtoStockOrder order)
         {
-            id = id == 0 ? (Rdrecord32.Max(t => t.Id) + 1) % 1000000000 + 2000000000 : id + 1;
-            string code = $"MFOUT{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
-            var rdrecord = new Rdrecord32()
+            var id = Rdrecord32.AsNoTracking().Max(t => t.Id) + 1;
+            var codePrefix = $"QC{DateTime.Today:yyMM}";
+            var cp = GetCode("销售出库单");
+            var code = $"{cp.Prefix}{"1".PadLeft(cp.GlideLen, '0')}";
+            var maxCode = Rdrecord32.AsNoTracking().Where(r => EF.Functions.Like(r.CCode, codePrefix + "%")).OrderByDescending(r => r.CCode).FirstOrDefault();
+            if (maxCode != null)
+            {
+                code = maxCode.CCode;
+                var newCodeNumber = int.Parse(code.Substring(code.Length - cp.GlideLen)) + 1;
+                code = $"{cp.Prefix}{newCodeNumber.ToString().PadLeft(cp.GlideLen, '0')}";
+            }
+            var rdrecord = new Rdrecord32
             {
                 Id = id,
-                BRdFlag = 0,
-                CVouchType = "32",
-                CBusType = "普通销售",
-                CSource = "发货单",
                 CBusCode = dispatch.CDlcode,
                 CCode = code,
                 CWhCode = cwhcode,
-                DDate = DateTime.Now.Date,
                 CRdCode = dispatch.CRdCode,
                 CDepCode = dispatch.CDepCode,
                 CPersonCode = dispatch.CPersonCode,
-                CPtcode = null,
                 CStcode = dispatch.CStcode,
                 CCusCode = dispatch.CCusCode,
                 CDlcode = dispatch.Dlid,
-                CHandler = dispatch.CMaker,
+                //CHandler = dispatch.CMaker,
                 CMemo = dispatch.CMemo,
-                BTransFlag = false,
                 CAccounter = dispatch.CAccounter,
-                CMaker = dispatch.CMaker,
+                CMaker = order.Maker,
                 CDefine1 = dispatch.CDefine1,
                 CDefine2 = dispatch.CDefine2,
                 CDefine10 = dispatch.CDefine10,
@@ -1314,7 +1315,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CDefine14 = dispatch.CDefine14,
                 CDefine15 = dispatch.CDefine15,
                 CDefine16 = dispatch.CDefine16,
-                CDefine3 = dispatch.CDefine3,
+                CDefine3 = dispatch.CDefine3.Trim(),
                 CDefine4 = dispatch.CDefine4,
                 CDefine5 = dispatch.CDefine5,
                 CDefine6 = dispatch.CDefine6,
@@ -1323,25 +1324,48 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CDefine9 = dispatch.CDefine9,
                 // DVeriDate=dispatch.Dverifydate
                 Biafirst = dispatch.BIafirst,
-                VtId = 87,
-                Ufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
-                Dnmaketime = DateTime.Now,
-                Bredvouch = 0,
                 Csysbarcode = $"||st32|{code}",
-                Cinvoicecompany = dispatch.Cinvoicecompany,
-                Details = new List<Rdrecords32>()
+                Cinvoicecompany = dispatch.Cinvoicecompany
             };
-            detailid = detailid == 0 ? (Rdrecords32.Max(t => t.AutoId) + 1) % 1000000000 + 2000000000 : detailid;
+            if (string.IsNullOrWhiteSpace(rdrecord.CRdCode))
+            {
+                var others = new string[] { "试用装", "柜台", "物料", "货品" };
+
+                //TODO 将逻辑移出类库
+                if (rdrecord.CDefine3.Contains("不计任务"))
+                {
+                    rdrecord.CRdCode = "222"; //特殊
+                }
+                else if (rdrecord.CDefine3.Contains("计任务"))
+                {
+                    rdrecord.CRdCode = "209"; //政策
+                }
+                else if (others.Contains(rdrecord.CDefine3))
+                {
+                    rdrecord.CRdCode = "211";  //费用
+                }
+                else
+                {
+                    rdrecord.CRdCode = "208";  //正常
+                }
+            }
+            var rowNumber = 0;
             foreach (var item in dispatch.Details)
             {
+                rowNumber++;
                 var orderitem = order.StoreStockDetail.First(t => t.ProductNumbers == item.CInvCode);
-                detailid += 1;
-                rdrecord.Details.Add(new Rdrecords32()
+                SoSodetails soDetailrow = null;
+                if (item.ISosId.HasValue)
                 {
-                    AutoId = detailid,
+                    //如果有销售订单，定位销售订单明细
+                    soDetailrow = SoSodetails.FirstOrDefault(sd => sd.ISosId == item.ISosId);
+                }
+                rdrecord.Details.Add(new Rdrecords32
+                {
+                    AutoId = Rdrecords32.AsNoTracking().Max(t => t.AutoId) + 1,
                     Id = rdrecord.Id,
                     CInvCode = orderitem.ProductNumbers,
-                    INum = item.INum,
+                    //INum = item.INum,
                     IQuantity = orderitem.Numbers,
                     Cbdlcode = rdrecord.CBusCode,
                     CDefine22 = item.CDefine22,
@@ -1361,30 +1385,21 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     CDefine36 = item.CDefine36,
                     CDefine37 = item.CDefine37,
                     CBatch = orderitem.ProductBatch,
-                    IDlsId = item.AutoId,
+                    IDlsId = item.IDlsId,
                     CItemCode = item.CItemCode,
                     CName = order.Brand,
                     CItemCname = item.CItemCname,
                     CItemClass = item.CItemClass,
-                    INquantity = item.FOutQuantity,
-                    IUnitCost = item.IUnitPrice,
-                    IPrice = item.IUnitPrice,
-                    IFlag = 0,
-                    BLpuseFree = false,
-                    IRsrowNo = 0,
-                    IOriTrackId = 0,
-                    BCosting = true,
-                    BVmiused = false,
+                    INquantity = item.IQuantity,
+                    //IUnitCost = item.IUnitPrice,
+                    //IPrice = item.IUnitPrice,
                     Iorderdid = item.ISosId,
                     Iordercode = item.CSoCode,
-                    Iordertype = 1,
-                    Iorderseq = orderitem.SourceEntryId,
+                    Iorderseq = soDetailrow?.IRowNo ?? null,
                     Ipesodid = item.ISosId.ToString(),
-                    Ipesotype = 1,
-                    Ipesoseq = orderitem.SourceEntryId,
-                    Irowno = orderitem.SourceEntryId,
-                    Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
-                    Cbsysbarcode = $"||st32|{rdrecord.CCode}|{orderitem.SourceEntryId}"
+                    Ipesoseq = soDetailrow?.IRowNo??null,
+                    Irowno = rowNumber,
+                    Cbsysbarcode = $"||st32|{rdrecord.CCode}|{rowNumber}"
                 });
             }
             return rdrecord;
