@@ -1314,7 +1314,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CAccounter = dispatch.CAccounter,
                 CMaker = order.Maker,
                 CDefine1 = dispatch.CDefine1,
-                CDefine2 = dispatch.CDefine2,
+                CDefine2 = dispatch.CDefine2?.Trim(),
                 CDefine10 = dispatch.CDefine10,
                 CDefine11 = dispatch.CDefine11,
                 CDefine12 = dispatch.CDefine12,
@@ -1322,7 +1322,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CDefine14 = dispatch.CDefine14,
                 CDefine15 = dispatch.CDefine15,
                 CDefine16 = dispatch.CDefine16,
-                CDefine3 = dispatch.CDefine3.Trim(),
+                CDefine3 = dispatch.CDefine3?.Trim(),
                 CDefine4 = dispatch.CDefine4,
                 CDefine5 = dispatch.CDefine5,
                 CDefine6 = dispatch.CDefine6,
@@ -1339,15 +1339,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 var others = new string[] { "试用装", "柜台", "物料", "货品" };
 
                 //TODO 将逻辑移出类库
-                if (rdrecord.CDefine3.Contains("不计任务"))
+                if (rdrecord.CDefine2.Contains("不计任务"))
                 {
                     rdrecord.CRdCode = "222"; //特殊
                 }
-                else if (rdrecord.CDefine3.Contains("计任务"))
+                else if (rdrecord.CDefine2.Contains("计任务"))
                 {
                     rdrecord.CRdCode = "209"; //政策
                 }
-                else if (others.Contains(rdrecord.CDefine3))
+                else if (others.Contains(rdrecord.CDefine2))
                 {
                     rdrecord.CRdCode = "211";  //费用
                 }
@@ -1870,14 +1870,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public void UpdateDispatchBillState(string billNo, string statusName)
         {
-            var dispatch = DispatchList.FirstOrDefault(v => v.CDlcode == billNo)
-                ?? throw new FinancialException($"找不到发货单:{billNo}");
-            dispatch.CChangeMemo = statusName;
-            Update(dispatch);
-            SaveChanges();
+            //没有主键没法跟踪
+            //var dispatch = DispatchList.FirstOrDefault(v => v.CDlcode == billNo)
+            //    ?? throw new FinancialException($"找不到发货单:{billNo}");
+            //dispatch.CChangeMemo = statusName;
+            //Update(dispatch);
+            //SaveChanges();
 
             //TODO remove this usage
-            //Database.ExecuteSqlRaw($"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'");
+            Database.ExecuteSqlRaw($"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'");
         }
 
         private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageIndex, int pageSize)

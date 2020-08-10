@@ -428,6 +428,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 State = state,
                 CusPerson = dispatchList.Ccusperson,
                 ShipAddress = dispatchList.CShipAddress,
+                Address = dispatchList.CDefine11,
+                Receiver = dispatchList.CDefine13,
+                ReceiverTel = dispatchList.CDefine14,
+                Station = dispatchList.CDefine10
             };
         }
 
