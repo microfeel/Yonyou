@@ -399,13 +399,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return db.GetMaterialOrders(brand, departmentcode).Select(v => v.GetDtoMaterialOrder()).ToList();
         }
 
-        PagedResult<DtoMaterialOrder> IDbOperation.GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
+        public PagedResult<DtoMaterialOrder> GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageindex, int pagesize)
         {
             var list = db.GetMaterials(departmentcode, key, starttime, endtime, pageindex, pagesize);
             return new PagedResult<DtoMaterialOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoMaterialOrder()), list.PageIndex, list.PageSize);
         }
 
-        DtoMaterialOrder IDbOperation.GetMaterials(string orderno)
+        public DtoMaterialOrder GetMaterials(string orderno)
         {
             return db.GetMaterials(orderno).GetDtoMaterialOrder();
         }

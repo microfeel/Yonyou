@@ -295,13 +295,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             && (endtime == null || t.main.DDate <= endtime)
                             && (string.IsNullOrEmpty(key) || t.head.Cinvstd.Contains(key)));
             var total = tmp_orders.Count();
-            var orders = tmp_orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
+            var orders = tmp_orders.Skip(pageIndex * pageSize).Take(pageSize).ToList();
             orders.ForEach(o =>
             {
                 o.main.ProductModel = o.head.Cinvstd;
                 o.main.ProductName = o.head.Cinvname;
             });
-            return new PagedResult<OmMomain>(total, tmp_orders.Select(v => v.main), pageIndex + 1, pageSize);
+            return new PagedResult<OmMomain>(total, orders.Select(v => v.main), pageIndex + 1, pageSize);
         }
 
         /// <summary>
@@ -1888,7 +1888,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             pageIndex--;
             var tmp_orders = PoPomain.Where(expression);
             var total = tmp_orders.Count();
-            var orders = tmp_orders.OrderBy(t => t.DPodate).Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
+            var orders = tmp_orders.OrderBy(t => t.DPodate).Skip(pageIndex * pageSize).Take(pageSize).ToList();
             orders.ForEach(o =>
             {
                 o.MaxArriveDate = PoPodetails.Where(d => d.Poid == o.Poid).Max(d => d.DArriveDate ?? DateTime.MinValue);
@@ -1933,7 +1933,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             .OrderByDescending(t => t.DDate);
 
             var total = tmp_orders.Count();
-            var result = tmp_orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
+            var result = tmp_orders.Skip(pageIndex * pageSize).Take(pageSize).ToList();
 
             result.ForEach(o =>
             {
@@ -1976,7 +1976,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         && (endtime == null || t.DDate <= endtime)
                         && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
             var total = tmp_orders.Count();
-            var datas = tmp_orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
+            var datas = tmp_orders.Skip(pageIndex * pageSize).Take(pageSize).ToList();
 
             datas.ForEach(o =>
             {
@@ -2018,7 +2018,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                                 && (isChecked ? !string.IsNullOrEmpty(t.CHandler) : string.IsNullOrEmpty(t.CHandler)));
 
             var total = tmp_orders.Count();
-            var datas = tmp_orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
+            var datas = tmp_orders.Skip(pageIndex * pageSize).Take(pageSize).ToList();
             datas.ForEach(o =>
             {
                 o.WhName = Warehouse.FirstOrDefault(w => w.CWhCode == o.CWhCode)?.CWhName ?? "";
@@ -2059,7 +2059,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 .Join(Rdrecords09.Where(rs => rs.CDefine29 != "checked"), r => r.Id, rs => rs.Id, (r, rs) => new { r, rs });
 
             var total = orders.Count();
-            var datas = orders.Skip(pageIndex * pageSize - pageSize).Take(pageSize).ToList();
+            var datas = orders.Skip(pageIndex * pageSize).Take(pageSize).ToList();
             var list = new List<Rdrecords09>();
 
             var results = datas.Select(v =>
