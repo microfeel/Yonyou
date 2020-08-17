@@ -339,7 +339,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         DtoCustomer IDbOperation.GetCustomers(string code)
         {
-            return db.GetCustomersAsync(code).GetAwaiter().GetResult().ToDtoCustomer();
+            return db.GetCustomersAsync(code).ConfigureAwait(false).GetAwaiter().GetResult().ToDtoCustomer();
         }
 
         (string, string) IDbOperation.GetCustomersByDispatch(string orderno)
@@ -349,7 +349,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         DtoCustomer IDbOperation.GetCustomersByOrderNo(string orderno)
         {
-            return db.GetCustomersByOrderNoAsync(orderno).GetAwaiter().GetResult().ToDtoCustomer();
+            return db.GetCustomersByOrderNoAsync(orderno).ConfigureAwait(false).GetAwaiter().GetResult().ToDtoCustomer();
         }
 
         PagedResult<DtoPurchaseOrder> IDbOperation.GetDeliverPOs(string brand, string suppliercode, int pageindex, int pagesize)
@@ -424,17 +424,24 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         DtoPerson IDbOperation.GetPerson(string code)
         {
-            return db.GetPersonAsync(code).GetAwaiter().GetResult().ToDtoPerson();
+            var person = db.GetPersonAsync(code).ConfigureAwait(false).GetAwaiter().GetResult()
+                ?? throw new NullReferenceException($"没有找到编号为{code}的用友用户");
+            return person.ToDtoPerson();
         }
 
         DtoPerson IDbOperation.GetPersonByName(string name)
         {
-            return db.GetPersonByNameAsync(name).GetAwaiter().GetResult().ToDtoPerson();
+            var person = db.GetPersonByNameAsync(name).ConfigureAwait(false).GetAwaiter().GetResult()
+                ?? throw new NullReferenceException($"没有找到名称为{name}的用友用户");
+
+            return person.ToDtoPerson();
         }
 
         DtoPerson IDbOperation.GetPersonByPhone(string phonecode)
         {
-            return db.GetPersonByPhoneAsync(phonecode).GetAwaiter().GetResult().ToDtoPerson();
+            var person = db.GetPersonByPhoneAsync(phonecode).ConfigureAwait(false).GetAwaiter().GetResult()
+                ?? throw new NullReferenceException($"没有找到手机号为{phonecode}的用友用户");
+            return person.ToDtoPerson();
         }
 
         List<DtoPurchaseOrderDetail> IDbOperation.GetPODetails(string orderno)
@@ -474,12 +481,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         DtoSupplier IDbOperation.GetSupplier(string code)
         {
-            return db.GetSupplierAsync(code).GetAwaiter().GetResult().GetDtoSupplier();
+            return db.GetSupplierAsync(code).ConfigureAwait(false).GetAwaiter().GetResult().GetDtoSupplier();
         }
 
         DtoSupplier IDbOperation.GetSupplierByPhone(string phonecode)
         {
-            return db.GetSupplierByPhoneAsync(phonecode).GetAwaiter().GetResult().GetDtoSupplier();
+            return db.GetSupplierByPhoneAsync(phonecode).ConfigureAwait(false).GetAwaiter().GetResult().GetDtoSupplier();
         }
 
         public Dictionary<string, string> GetWarehouses()

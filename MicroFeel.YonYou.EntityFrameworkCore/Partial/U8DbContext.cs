@@ -53,7 +53,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public async Task<Data.Customer> GetCustomersAsync(string code)
         {
-            return await GetFirstAsync<Data.Customer>(c => c.CCusCode == code).ConfigureAwait(false);
+            return await GetFirstAsync<Data.Customer>(c => c.CCusCode == code);
         }
 
         public (string, string) GetCustomersByDispatch(string orderno)
@@ -104,22 +104,22 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
 
         public async Task<Person> GetPersonAsync(string code)
         {
-            return await GetFirstAsync<Person>(t => t.CPersonCode == code).ConfigureAwait(false);
+            return await GetFirstAsync<Person>(t => t.CPersonCode == code);
         }
 
         public async Task<Person> GetPersonByNameAsync(string name)
         {
-            return await GetFirstAsync<Person>(t => t.CPersonName == name).ConfigureAwait(false);
+            return await GetFirstAsync<Person>(t => t.CPersonName == name);
         }
 
         public async Task<Vendor> GetSupplierByPhoneAsync(string phonecode)
         {
-            return await GetFirstAsync<Vendor>(t => t.CVenPhone == phonecode).ConfigureAwait(false);
+            return await GetFirstAsync<Vendor>(t => t.CVenPhone == phonecode);
         }
 
         public async Task<Vendor> GetSupplierAsync(string code)
         {
-            return await GetFirstAsync<Vendor>(t => t.CVenCode == code).ConfigureAwait(false);
+            return await GetFirstAsync<Vendor>(t => t.CVenCode == code);
         }
 
         /// <summary>
@@ -283,7 +283,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="pagesize"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public PagedResult<OmMomain> GetMaterials(string departmentcode, string key, DateTime? starttime, DateTime? endtime, int pageIndex, int pageSize)
+        public PagedResult<OmMomain> GetMaterials(
+            string departmentcode,
+            string key,
+            DateTime? starttime,
+            DateTime? endtime,
+            int pageIndex,
+            int pageSize)
         {
             CheckPageIndex(pageIndex);
             CheckPageSize(pageSize);
