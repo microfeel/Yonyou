@@ -153,6 +153,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 SupplierCode = puArrHead.Cvencode,
                 CreateDate = puArrHead.Ddate,
                 StockOrderCode = puArrHead.RdRecordNo,
+                SendOrderNo = puArrHead.SendOrderNo,
                 PurchaseOrderDetails = puArrHead.Details.Select(v => v.GetDtoPurchaseOrderDetail()).ToList()
             };
         }
@@ -258,7 +259,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 OrderType = t.CBusType,
                 SupplierCode = t.SupplierCode,
                 Remark = t.CMemo,
-                State = string.IsNullOrEmpty(t.CDefine9) ? "待处理" : t.CDefine9,
+                State = t.CDefine9 ?? "待处理",
                 PurchaseOrderNo = t.CPoid,
                 Supplier = t.CVenAccount,
                 PurchaseOrderDetails = t.Details.Select(d => d.GetDtoPurchaseOrderDetail()).ToList()

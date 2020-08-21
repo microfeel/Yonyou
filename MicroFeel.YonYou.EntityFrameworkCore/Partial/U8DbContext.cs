@@ -248,7 +248,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             orders.ForEach(e =>
             {
                 //填充对应的入库单号和明细
-                e.RdRecordNo = RdRecord01.FirstOrDefault(r => r.Ipurarriveid == e.Id)?.CCode ?? "";
+                var rd = RdRecord01.FirstOrDefault(r => r.Ipurarriveid == e.Id);
+                e.RdRecordNo = rd?.CCode ?? "";
+                e.SendOrderNo = rd?.CDefine10 ?? "";
                 e.Details = PuArrbody.Where(t => t.Id == e.Id).ToList();
             });
             return new PagedResult<PuArrHead>(total, orders, pageIndex + 1, pageSize);
@@ -381,7 +383,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             CheckPageSize(pageSize);
             pageIndex--;
             var products = Inventory
-                            .Where(t => t.CInvDefine1 == brand && t.CInvCcode == classCode && (string.IsNullOrEmpty(key) || t.CInvName.Contains(key)))
+                            .Where(t => t.CInvDefine1 == brand && t.CInvCcode.StartsWith(classCode) && (string.IsNullOrEmpty(key) || t.CInvName.Contains(key)))
                             .Join(CurrentStock.Where(t => t.CWhCode == storecode && t.IQuantity.HasValue && t.IQuantity.Value > 0)
                             .Select(t => t.CInvCode).Distinct(), t => t.CInvCode, d => d, (t, d) => t);
             var total = products.Count();
