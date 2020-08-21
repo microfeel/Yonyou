@@ -1886,7 +1886,20 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             //SaveChanges();
 
             //TODO remove this usage
-            Database.ExecuteSqlRaw($"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'");
+            var sql = "";
+            switch (statusName)
+            {
+                case "已完成":
+                    sql = $"UPDATE DispatchList SET CChangeMemo = '{statusName}', Dverifysystime='{DateTime.Now}' WHERE cDLCode = '{billNo}'";
+                    break;
+                case "待发货":
+                    sql = $"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'";
+                    break;
+                default:
+                    break;
+            }
+            if (!string.IsNullOrEmpty(sql))
+                Database.ExecuteSqlRaw(sql);
         }
 
         private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageIndex, int pageSize)
