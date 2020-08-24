@@ -347,11 +347,22 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="productcode"></param>
         public Inventory GetInventory(string productcode)
         {
+            return GetInventory(productcode, "");
+        }
+
+        /// <summary>
+        /// 带批号获取存货
+        /// </summary>
+        /// <param name="productcode">存货编码</param>
+        /// <param name="batch">批号</param>
+        /// <returns></returns>
+        internal Inventory GetInventory(string productcode, string batch)
+        {
             var product = Inventory.FirstOrDefault(t => t.CInvCode == productcode);
             if (product != null)
             {
                 product.InvClassName = InventoryClass.FirstOrDefault(c => c.CInvCcode == product.CInvCcode)?.CInvCname;
-                product.Stock = GetInventoryStock(productcode);
+                product.Stock = GetInventoryStock(productcode, batch);
                 product.UnitName = ComputationUnit.FirstOrDefault(u => u.CComunitCode == product.CShopUnit)?.CComUnitName;
             }
             return product;
@@ -362,11 +373,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// </summary>
         /// <param name="inventoryCode"></param>
         /// <returns></returns>
-        public List<CurrentStock> GetInventoryStock(string inventoryCode)
+        public List<CurrentStock> GetInventoryStock(string inventoryCode, string batch = "")
         {
-            var stocks = CurrentStock.Where(t => t.CInvCode == inventoryCode)
-                .Join(Warehouse, inv => inv.CWhCode, wh => wh.CWhCode, (inv, wh) => new { inv, wh }).ToList();
-            stocks.ForEach(s => s.inv.WhName = s.wh.CWhName);
+            var cs = CurrentStock.Where(t => t.CInvCode == inventoryCode);
+            if (!string.IsNullOrEmpty(batch))
+            {
+                cs = cs.Where(v => v.CBatch == batch);
+            }
+            var stocks = cs
+                .Join(Warehouse, inv => inv.CWhCode, wh => wh.CWhCode, (inv, wh) => new { inv, wh.CWhName }).ToList();
+            stocks.ForEach(s => s.inv.WhName = s.CWhName);
             return stocks.Select(s => s.inv).ToList();
         }
 
@@ -458,8 +474,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             CheckPageSize(pageSize);
             pageIndex--;
 
-            DateTime startDate = Convert.ToDateTime("2020-07-28 00:00:00");
-            IEnumerable<DispatchList> dispatchbills = DispatchList.Where(dl => (!dl.BReturnFlag) && (dl.CDefine2 != "柜台") && (dl.CSocode != "") && dl.DDate >= startDate);
+            var startDate = new DateTime(2020, 7, 28);
+            IEnumerable<DispatchList> dispatchbills = DispatchList.Where(dl => dl.DDate >= startDate && (!dl.BReturnFlag) && (dl.CDefine2 != "柜台") && (dl.CSocode != ""));
             if (!string.IsNullOrWhiteSpace(brand))
             {
                 dispatchbills = dispatchbills.Where(dl => dl.CDefine8 == brand);
@@ -470,7 +486,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     dispatchbills = dispatchbills.Where(d => d.CChangeMemo is null && !d.Dverifysystime.HasValue);
                     break;
                 case DispatchBillState.Sending:
-                    dispatchbills = dispatchbills.Where(d => d.CChangeMemo != null && d.CChangeMemo.StartsWith("待发货"));
+                    dispatchbills = dispatchbills.Where(d => d.CChangeMemo.StartsWith("待发货"));
                     break;
                 case DispatchBillState.Completed:
                     dispatchbills = dispatchbills.Where(d => d.Dverifysystime.HasValue);
@@ -1966,7 +1982,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 o.Details = Rdrecords09.Where(d => d.CDefine29 != "checked" && d.Id == o.Id).ToList();
                 o.Details.ForEach(d =>
                 {
-                    var inventory = GetInventory(d.CInvCode);
+                    var inventory = GetInventory(d.CInvCode, d.CBatch);
                     d.ProductName = inventory.CInvName;
                     d.ProductModel = inventory.CInvStd;
                     d.UnitName = inventory.UnitName;
@@ -2005,7 +2021,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 o.Details = Rdrecords09.Where(d => d.Id == o.Id).ToList();
                 o.Details.ForEach(d =>
                 {
-                    var inv = GetInventory(d.CInvCode);
+                    var inv = GetInventory(d.CInvCode, d.CBatch);
                     d.ProductModel = inv.CInvStd;
                     d.ProductName = inv.CInvName;
                     d.OrderNo = o.CCode;
@@ -2046,7 +2062,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 o.Details = Rdrecords08.Where(d => d.Id == o.Id).ToList();
                 o.Details.ForEach(d =>
                 {
-                    var inv = GetInventory(d.CInvCode);
+                    var inv = GetInventory(d.CInvCode, d.CBatch);
                     d.ProductModel = inv.CInvStd;
                     d.ProductName = inv.CInvName;
                     d.OrderNo = o.CCode;

@@ -373,6 +373,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return db.GetInventory(productcode).GetDtoInventory();
         }
 
+        DtoInventory IDbOperation.GetInventory(string productcode, string batch)
+        {
+            return db.GetInventory(productcode, batch).GetDtoInventory();
+        }
+
         PagedResult<DtoInventory> IDbOperation.GetInventory(string brand, string classcode, string storecode, string key, int pageindex, int pagesize)
         {
             var list = db.GetInventory(brand, classcode, storecode, key, pageindex, pagesize);
