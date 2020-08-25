@@ -232,28 +232,28 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             CheckPageIndex(pageIndex);
             CheckPageSize(pageSize);
             pageIndex--;
-            var tmp_datas = PuArrHead.Where(t => t.Cdefine8 == brand
-                            && t.Cbustype == ordertype
-                            && t.Cvoucherstate == state
-                            && (string.IsNullOrEmpty(key) || t.Ccode.Contains(key))
-                            && (starttime == null || t.Ddate >= starttime)
-                            && (endtime == null || t.Ddate <= endtime)
-                            && (string.IsNullOrEmpty(supplier) || t.Cvenname.Contains(supplier)));
+            var tmp_datas = PuArrHead.Join(RdRecord01, h => h.Id, rd => rd.Ipurarriveid, (h, rd) => new { h, rd })
+                .Where(t => t.h.Cdefine8 == brand
+                            && t.h.Cbustype == ordertype
+                            && t.h.Cvoucherstate == state
+                            && (string.IsNullOrEmpty(key) || t.rd.CDefine10.Contains(key))
+                            && (starttime == null || t.h.Ddate >= starttime)
+                            && (endtime == null || t.h.Ddate <= endtime)
+                            && (string.IsNullOrEmpty(supplier) || t.h.Cvenname.Contains(supplier)));
             var total = tmp_datas.Count();
             var orders = tmp_datas
-                .OrderByDescending(v => v.Ddate)
+                .OrderByDescending(v => v.h.Ddate)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
                 .ToList();
             orders.ForEach(e =>
             {
                 //填充对应的入库单号和明细
-                var rd = RdRecord01.FirstOrDefault(r => r.Ipurarriveid == e.Id);
-                e.RdRecordNo = rd?.CCode ?? "";
-                e.SendOrderNo = rd?.CDefine10 ?? "";
-                e.Details = PuArrbody.Where(t => t.Id == e.Id).ToList();
+                e.h.Details = PuArrbody.Where(t => t.Id == e.h.Id).ToList();
+                e.h.RdRecordNo = e.rd?.CCode ?? "";
+                e.h.SendOrderNo = e.rd?.CDefine10 ?? "";
             });
-            return new PagedResult<PuArrHead>(total, orders, pageIndex + 1, pageSize);
+            return new PagedResult<PuArrHead>(total, orders.Select(o => o.h), pageIndex + 1, pageSize);
         }
 
         /// <summary>
