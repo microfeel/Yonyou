@@ -486,7 +486,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     dispatchbills = dispatchbills.Where(d => d.CChangeMemo is null && !d.Dverifysystime.HasValue);
                     break;
                 case DispatchBillState.Sending:
-                    dispatchbills = dispatchbills.Where(d => d.CChangeMemo.StartsWith("待发货"));
+                    dispatchbills = dispatchbills.Where(d => !(d.CChangeMemo is null) && d.CChangeMemo.StartsWith("待发货"));
                     break;
                 case DispatchBillState.Completed:
                     dispatchbills = dispatchbills.Where(d => d.Dverifysystime.HasValue);
