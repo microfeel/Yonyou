@@ -154,6 +154,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 CreateDate = puArrHead.Ddate,
                 StockOrderCode = puArrHead.RdRecordNo,
                 SendOrderNo = puArrHead.SendOrderNo,
+                State = puArrHead.Cvoucherstate,
                 Content = string.Join(",", puArrHead.Details.Select(b => $"{b.Cinvcode}{(string.IsNullOrEmpty(b.Cinvstd) ? string.Empty : "(" + b.Cinvstd + ")")}")),
                 PurchaseOrderDetails = puArrHead.Details.Select(v => v.GetDtoPurchaseOrderDetail()).ToList()
             };

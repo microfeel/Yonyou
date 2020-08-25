@@ -232,28 +232,47 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             CheckPageIndex(pageIndex);
             CheckPageSize(pageSize);
             pageIndex--;
-            var tmp_datas = PuArrHead.Join(RdRecord01, h => h.Id, rd => rd.Ipurarriveid, (h, rd) => new { h, rd })
-                .Where(t => t.h.Cdefine8 == brand
-                            && t.h.Cbustype == ordertype
-                            && t.h.Cvoucherstate == state
-                            && (string.IsNullOrEmpty(key) || t.rd.CDefine10.Contains(key))
-                            && (starttime == null || t.h.Ddate >= starttime)
-                            && (endtime == null || t.h.Ddate <= endtime)
-                            && (string.IsNullOrEmpty(supplier) || t.h.Cvenname.Contains(supplier)));
+            var puarrOrders = PuArrHead
+                .Where(pu => pu.Cdefine8 == brand
+                            && pu.Cbustype == ordertype
+                            && pu.Cvoucherstate == state
+                            && (starttime == null || pu.Ddate >= starttime)
+                            && (endtime == null || pu.Ddate <= endtime)
+                            && (string.IsNullOrEmpty(supplier) || pu.Cvenname.Contains(supplier)));
+
+            IEnumerable<RdRecord01> rdorders = RdRecord01;
+            //if (!string.IsNullOrEmpty(key))
+            //{
+            //    rdorders = rdorders.Where(rd => !string.IsNullOrEmpty(rd.CDefine10) && rd.CDefine10.Contains(key)).ToList();
+            //}
+
+            //实现LEFT JOIN
+            var tmp_datas = from pu in puarrOrders
+                            join rd in RdRecord01
+                            on pu.Id equals rd.Ipurarriveid
+                            into pugroup
+                            from rd2 in pugroup.DefaultIfEmpty()
+                            select new { pu, rd2 };
+            
+            if (!string.IsNullOrEmpty(key))
+            {
+                tmp_datas = tmp_datas.Where(c => c.rd2 != null && c.rd2.CDefine10 != null && c.rd2.CDefine10.Contains(key));
+            }
+
             var total = tmp_datas.Count();
             var orders = tmp_datas
-                .OrderByDescending(v => v.h.Ddate)
+                .OrderByDescending(v => v.pu.Ddate)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
                 .ToList();
             orders.ForEach(e =>
             {
                 //填充对应的入库单号和明细
-                e.h.Details = PuArrbody.Where(t => t.Id == e.h.Id).ToList();
-                e.h.RdRecordNo = e.rd?.CCode ?? "";
-                e.h.SendOrderNo = e.rd?.CDefine10 ?? "";
+                e.pu.Details = PuArrbody.Where(t => t.Id == e.pu.Id).ToList();
+                e.pu.RdRecordNo = e.rd2?.CCode ?? "";
+                e.pu.SendOrderNo = e.rd2?.CDefine10 ?? "";
             });
-            return new PagedResult<PuArrHead>(total, orders.Select(o => o.h), pageIndex + 1, pageSize);
+            return new PagedResult<PuArrHead>(total, orders.Select(o => o.pu), pageIndex + 1, pageSize);
         }
 
         /// <summary>
