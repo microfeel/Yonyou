@@ -253,7 +253,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             into pugroup
                             from rd2 in pugroup.DefaultIfEmpty()
                             select new { pu, rd2 };
-            
+
             if (!string.IsNullOrEmpty(key))
             {
                 tmp_datas = tmp_datas.Where(c => c.rd2 != null && c.rd2.CDefine10 != null && c.rd2.CDefine10.Contains(key));
@@ -320,6 +320,40 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 .Where(t => t.main.CDepCode == departmentcode
                             && (starttime == null || t.main.DDate >= starttime)
                             && (endtime == null || t.main.DDate <= endtime)
+                            && (string.IsNullOrEmpty(key) || t.head.Cinvname.Contains(key) || t.head.Ccode.Contains(key) || t.head.Cinvstd.Contains(key)));
+            var total = tmp_orders.Count();
+            var orders = tmp_orders.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+            orders.ForEach(o =>
+            {
+                o.main.ProductModel = o.head.Cinvstd;
+                o.main.ProductName = o.head.Cinvname;
+            });
+            return new PagedResult<OmMomain>(total, orders.Select(v => v.main), pageIndex + 1, pageSize);
+        }
+
+        /// <summary>
+        /// 获取委外加工领料单
+        /// </summary>
+        /// <param name="departmentcode"></param>
+        /// <param name="key"></param>
+        /// <param name="starttime"></param>
+        /// <param name="endtime"></param>
+        /// <param name="pageindex"></param>
+        /// <param name="pagesize"></param>
+        /// <param name="total"></param>
+        /// <returns></returns>
+        public PagedResult<OmMomain> GetMaterials(
+            string departmentcode,
+            string key,
+            int pageIndex,
+            int pageSize)
+        {
+            CheckPageIndex(pageIndex);
+            CheckPageSize(pageSize);
+            pageIndex--;
+            var tmp_orders = OmMomain
+                .Join(OmMomaterialshead, main => main.Moid, head => head.Moid, (main, head) => new { main, head })
+                .Where(t => t.main.CDepCode == departmentcode
                             && (string.IsNullOrEmpty(key) || t.head.Cinvstd.Contains(key)));
             var total = tmp_orders.Count();
             var orders = tmp_orders.Skip(pageIndex * pageSize).Take(pageSize).ToList();

@@ -410,6 +410,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return new PagedResult<DtoMaterialOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoMaterialOrder()), list.PageIndex, list.PageSize);
         }
 
+        public PagedResult<DtoMaterialOrder> GetMaterials(string departmentcode, string key, int pageindex, int pagesize)
+        {
+            var list = db.GetMaterials(departmentcode, key, pageindex, pagesize);
+            return new PagedResult<DtoMaterialOrder>(list.TotalCount, list.Results.Select(v => v.GetDtoMaterialOrder()), list.PageIndex, list.PageSize);
+        }
+
         public DtoMaterialOrder GetMaterials(string orderno)
         {
             return db.GetMaterials(orderno).GetDtoMaterialOrder();
