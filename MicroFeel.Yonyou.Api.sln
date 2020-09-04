@@ -17,6 +17,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroFeel.YonYou.U8Api", "M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroFeel.Yonyou.OpenApi", "MicroFeel.Yonyou.OpenApi\MicroFeel.Yonyou.OpenApi.csproj", "{311AE5E0-AD9F-4000-8A51-AA8EA1731DED}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6F972529-0D71-4E47-B4B5-FE7452AD68A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YongYouEFLib.Test", "YongYouEFLib.Test\YongYouEFLib.Test.csproj", "{950C5243-0907-4CA8-92A4-76BE3294CA8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,9 +81,21 @@ Global
 		{311AE5E0-AD9F-4000-8A51-AA8EA1731DED}.Release|Any CPU.Build.0 = Release|Any CPU
 		{311AE5E0-AD9F-4000-8A51-AA8EA1731DED}.Release|x86.ActiveCfg = Release|Any CPU
 		{311AE5E0-AD9F-4000-8A51-AA8EA1731DED}.Release|x86.Build.0 = Release|Any CPU
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C}.Debug|x86.Build.0 = Debug|Any CPU
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C}.Release|x86.ActiveCfg = Release|Any CPU
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{698645E0-22E6-4221-B332-52BCA391F6D7} = {6F972529-0D71-4E47-B4B5-FE7452AD68A8}
+		{950C5243-0907-4CA8-92A4-76BE3294CA8C} = {6F972529-0D71-4E47-B4B5-FE7452AD68A8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89186664-451F-4709-ADE5-874B7073AF0C}

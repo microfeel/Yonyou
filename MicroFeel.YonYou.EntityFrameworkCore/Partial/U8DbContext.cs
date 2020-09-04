@@ -704,7 +704,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         private PuArrivalVouch CreatePurchaseArrivalVouch(PoPomain pomain, DtoStockOrder order)
         {
             var id = PuArrivalVouch.Max(t => t.Id) + 1;
-            string code = $"PuWIN{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
+            string code = $"PuWIN{DateTime.Today:yyyyMMdd}{id.ToString().Substring(id.ToString().Length - 5)}";
             PuArrivalVouch puArrivalVouch = new PuArrivalVouch()
             {
                 IVtid = 8169,
@@ -1000,7 +1000,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 GlideLen = vn.GlideLen,
                 ResetOn = vn.GlideRule ?? "",
                 Start = vn.IStartNumber,
-                Step = vn.IGlideStep
+                Step = vn.IGlideStep,
+                Prefix1Rule = vn.Prefix1Rule.Trim()
             };
         }
 
@@ -1013,13 +1014,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="detailid">明细ID</param>
         /// <param name="maker">制单人</param>
         /// <returns></returns>
-        private RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid, string maker)
+        public RdRecord01 CreateRdrecord01(string cwhcode, PuArrivalVouch puArrival, ref long id, ref long detailid, string maker)
         {
             id = (id == 0) ? (RdRecord01.Max(t => t.Id) + 1) : (id + 1);
-            var codePrefix = $"CR{DateTime.Today:yyMM}";
             var cp = GetCode("采购入库单");
+            //var codePrefix = $"{cp.Prefix1Rule}{DateTime.Today:yyMM}";
             var code = $"{cp.Prefix}{"1".PadLeft(cp.GlideLen, '0')}";
-            var maxCode = RdRecord01.AsNoTracking().Where(r => EF.Functions.Like(r.CCode, codePrefix + "%")).OrderByDescending(r => r.CCode).FirstOrDefault();
+            var maxCode = RdRecord01.AsNoTracking().Where(r => EF.Functions.Like(r.CCode, cp.Prefix + "%")).OrderByDescending(r => r.CCode).FirstOrDefault();
             if (maxCode != null)
             {
                 code = maxCode.CCode;
@@ -1319,15 +1320,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         Rdrecord32.Add(result);
                         Rdrecords32.AddRange(result.Details);
                     });
-                    foreach (var item in dispatch.Details)
+                    foreach (var disDetail in dispatch.Details)
                     {
                         //更新销售订单发货数量
-                        var detail = SoSodetails.FirstOrDefault(t => t.ISosId == item.ISosId);
-                        if (detail == null) continue;
-                        var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductBatch == item.CBatch && t.ProductNumbers == item.CInvCode);
-                        detail.IFhquantity = (detail.IFhquantity ?? 0) + (orderdetail?.Numbers ?? item.IQaquantity);
+                        var sodetail = SoSodetails.FirstOrDefault(t => t.ISosId == disDetail.ISosId);
+                        if (sodetail == null)
+                            continue;
+                        var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductBatch == disDetail.CBatch && t.ProductNumbers == disDetail.CInvCode);
+                        sodetail.IFhquantity = (sodetail.IFhquantity ?? 0) + (orderdetail?.Numbers ?? 0);
                         //更新已出库数量
-                        item.FOutQuantity = (item.FOutQuantity ?? 0) + (orderdetail?.Numbers ?? item.IQaquantity);
+                        disDetail.FOutQuantity = (disDetail.FOutQuantity ?? 0) + (orderdetail?.Numbers ?? 0);
                     }
                     //添加未记账数据
                     results.ForEach(t =>
@@ -1364,10 +1366,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         private Rdrecord32 CreateRdrecord32(string cwhcode, DispatchList dispatch, DtoStockOrder order)
         {
             var id = Rdrecord32.AsNoTracking().Max(t => t.Id) + 1;
-            var codePrefix = $"QC{DateTime.Today:yyMM}";
             var cp = GetCode("销售出库单");
+            //var codePrefix = $"QC{DateTime.Today:yyMM}";
             var code = $"{cp.Prefix}{"1".PadLeft(cp.GlideLen, '0')}";
-            var maxCode = Rdrecord32.AsNoTracking().Where(r => EF.Functions.Like(r.CCode, codePrefix + "%")).OrderByDescending(r => r.CCode).FirstOrDefault();
+            var maxCode = Rdrecord32.AsNoTracking().Where(r => EF.Functions.Like(r.CCode, cp.Prefix + "%")).OrderByDescending(r => r.CCode).FirstOrDefault();
             if (maxCode != null)
             {
                 code = maxCode.CCode;
@@ -2463,6 +2465,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// 步进
         /// </summary>
         public int Step { get; set; }
+        /// <summary>
+        /// 单据前缀
+        /// </summary>
+        public string Prefix1Rule { get; set; }
     }
 
 }
