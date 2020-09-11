@@ -501,12 +501,18 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     order.OrderNo = result.CCode;
                     PuArrivalVouch.Add(result);
                     PuArrivalVouchs.AddRange(result.Details);
-                    //回填到货数量
+                    //更新委外明细 回填到货数量
                     foreach (var item in result.Details)
                     {
                         UpdateModetailsArrQty(item);
+                        //更新待入库数量
+                        UpdateCurrentStock(
+                            item.CWhCode,
+                            item.CInvCode,
+                            item.CBatch,
+                            c => { c.FInQuantity += item.IQuantity; });
                     }
-                    // OmModetails.UpdateRange(momain.OmModetails);
+                    //更新现存量
                     var commitResult = SaveChanges() > 0;
                     tran.Commit();
                     return commitResult;
@@ -516,9 +522,92 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     tran.Rollback();
                     throw ex;
                 }
-
             }
+        }
 
+        //更新现存量
+        private void UpdateCurrentStock(string whcode, string invCode, string batch, Action<CurrentStock> action)
+        {
+            var cs = CurrentStock.FirstOrDefault(c => c.CWhCode == whcode && c.CInvCode == invCode && c.CBatch == batch);
+            if (cs == null)
+            {
+                var itemid = GetSCMItem(invCode).Id;
+                cs = new CurrentStock
+                {
+                    CWhCode = whcode,
+                    CInvCode = invCode,
+                    CBatch = batch,
+                    ItemId = itemid
+                };
+                CurrentStock.Add(cs);
+            }
+            //对此现存量对象操作
+            action(cs);
+            CurrentStock.Update(cs);
+        }
+
+        /// <summary>
+        /// 获取计算存量用临时表Id
+        /// </summary>
+        /// <param name="invCode">存货编码</param>
+        /// <param name="v1">存货自由项1</param>
+        /// <param name="v2">存货自由项2</param>
+        /// <param name="v3">存货自由项3</param>
+        /// <param name="v4">存货自由项4</param>
+        /// <param name="v5">存货自由项5</param>
+        /// <param name="v6">存货自由项6</param>
+        /// <param name="v7">存货自由项7</param>
+        /// <param name="v8">存货自由项8</param>
+        /// <param name="v9">存货自由项9</param>
+        /// <param name="v10">存货自由项10</param>
+        /// <returns></returns>
+        private ScmItem GetSCMItem(
+            string invCode,
+            string v1 = "",
+            string v2 = "",
+            string v3 = "",
+            string v4 = "",
+            string v5 = "",
+            string v6 = "",
+            string v7 = "",
+            string v8 = "",
+            string v9 = "",
+            string v10 = "")
+        {
+            var item = ScmItem.FirstOrDefault(s => s.CInvCode == invCode
+                && v1 == s.CFree1
+                && v2 == s.CFree2
+                && v3 == s.CFree3
+                && v4 == s.CFree4
+                && v5 == s.CFree5
+                && v6 == s.CFree6
+                && v7 == s.CFree7
+                && v8 == s.CFree8
+                && v9 == s.CFree9
+                && v10 == s.CFree10);
+            if (item == null)
+            {
+                var nid = ScmItem.OrderByDescending(item => item.Id).FirstOrDefault()?.Id + 1 ?? 1;
+                item = new ScmItem
+                {
+                    Id = nid,
+                    PartId = 0,
+                    CInvCode = invCode,
+                    CFree1 = v1,
+                    CFree2 = v2,
+                    CFree3 = v3,
+                    CFree4 = v4,
+                    CFree5 = v5,
+                    CFree6 = v6,
+                    CFree7 = v7,
+                    CFree8 = v8,
+                    CFree9 = v9,
+                    CFree10 = v10
+                };
+                ScmItem.Add(item);
+                ScmItem.Update(item);
+            }
+            return item;
         }
 
         internal PagedResult<DispatchList> GetDispatchBills(string brand, int pageIndex, int pageSize, DispatchBillState billState)
@@ -802,7 +891,19 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 RdRecord01.Add(result);
                 Rdrecords01.AddRange(result.Details);
             });
-            InsertOrUpdateStore(order, (s, t) => { return s + t; });
+            //更新现存量
+            //InsertOrUpdateStore(order, (s, t) => { return s + t; });
+            foreach (var item in puarrival.Details)
+                UpdateCurrentStock(
+                    item.CWhCode,
+                    item.CInvCode,
+                    item.CBatch,
+                    cs =>
+                    {
+                        cs.FInQuantity -= item.IQuantity; //更新待入库数量
+                        cs.IQuantity += item.IQuantity; //更新现存量
+                    });
+
             //UpdateModetailsReceiveNumber(puarrival.PuArrivalVouchs);
             var commitResult = SaveChanges() > 0;
             if (commitResult)
@@ -1266,19 +1367,30 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             puarrival.Dclosedate = puarrival.CAuditDate = DateTime.Now.Date;
             puarrival.Caudittime = DateTime.Now;
             PuArrivalVouch.Update(puarrival);
-            //更新库存
-            InsertOrUpdateStore(new DtoStockOrder
-            {
-                Brand = puarrival.CDefine8,
-                SourceOrderNo = puarrival.CCode,
-                StoreStockDetail = puarrival.Details.Select(t => new DtoStoreStockDetail
-                {
-                    Numbers = t.IQuantity,
-                    ProductBatch = t.CBatch,
-                    ProductNumbers = t.CInvCode,
-                    StoreId = t.CWhCode
-                })
-            }, (s, t) => { return s + t; });
+            //更新现存量
+            //InsertOrUpdateStore(new DtoStockOrder
+            //{
+            //    Brand = puarrival.CDefine8,
+            //    SourceOrderNo = puarrival.CCode,
+            //    StoreStockDetail = puarrival.Details.Select(t => new DtoStoreStockDetail
+            //    {
+            //        Numbers = t.IQuantity,
+            //        ProductBatch = t.CBatch,
+            //        ProductNumbers = t.CInvCode,
+            //        StoreId = t.CWhCode
+            //    })
+            //}, (s, t) => { return s + t; });
+            foreach (var item in puarrival.Details)
+                UpdateCurrentStock(
+                    item.CWhCode,
+                    item.CInvCode,
+                    item.CBatch,
+                    cs =>
+                    {
+                        cs.FInQuantity -= item.IQuantity; //更新待入库数量
+                        cs.IQuantity += item.IQuantity; //更新现存量
+                    });
+
             records.ForEach(result =>
             {
                 //添加未记账数据
@@ -2259,6 +2371,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="order"></param>
         /// <param name="action"></param>
         /// <returns></returns>
+        [Obsolete]
         private void InsertOrUpdateStore(DtoStockOrder order, Func<decimal, decimal, decimal> action)
         {
             foreach (var item in order.StoreStockDetail)
@@ -2271,6 +2384,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     SaveChanges();
                 }
                 //?? throw new FinancialException($"scmitem(库存管理)中无法找到编码为{item.ProductNumbers}的存货");
+
                 var itemid = scmItem.Id;
                 var stock = CurrentStock.FirstOrDefault(t => t.CInvCode == item.ProductNumbers
                     && t.CBatch == item.ProductBatch
