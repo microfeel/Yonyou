@@ -542,7 +542,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="action"></param>
         private void UpdateCurrentStock(string whcode, string invCode, string batch, Action<CurrentStock> action)
         {
-            var cs = CurrentStock.FirstOrDefault(c => c.CWhCode == whcode && c.CInvCode == invCode && c.CBatch == batch);
+            var cs = CurrentStock.AsNoTracking().FirstOrDefault(c => c.CWhCode == whcode && c.CInvCode == invCode && c.CBatch == batch);
             if (cs == null)
             {
                 var itemid = GetSCMItem(invCode).Id;
@@ -2435,7 +2435,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             //?? throw new FinancialException($"scmitem(库存管理)中无法找到编码为{item.ProductNumbers}的存货");
 
             var itemid = scmItem.Id;
-            var stock = CurrentStock.FirstOrDefault(t => t.CInvCode == invCode
+            var stock = CurrentStock.AsNoTracking().FirstOrDefault(t => t.CInvCode == invCode
                 && t.CBatch == batch
                 && t.CWhCode == whcode);
             if (stock != null)
@@ -2459,7 +2459,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             foreach (var item in order.StoreStockDetail)
             {
-                var tmp_stocks = CurrentStock.Where(t => t.CInvCode == item.ProductNumbers);
+                var tmp_stocks = CurrentStock.AsNoTracking().Where(t => t.CInvCode == item.ProductNumbers);
                 if (tmp_stocks.Count() == 0)
                 {
                     throw new Exception($"{item.ProductNumbers}不存在任何库存记录");
