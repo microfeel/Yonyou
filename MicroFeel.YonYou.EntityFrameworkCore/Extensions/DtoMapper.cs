@@ -204,7 +204,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 ProductName = omModetails.ProductName,
                 StoreCode = "",
                 StoreName = "",
-                UnitName = ""
+                UnitName = "",
+                TotalSendQty = omModetails.IMaterialSendQty ?? 0
             };
         }
         public static DtoMaterialOrderDetail GetDtoMaterialOrderDetail(this Data.OmMomaterialsbody omMomaterialsbody)

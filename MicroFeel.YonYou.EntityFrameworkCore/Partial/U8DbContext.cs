@@ -315,18 +315,19 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             CheckPageIndex(pageIndex);
             CheckPageSize(pageSize);
             pageIndex--;
-            var tmp_orders = OmMomain
+            var tmp_orders = OmMomain.Include(main=>main.OmModetails)
                 .Join(OmMomaterialshead, main => main.Moid, head => head.Moid, (main, head) => new { main, head })
-                .Where(t => t.main.CDepCode == departmentcode
+                .Where(t => (t.main.CDepCode == departmentcode || string.IsNullOrEmpty(t.main.CDepCode))
                             && (starttime == null || t.main.DDate >= starttime)
                             && (endtime == null || t.main.DDate <= endtime)
                             && (string.IsNullOrEmpty(key) || t.head.Cinvname.Contains(key) || t.head.Ccode.Contains(key) || t.head.Cinvstd.Contains(key)));
             var total = tmp_orders.Count();
-            var orders = tmp_orders.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+            var orders = tmp_orders.OrderByDescending(o=>o.main.Moid).Skip(pageIndex * pageSize).Take(pageSize).ToList();
             orders.ForEach(o =>
             {
                 o.main.ProductModel = o.head.Cinvstd;
                 o.main.ProductName = o.head.Cinvname;
+                o.main.Details = o.main.OmModetails.ToList();
             });
             return new PagedResult<OmMomain>(total, orders.Select(v => v.main), pageIndex + 1, pageSize);
         }
