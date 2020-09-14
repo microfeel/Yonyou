@@ -315,14 +315,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             CheckPageIndex(pageIndex);
             CheckPageSize(pageSize);
             pageIndex--;
-            var tmp_orders = OmMomain.Include(main=>main.OmModetails)
+            var tmp_orders = OmMomain.Include(main => main.OmModetails)
                 .Join(OmMomaterialshead, main => main.Moid, head => head.Moid, (main, head) => new { main, head })
                 .Where(t => (t.main.CDepCode == departmentcode || string.IsNullOrEmpty(t.main.CDepCode))
                             && (starttime == null || t.main.DDate >= starttime)
                             && (endtime == null || t.main.DDate <= endtime)
                             && (string.IsNullOrEmpty(key) || t.head.Cinvname.Contains(key) || t.head.Ccode.Contains(key) || t.head.Cinvstd.Contains(key)));
             var total = tmp_orders.Count();
-            var orders = tmp_orders.OrderByDescending(o=>o.main.Moid).Skip(pageIndex * pageSize).Take(pageSize).ToList();
+            var orders = tmp_orders.OrderByDescending(o => o.main.Moid).Skip(pageIndex * pageSize).Take(pageSize).ToList();
             orders.ForEach(o =>
             {
                 o.main.ProductModel = o.head.Cinvstd;
@@ -390,10 +390,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         public List<OmMomaterialsbody> GetMaterialDetails(string orderno)
         {
-            var orders = OmMomain.Where(t => t.CCode == orderno)
-                .Join(OmMomaterialsbody, t => t.Moid, d => d.Moid, (t, d) => d)
+            var orders = OmMomaterialshead.Where(t => t.Ccode == orderno)
+                .Join(OmMomaterialsbody, t => t.Moid, d => d.Moid, (t, d) => new { d, InStoreQty = t.Ireceivedqty })
                 .ToList();
-            return orders;
+            //为可退货数量赋值
+            orders.ForEach(o => o.d.AllowReturnQty = (o.d.Isendqty ?? 0) - Math.Max(0, decimal.Divide((o.InStoreQty ?? 0) * (o.d.Fbaseqtyn ?? 0), (o.d.Fbaseqtyd ?? 1))));
+            return orders.Select(o=>o.d).ToList();
         }
         /// <summary>
         /// 获取存货

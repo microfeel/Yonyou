@@ -215,12 +215,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Id = omMomaterialsbody.Momaterialsid,
                 ProductName = omMomaterialsbody.Cinvname,
                 ProductNumbers = omMomaterialsbody.Cinvcode,
-                ProductBatch = "",
+                ProductBatch = omMomaterialsbody.Cbatch??"",
                 ProductModel = omMomaterialsbody.Cinvstd,
                 Numbers = omMomaterialsbody.Iquantity.Value - (omMomaterialsbody.Isendqty ?? 0),
                 StoreCode = omMomaterialsbody.Cwhcode,
                 StoreName = omMomaterialsbody.Cwhname,
-                UnitName = omMomaterialsbody.CinvmUnit
+                UnitName = omMomaterialsbody.CinvmUnit,
+                TotalSendQty = omMomaterialsbody.Isendqty ?? 0,
+                AllowReturnQty = omMomaterialsbody.AllowReturnQty
             };
         }
         public static DtoInventoryStock GetDtoInventoryStock(this Data.CurrentStock stock)
