@@ -1337,10 +1337,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     //创建入库单
                     var records = CreateRdrecord01(puarrival, maker);
                     action?.Invoke(records);
+                    //保存记录并更新现存量
                     bool commitResult = SaveRdRecords(puarrival, records);
                     //更新到货单状态
                     ClosePuArrivalState(puarrival, maker);
-
                     if (commitResult) tran.Commit();
                     else tran.Rollback();
                     return commitResult;
@@ -1538,7 +1538,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CStcode = dispatch.CStcode,
                 CCusCode = dispatch.CCusCode,
                 CDlcode = dispatch.Dlid,
-                //CHandler = dispatch.CMaker,
+                //CHandler = dispatch.CMaker,      //不做自动审核
+                // DVeriDate=dispatch.Dverifydate
                 CMemo = dispatch.CMemo,
                 CAccounter = dispatch.CAccounter,
                 CMaker = order.Maker,
@@ -1558,7 +1559,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CDefine7 = dispatch.CDefine7,
                 CDefine8 = dispatch.CDefine8,
                 CDefine9 = dispatch.CDefine9,
-                // DVeriDate=dispatch.Dverifydate
                 Biafirst = dispatch.BIafirst,
                 Csysbarcode = $"||st32|{code}",
                 Cinvoicecompany = dispatch.Cinvoicecompany
@@ -2444,7 +2444,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             if (stock != null)
             {
                 var qty = isPrepare ? stock.IQuantity ?? 0 : (stock.IQuantity ?? 0 + quantity);
-                var inqty = isPrepare ? (stock.FInQuantity ?? 0 - quantity) : stock.FInQuantity ?? 0;
+                var inqty = isPrepare ? (stock.FInQuantity ?? 0 + quantity) : (stock.FInQuantity ?? 0 - quantity);
                 Database.ExecuteSqlRaw($"update currentstock set iQuantity ={qty},finQuantity={inqty} where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
             }
             else
