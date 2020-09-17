@@ -2441,28 +2441,21 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             var stock = CurrentStock.FirstOrDefault(t => t.CInvCode == invCode
                 && t.CBatch == batch
                 && t.CWhCode == whcode);
-            //if (stock != null)
-            //{
-            //    stock.IQuantity = action(stock.IQuantity ?? 0, item.Numbers ?? 0);
-            //    Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity } where cInvCode = '{item.ProductNumbers}' and cBatch = '{item.ProductBatch}' and cWhCode = '{item.StoreId}'");
-            //    continue;
-            //}
-
-            ////新增
-            //Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{item.StoreId}','{item.ProductNumbers}',{itemid},'{item.ProductBatch}','',0,'',{item.Numbers},{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
 
             if (stock != null)
             {
-                stock.IQuantity = stock.IQuantity ?? 0 + quantity;
-                //stock.IQuantity = isPrepare ? stock.IQuantity ?? 0 : (stock.IQuantity ?? 0 + quantity);
-                stock.FInQuantity = isPrepare ? (stock.FInQuantity ?? 0 + quantity) : (stock.FInQuantity ?? 0 - quantity);
-                //Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity},finQuantity={stock.FInQuantity} where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
-                Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity } where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
+                stock.IQuantity = isPrepare ? (stock.IQuantity ?? 0) : (stock.IQuantity ?? 0) + quantity;
+                stock.FInQuantity = isPrepare ? ((stock.FInQuantity ?? 0) + quantity) : ((stock.FInQuantity ?? 0) - quantity);
+                if (stock.FInQuantity < 0)
+                {
+                    stock.FInQuantity = 0;
+                }
+                Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity},finQuantity={stock.FInQuantity} where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
             }
             else
                 //新增
-                //Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{(isPrepare ? 0 : quantity)},0,0,0,{(isPrepare ? quantity : 0)},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
-                Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{quantity},{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
+                Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{(isPrepare ? 0 : quantity)},0,0,0,{(isPrepare ? quantity : 0)},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
+            //Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{quantity},{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
         }
 
         /// <summary>
