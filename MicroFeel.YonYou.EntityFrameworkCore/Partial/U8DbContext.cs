@@ -395,7 +395,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 .ToList();
             //为可退货数量赋值
             orders.ForEach(o => o.d.AllowReturnQty = (o.d.Isendqty ?? 0) - Math.Max(0, decimal.Divide((o.InStoreQty ?? 0) * (o.d.Fbaseqtyn ?? 0), (o.d.Fbaseqtyd ?? 1))));
-            return orders.Select(o=>o.d).ToList();
+            return orders.Select(o => o.d).ToList();
         }
         /// <summary>
         /// 获取存货
@@ -2407,7 +2407,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// 新增或者更新仓储数据
         /// </summary>
         /// <param name="order"></param>
-        /// <param name="action"></param>
+        /// <param name="isPrepare">是待入库</param>
         /// <returns></returns>
         private void InsertOrUpdateStore(DtoStockOrder order, bool isPrepare = false)
         {
@@ -2438,18 +2438,31 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             //?? throw new FinancialException($"scmitem(库存管理)中无法找到编码为{item.ProductNumbers}的存货");
 
             var itemid = scmItem.Id;
-            var stock = CurrentStock.AsNoTracking().FirstOrDefault(t => t.CInvCode == invCode
+            var stock = CurrentStock.FirstOrDefault(t => t.CInvCode == invCode
                 && t.CBatch == batch
                 && t.CWhCode == whcode);
+            //if (stock != null)
+            //{
+            //    stock.IQuantity = action(stock.IQuantity ?? 0, item.Numbers ?? 0);
+            //    Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity } where cInvCode = '{item.ProductNumbers}' and cBatch = '{item.ProductBatch}' and cWhCode = '{item.StoreId}'");
+            //    continue;
+            //}
+
+            ////新增
+            //Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{item.StoreId}','{item.ProductNumbers}',{itemid},'{item.ProductBatch}','',0,'',{item.Numbers},{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
+
             if (stock != null)
             {
-                var qty = isPrepare ? stock.IQuantity ?? 0 : (stock.IQuantity ?? 0 + quantity);
-                var inqty = isPrepare ? (stock.FInQuantity ?? 0 + quantity) : (stock.FInQuantity ?? 0 - quantity);
-                Database.ExecuteSqlRaw($"update currentstock set iQuantity ={qty},finQuantity={inqty} where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
+                stock.IQuantity = stock.IQuantity ?? 0 + quantity;
+                //stock.IQuantity = isPrepare ? stock.IQuantity ?? 0 : (stock.IQuantity ?? 0 + quantity);
+                stock.FInQuantity = isPrepare ? (stock.FInQuantity ?? 0 + quantity) : (stock.FInQuantity ?? 0 - quantity);
+                //Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity},finQuantity={stock.FInQuantity} where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
+                Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity } where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
             }
             else
                 //新增
-                Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{(isPrepare ? 0 : quantity)},0,0,0,{(isPrepare ? quantity : 0)},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
+                //Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{(isPrepare ? 0 : quantity)},0,0,0,{(isPrepare ? quantity : 0)},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
+                Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{quantity},{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
         }
 
         /// <summary>
