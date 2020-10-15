@@ -45,6 +45,9 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Data
         public DateTime? DVeriDate { get; set; }
         public bool? Bpufirst { get; set; }
         public bool? Biafirst { get; set; }
+        /// <summary>
+        /// 产量
+        /// </summary>
         public double? IMquantity { get; set; }
         public DateTime? DArvdate { get; set; }
         public string CChkCode { get; set; }

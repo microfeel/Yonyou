@@ -276,7 +276,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         }
 
         /// <summary>
-        /// 获取领料单
+        /// 获取领料申请单
         /// </summary>
         /// <param name="brand"></param>
         /// <param name="departmentcode"></param>
@@ -367,7 +367,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         }
 
         /// <summary>
-        /// 
+        /// 获取委外订单领料单
         /// </summary>
         /// <param name="orderno"></param>
         /// <returns></returns>
@@ -397,6 +397,41 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             orders.ForEach(o => o.d.AllowReturnQty = (o.d.Isendqty ?? 0) - Math.Max(0, decimal.Divide((o.InStoreQty ?? 0) * (o.d.Fbaseqtyn ?? 0), (o.d.Fbaseqtyd ?? 1))));
             return orders.Select(o => o.d).ToList();
         }
+
+        /// <summary>
+        /// 获取委外订单材料出库单
+        /// </summary>
+        /// <param name="mainNo">订单编号</param>
+        /// <param name="includeDetails">是否包含明细</param>
+        /// <returns></returns>
+        public List<Rdrecord11> GetOmMainRdrecords(string mainNo, bool includeDetails = true)
+        {
+            var rdrecode11s = Rdrecord11.Where(r => r.CMpoCode == mainNo).ToList();
+            if (includeDetails)
+            {
+                foreach (var rdrecord in rdrecode11s)
+                {
+                    rdrecord.Details = Rdrecords11.Where(rds => rds.Id == rdrecord.Id).ToList();
+                }
+            }
+            return rdrecode11s;
+        }
+
+        /// <summary>
+        /// 获取委外订单
+        /// </summary>
+        /// <param name="mainNo"></param>
+        /// <returns></returns>
+        public OmMomain GetOmMomain(string mainNo, bool includeDetails = true)
+        {
+            var bill = OmMomain.FirstOrDefault(t => t.CCode == mainNo);
+            if (includeDetails)
+            {
+                bill.Details = OmModetails.Where(v => v.Moid == bill.Moid).ToList();
+            }
+            return bill;
+        }
+
         /// <summary>
         /// 获取存货
         /// </summary>
@@ -448,7 +483,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         //    return (total, result);
         //}
 
-
+        /// <summary>
+        /// 获取存货列表
+        /// </summary>
+        /// <param name="brand">品牌</param>
+        /// <param name="classCode">大类编码</param>
+        /// <param name="storecode">仓库编码</param>
+        /// <param name="key">关键词</param>
+        /// <param name="pageIndex">页码</param>
+        /// <param name="pageSize">页大小</param>
+        /// <returns></returns>
         public PagedResult<Inventory> GetInventory(string brand, string classCode, string storecode, string key, int pageIndex, int pageSize)
         {
             CheckPageIndex(pageIndex);
@@ -1655,6 +1699,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 try
                 {
                     UpdateStore(order, (s, t) => s - t);
+                    //查找领料申请单
                     var materialApp = MaterialAppVouch.AsNoTracking().FirstOrDefault(t => t.CCode == order.SourceOrderNo);
                     if (materialApp == null) return false;
                     materialApp.MaterialAppVouchs = MaterialAppVouchs.AsNoTracking().Where(t => t.Id == materialApp.Id).ToList();
@@ -1701,7 +1746,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 }
             }
         }
-
+        /// <summary>
+        /// 创建材料出库单
+        /// </summary>
+        /// <param name="materialApp"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
         private List<Rdrecord11> CreateRdrecord11s(MaterialAppVouch materialApp, DtoStockOrder order)
         {
             List<Rdrecord11> list = new List<Rdrecord11>();
@@ -1714,32 +1764,42 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             }
             return list;
         }
+        /// <summary>
+        /// 创建材料出库单(从领料申请单)
+        /// </summary>
+        /// <param name="cwhcode">创建编码</param>
+        /// <param name="materialApp">领料申请单</param>
+        /// <param name="order"></param>
+        /// <param name="id"></param>
+        /// <param name="detailid"></param>
+        /// <returns></returns>
         private Rdrecord11 CreateRdrecord11(string cwhcode, MaterialAppVouch materialApp, DtoStockOrder order, ref long id, ref long detailid)
         {
             var momain = OmMomain.FirstOrDefault(t => t.CCode == materialApp.MaterialAppVouchs.FirstOrDefault().Comcode);
             if (momain == null)
-                throw new Finance.FinancialException($"申请单（{materialApp.CCode})明细中关联的委外订单单号（{materialApp.MaterialAppVouchs.FirstOrDefault()?.Comcode}）没有对应的委外单据");
+                throw new FinancialException($"申请单（{materialApp.CCode})明细中关联的委外订单单号（{materialApp.MaterialAppVouchs.FirstOrDefault()?.Comcode}）没有对应的委外单据");
+            var head = $"CC{DateTime.Now:yyMM}";
             id = id == 0 ? (Rdrecord11.Max(t => t.Id) + 1) : id + 1;
-            string code = $"MFMA{DateTime.Now.ToString("yyyyMMdd")}{id.ToString().Substring(id.ToString().Length - 5)}";
-            var rdrecord = new Rdrecord11()
+            var lastcode = Rdrecord11.Where(rd => rd.CCode.StartsWith(head)).OrderByDescending(rd => rd.CCode).FirstOrDefault();
+
+            var codeNumber = lastcode?.CCode.Substring(7) ?? "0";
+
+            string code = $"CC{DateTime.Now:yyMMdd}{int.Parse(codeNumber) + 1:d4}";
+
+            var rdrecord = new Rdrecord11
             {
                 Id = id,
-                BRdFlag = 0,
-                CVouchType = "11",
                 CBusType = "委外发料",
                 CSource = "领料申请单",
-                CBusCode = materialApp.CCode,
+                //CBusCode = materialApp.CCode,
                 CWhCode = cwhcode,
-                DDate = DateTime.Now.Date,
                 CCode = code,
                 CRdCode = materialApp.CRdCode,
                 CDepCode = materialApp.CDepCode,
                 CPersonCode = materialApp.CPersonCode,
-                CPtcode = null,
                 CVenCode = materialApp.Cvencode,
                 CHandler = materialApp.CMaker,
                 CMemo = materialApp.CMemo,
-                BTransFlag = false,
                 CMaker = materialApp.CMaker,
                 CDefine1 = materialApp.CDefine1,
                 CDefine2 = materialApp.CDefine2,
@@ -1758,15 +1818,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CDefine8 = materialApp.CDefine8,
                 CDefine9 = materialApp.CDefine9,
                 CArvcode = materialApp.CCode,
-                DArvdate = DateTime.Now.Date,
-                VtId = 65,
 
                 CPsPcode = OmModetails.FirstOrDefault(o => o.ModetailsId == materialApp.MaterialAppVouchs.FirstOrDefault().IOmoMid)?.CInvCode,
                 CMpoCode = materialApp.MaterialAppVouchs.FirstOrDefault()?.Comcode,
 
-                Ufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
-                Dnmaketime = DateTime.Now,
-                Bredvouch = 0,
+                //Ufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
                 IMquantity = materialApp.Imquantity.HasValue ? (double)materialApp.Imquantity.Value : 0,
                 Iproorderid = momain.Moid,
 
@@ -1774,65 +1830,202 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 Details = new List<Rdrecords11>()
             };
             detailid = detailid == 0 ? (Rdrecords11.Max(t => t.AutoId) + 1) : detailid;
-            foreach (var item in materialApp.MaterialAppVouchs)
+            foreach (var mavItem in materialApp.MaterialAppVouchs)
             {
-                var orderitem = order.StoreStockDetail.First(t => t.ProductNumbers == item.CInvCode);
+                var orderitem = order.StoreStockDetail.First(t => t.ProductNumbers == mavItem.CInvCode);
                 detailid += 1;
-                rdrecord.Details.Add(new Rdrecords11()
+                rdrecord.Details.Add(new Rdrecords11
                 {
                     AutoId = detailid,
                     Id = rdrecord.Id,
                     CInvCode = orderitem.ProductNumbers,
-                    INum = item.INum,
+                    INum = mavItem.INum,
                     IQuantity = orderitem.Numbers,
-                    CDefine22 = item.CDefine22,
-                    CDefine23 = item.CDefine23,
-                    CDefine24 = item.CDefine24,
-                    CDefine25 = item.CDefine25,
-                    CDefine26 = item.CDefine26,
-                    CDefine27 = item.CDefine27,
-                    CDefine28 = item.CDefine28,
-                    CDefine29 = item.CDefine29,
-                    CDefine30 = item.CDefine30,
-                    CDefine31 = item.CDefine31,
-                    CDefine32 = item.CDefine32,
-                    CDefine33 = item.CDefine33,
-                    CDefine34 = item.CDefine34,
-                    CDefine35 = item.CDefine35,
-                    CDefine36 = item.CDefine36,
-                    CDefine37 = item.CDefine37,
+                    CDefine22 = mavItem.CDefine22,
+                    CDefine23 = mavItem.CDefine23,
+                    CDefine24 = mavItem.CDefine24,
+                    CDefine25 = mavItem.CDefine25,
+                    CDefine26 = mavItem.CDefine26,
+                    CDefine27 = mavItem.CDefine27,
+                    CDefine28 = mavItem.CDefine28,
+                    CDefine29 = mavItem.CDefine29,
+                    CDefine30 = mavItem.CDefine30,
+                    CDefine31 = mavItem.CDefine31,
+                    CDefine32 = mavItem.CDefine32,
+                    CDefine33 = mavItem.CDefine33,
+                    CDefine34 = mavItem.CDefine34,
+                    CDefine35 = mavItem.CDefine35,
+                    CDefine36 = mavItem.CDefine36,
+                    CDefine37 = mavItem.CDefine37,
                     CBatch = orderitem.ProductBatch,
-                    CItemCode = item.CItemCode,
+                    CItemCode = mavItem.CItemCode,
                     CName = order.Brand,
-                    CItemCname = item.CItemCname,
-                    CItemClass = item.CItemClass,
-                    INquantity = item.FOutQuantity,
-                    IFlag = 0,
-                    IOmoMid = item.IOmoMid,
-                    IOmoDid = item.IOmoDid,
-                    Cmocode = item.Cmocode,
-                    Ipesodid = item.Ipesodid,
-                    Cpesocode = item.Cpesocode,
-                    BLpuseFree = false,
-                    IRsrowNo = 0,
-                    IOriTrackId = 0,
-                    BCosting = true,
-                    BVmiused = false,
-                    Ipesotype = item.Ipesotype,
+                    CItemCname = mavItem.CItemCname,
+                    CItemClass = mavItem.CItemClass,
+                    INquantity = mavItem.FOutQuantity,
+                    IOmoMid = mavItem.IOmoMid,
+                    IOmoDid = mavItem.IOmoDid,
+                    Cmocode = mavItem.Cmocode,
+                    Ipesodid = mavItem.Ipesodid,
+                    Cpesocode = mavItem.Cpesocode,
+                    Ipesotype = mavItem.Ipesotype,
                     Ipesoseq = orderitem.SourceEntryId,
                     Irowno = orderitem.SourceEntryId,
-                    Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
+                    //Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
                     Cbsysbarcode = $"||st11|{rdrecord.CCode}|{orderitem.SourceEntryId}",
-                    BOutMaterials = 1,
-                    //Applycode ="",
-                    // Applydid = 1,
                     //  CbMemo = item.CbMemo,
-                    //    Iorderdid = 1,
-                    //     Iorderseq =1, 
                 });
             }
             return rdrecord;
         }
+
+        /// <summary>
+        /// 创建材料出库单(从退料数据)
+        /// </summary>
+        /// <param name="order">领料单号</param>
+        /// <returns></returns>
+        public void CreateRdrecord11(DtoBackStore order)
+        {
+            //查询材料出库单
+            var momainBill = GetOmMomain(order.SourceOrderNo);
+            var sourceBills = GetOmMainRdrecords(order.SourceOrderNo).OrderByDescending(o => o.CCode);
+            ///所有退料编号
+            //var invCodes = order.Details.Select(o => o.InvCode).ToList();
+
+            //按仓库分组处理明细
+            var orderDetails = order.Details.GroupBy(d => d.StoreCode);
+            //遍历退料明细生成退料单
+            foreach (var storeGroup in orderDetails)
+            {
+                //查找领出单据
+                //源出库单明细
+                var originalRecordDetail = Rdrecords11.FirstOrDefault(ords => ords.AutoId == storeGroup.First().AutoId); // sourceBills.FirstOrDefault(b => b.CWhCode == backDetail.StoreCode && b.Details.Any(d => d.Invcode == backDetail.InvCode && d.CBatch == backDetail.BatchCode))
+
+                //源出库单
+                var originalRecord = Rdrecord11.First(rd => rd.Id == originalRecordDetail.Id);
+                //创建出库单
+                //计算ID
+                var id = Rdrecord11.Max(t => t.Id) + 1;
+                //计算编号
+                var head = $"CC{DateTime.Now:yyMM}";
+                var lastcode = Rdrecord11.Where(rd => rd.CCode.StartsWith(head)).OrderByDescending(rd => rd.CCode).FirstOrDefault();
+                var codeNumber = lastcode?.CCode.Substring(8) ?? "0";
+
+                string code = $"CC{DateTime.Now:yyMMdd}{int.Parse(codeNumber) + 1:d4}";
+                var currentRdrecord = new Rdrecord11
+                {
+                    Id = id,
+                    CBusType = "委外发料",
+                    CSource = "委外订单",
+                    BRdFlag = 0,
+                    CWhCode = storeGroup.Key,
+                    CCode = code,
+                    CRdCode = "201",    //委外出库-对外发料 from rd_style
+                    CVenCode = momainBill.CVenCode,
+                    CMemo = $"(自动) {order.SourceOrderNo}退料",
+                    CMaker = order.Maker,
+                    BTransFlag = false,
+                    CDefine8 = order.Brand,
+                    CDefine9 = "已同步",
+                    Bpufirst = false,
+                    Biafirst = false,
+                    //产量
+                    IMquantity = (double)(momainBill.Details.First().IQuantity ?? 0),
+                    VtId = 65,
+                    BIsStqc = false,
+
+                    Iproorderid = originalRecord.Iproorderid,
+                    CArvcode = originalRecord.CCode,
+                    CPsPcode = originalRecord.CPsPcode,
+                    CMpoCode = originalRecord.CPsPcode,
+                    Csysbarcode = $"||st11|{originalRecord.CCode}",
+                    Details = new List<Rdrecords11>()
+                };
+                Rdrecord11.Add(currentRdrecord);
+                foreach (var backDetail in storeGroup)
+                {
+                    //查找领出单据
+                    //源出库单明细
+                    originalRecordDetail = Rdrecords11.FirstOrDefault(ords => ords.AutoId == backDetail.AutoId) // sourceBills.FirstOrDefault(b => b.CWhCode == backDetail.StoreCode && b.Details.Any(d => d.Invcode == backDetail.InvCode && d.CBatch == backDetail.BatchCode))
+                        ?? throw new Exception($"无法找到需要退料的数据:invCode :{backDetail.InvCode},batch:{backDetail.BatchCode},whcode:{backDetail.StoreCode}");
+                    //源出库单
+                    originalRecord = Rdrecord11.First(rd => rd.Id == originalRecordDetail.Id);
+
+                    var detailid = Rdrecords11.Max(t => t.AutoId);
+
+                    var orderitem = order.Details.First(t => t.InvCode == originalRecordDetail.CInvCode && originalRecordDetail.CBatch == t.BatchCode);
+                    //源投料单
+                    var materialBill = OmMomaterials.First(md => md.MomaterialsId == originalRecordDetail.IOmoMid);
+                    detailid += 1;
+                    var newrds = new Rdrecords11
+                    {
+                        AutoId = detailid,
+                        Id = currentRdrecord.Id,
+                        CInvCode = orderitem.InvCode,
+                        CBatch = orderitem.BatchCode,
+                        IQuantity = -orderitem.Qty,
+                        CDefine26 = originalRecordDetail.CDefine26.GetValueOrDefault(1),
+                        IFlag = 0,//退料
+                        INquantity = -(originalRecordDetail.IQuantity ?? 0),
+                        INnum = -(originalRecordDetail.INum ?? 0),
+                        CAssUnit = originalRecordDetail.CAssUnit,
+                        BLpuseFree = originalRecordDetail.BLpuseFree,
+                        IOriTrackId = originalRecordDetail.IOriTrackId,
+                        BCosting = originalRecordDetail.BCosting,
+                        BVmiused = originalRecordDetail.BVmiused,
+                        Iinvexchrate = originalRecordDetail.Iinvexchrate,
+                        Comcode = originalRecordDetail.Comcode,
+                        Invcode = originalRecordDetail.Invcode,
+                        IExpiratDateCalcu = originalRecordDetail.IExpiratDateCalcu,
+                        Iorderdid = originalRecordDetail.Iorderdid,
+                        Iordertype = originalRecordDetail.Iordertype,
+                        Iordercode = originalRecordDetail.Iordercode,
+                        Iopseq = originalRecordDetail.Iopseq,
+                        Isotype = originalRecordDetail.Isotype,
+                        Irowno = currentRdrecord.Details.Count + 1,
+                        Cbsysbarcode = $"||st11|{currentRdrecord.CCode}|{currentRdrecord.Details.Count + 1}",
+                        Cplanlotcode = originalRecordDetail.Cplanlotcode,
+                        //下面是次要字段
+                        CDefine22 = originalRecordDetail.CDefine22,
+                        CDefine23 = originalRecordDetail.CDefine23,
+                        CDefine24 = originalRecordDetail.CDefine24,
+                        CDefine25 = originalRecordDetail.CDefine25,
+                        CDefine27 = originalRecordDetail.CDefine27,
+                        CDefine28 = originalRecordDetail.CDefine28,
+                        CDefine29 = originalRecordDetail.CDefine29,
+                        CDefine30 = originalRecordDetail.CDefine30,
+                        CDefine31 = originalRecordDetail.CDefine31,
+                        CDefine32 = originalRecordDetail.CDefine32,
+                        CDefine33 = originalRecordDetail.CDefine33,
+                        CDefine34 = originalRecordDetail.CDefine34,
+                        CDefine35 = originalRecordDetail.CDefine35,
+                        CDefine36 = originalRecordDetail.CDefine36,
+                        CDefine37 = originalRecordDetail.CDefine37,
+                        CItemCode = originalRecordDetail.CItemCode,
+                        CName = originalRecordDetail.CName,
+                        CItemCname = originalRecordDetail.CItemCname,
+                        CItemClass = originalRecordDetail.CItemClass,
+                        IOmoMid = originalRecordDetail.IOmoMid,
+                        IOmoDid = originalRecordDetail.IOmoDid,
+                        Cmocode = originalRecordDetail.Cmocode,
+                        Ipesodid = originalRecordDetail.Ipesodid,
+                        Cpesocode = originalRecordDetail.Cpesocode,
+                        Ipesotype = originalRecordDetail.Ipesotype,
+                        Ipesoseq = originalRecordDetail.Ipesoseq,
+                        //Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
+                        CbMemo = originalRecordDetail.CbMemo,
+                    };
+                    if (originalRecordDetail.CDefine26.GetValueOrDefault(1) != 1)
+                    {
+                        newrds.INum = decimal.Divide(-orderitem.Qty, (decimal)originalRecordDetail.CDefine26.GetValueOrDefault(1));
+                    }
+                    Rdrecords11.Add(newrds);
+                }// foreach backorder.detail
+                //保存出库单
+                SaveChanges();
+            }// foreach storeGroup
+        }
+
         #endregion
 
         #region 添加领料申请单
@@ -1935,7 +2128,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return SaveChanges() > 0;
         }
         #endregion
-
 
         #region 退料申请单
         public bool AddReturnMetarialApply(DtoStockOrder order)
@@ -2047,7 +2239,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return (time - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
 
-
         #region 查询采购
         public PagedResult<PoPomain> GetCheckedPOs(string brand, string suppliercode, int pageIndex, int pageSize)
         {
@@ -2146,7 +2337,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             return new PagedResult<PoPomain>(total, orders, pageIndex + 1, pageSize);
         }
         #endregion
-
 
         #region 调拨
 

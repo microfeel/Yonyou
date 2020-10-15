@@ -220,6 +220,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             db.AddPurchaseOrder(order);
         }
+        /// <summary>
+        /// 添加退料申请单
+        /// </summary>
+        /// <param name="order"></param>
+        /// <returns></returns>
 
         void IDbOperation.AddReturnMetarialApply(DtoStockOrder order)
         {
@@ -581,6 +586,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             var bill = db.GetDispatchBillByCode(billNo);
             return bill.GetDispatchBill();
+        }
+
+        /// <summary>
+        /// 生产退料
+        /// </summary>
+        /// <param name="dtoStockOrder"></param>
+        public void BackStore(DtoBackStore order)
+        {
+            db.CreateRdrecord11(order);
         }
         #endregion
 
