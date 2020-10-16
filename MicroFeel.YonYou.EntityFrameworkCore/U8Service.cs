@@ -2,12 +2,14 @@
 using MicroFeel.Finance.Interfaces;
 using MicroFeel.Finance.Models;
 using MicroFeel.Finance.Models.DbDto;
+//using MicroFeel.YonYou.EntityFrameworkCore.Data;
 using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Sugar.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace MicroFeel.YonYou.EntityFrameworkCore
@@ -37,12 +39,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             db.Dispose();
         }
 
-        Customer IBasicService.AddCustomer(Customer customer)
+        public Customer AddCustomer(Customer customer)
         {
             throw new NotImplementedException();
         }
 
-        Customer IBasicService.AddCustomer(Customer customer, string predicate, params object[] parameters)
+        public Customer AddCustomer(Customer customer, string predicate, params object[] parameters)
         {
             throw new NotImplementedException();
         }
@@ -595,6 +597,40 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         public void BackStore(DtoBackStore order)
         {
             db.CreateRdrecord11(order);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="billno"></param>
+        /// <param name="includeDetails"></param>
+        /// <returns></returns>
+        public IEnumerable<DtoOutRecord> GetOmMomainRecords(string billno, bool includeDetails)
+        {
+            var bills = db.GetOmMainRdrecords(billno, includeDetails);
+            var material = db.GetMaterialDetails(billno);
+            var results = new List<DtoOutRecord>();
+            foreach (var bill in bills)
+            {
+                foreach (var record in bill.Details)
+                {
+                    var invtory = db.GetInventory(record.CInvCode,record.CBatch);
+                    results.Add(new DtoOutRecord
+                    {
+                        AutoId = record.AutoId,
+                        Name = invtory.CInvName,
+                        InvCode = record.CInvCode,
+                        Batch = record.CBatch,
+                        SendQuantity = record.IQuantity ?? 0,
+                        WhCode = bill.CWhCode,
+                        OrderNo = bill.CCode,
+                        //可退料数
+                        RQuantity = material.First(v => v.Cinvcode == record.CInvCode).AllowReturnQty,
+                        Unit = invtory.UnitName,
+                    });
+                }
+            }
+            return results;
         }
         #endregion
 
