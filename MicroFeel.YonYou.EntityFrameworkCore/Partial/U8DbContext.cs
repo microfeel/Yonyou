@@ -742,7 +742,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             //SaveChanges();
 
             //TODO remove this usage
-            var sql = $"UPDATE DispatchList SET CChangeMemo = '{statusName}'' WHERE cDLCode = '{billNo}'";
+            var sql = $"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'";
             Database.ExecuteSqlRaw(sql);
         }
 
@@ -753,7 +753,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="makerName"></param>
         internal void VerifyDispatchBill(string billNo, string makerName)
         {
-            var sql = $"UPDATE DispatchList SET cVerifier = {makerName}, Dverifydate='{DateTime.Today}', Dverifysystime='{DateTime.Now}' WHERE cDLCode = '{billNo}'";
+            var sql = $"UPDATE DispatchList SET cVerifier = '{makerName}', Dverifydate='{DateTime.Today}', Dverifysystime='{DateTime.Now}' WHERE cDLCode = '{billNo}'";
             Database.ExecuteSqlRaw(sql);
         }
 
