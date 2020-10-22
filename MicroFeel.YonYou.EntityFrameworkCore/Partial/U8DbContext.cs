@@ -317,7 +317,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             pageIndex--;
             var tmp_orders = OmMomain.Include(main => main.OmModetails)
                 .Join(OmMomaterialshead, main => main.Moid, head => head.Moid, (main, head) => new { main, head })
-                .Where(t => (t.main.CDepCode == departmentcode || string.IsNullOrEmpty(t.main.CDepCode))
+                .Where(t => t.main.CState < 2
+                            && (t.main.CDepCode == departmentcode || string.IsNullOrEmpty(t.main.CDepCode))
                             && (starttime == null || t.main.DDate >= starttime)
                             && (endtime == null || t.main.DDate <= endtime)
                             && (string.IsNullOrEmpty(key) || t.head.Cinvname.Contains(key) || t.head.Ccode.Contains(key) || t.head.Cinvstd.Contains(key)));
@@ -724,6 +725,36 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             return DispatchList.AsNoTracking().FirstOrDefault(v => v.CDlcode == billNo)
                 ?? throw new FinancialException($"找不到发货单:{billNo}");
+        }
+
+        /// <summary>
+        /// 更新发货单状态
+        /// </summary>
+        /// <param name="billNo">单号</param>
+        /// <param name="statusName">状态名称</param>
+        public void UpdateDispatchBillState(string billNo, string statusName)
+        {
+            //没有主键没法跟踪
+            //var dispatch = DispatchList.FirstOrDefault(v => v.CDlcode == billNo)
+            //    ?? throw new FinancialException($"找不到发货单:{billNo}");
+            //dispatch.CChangeMemo = statusName;
+            //Update(dispatch);
+            //SaveChanges();
+
+            //TODO remove this usage
+            var sql = $"UPDATE DispatchList SET CChangeMemo = '{statusName}'' WHERE cDLCode = '{billNo}'";
+            Database.ExecuteSqlRaw(sql);
+        }
+
+        /// <summary>
+        /// 审核发货单
+        /// </summary>
+        /// <param name="billNo"></param>
+        /// <param name="makerName"></param>
+        internal void VerifyDispatchBill(string billNo, string makerName)
+        {
+            var sql = $"UPDATE DispatchList SET cVerifier = {makerName}, Dverifydate='{DateTime.Today}', Dverifysystime='{DateTime.Now}' WHERE cDLCode = '{billNo}'";
+            Database.ExecuteSqlRaw(sql);
         }
 
         /// <summary>
@@ -2286,32 +2317,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             var po = PoPomain.FirstOrDefault(t => t.CPoid == orderno);
             po.CDefine9 = state;
             return SaveChanges() > 0;
-        }
-
-        public void UpdateDispatchBillState(string billNo, string statusName)
-        {
-            //没有主键没法跟踪
-            //var dispatch = DispatchList.FirstOrDefault(v => v.CDlcode == billNo)
-            //    ?? throw new FinancialException($"找不到发货单:{billNo}");
-            //dispatch.CChangeMemo = statusName;
-            //Update(dispatch);
-            //SaveChanges();
-
-            //TODO remove this usage
-            var sql = "";
-            switch (statusName)
-            {
-                case "已完成":
-                    sql = $"UPDATE DispatchList SET CChangeMemo = '{statusName}', Dverifysystime='{DateTime.Now}' WHERE cDLCode = '{billNo}'";
-                    break;
-                case "待发货":
-                    sql = $"UPDATE DispatchList SET CChangeMemo = '{statusName}' WHERE cDLCode = '{billNo}'";
-                    break;
-                default:
-                    break;
-            }
-            if (!string.IsNullOrEmpty(sql))
-                Database.ExecuteSqlRaw(sql);
         }
 
         private PagedResult<PoPomain> GetPos(Expression<Func<PoPomain, bool>> expression, int pageIndex, int pageSize)

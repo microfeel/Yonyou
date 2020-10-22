@@ -614,7 +614,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             {
                 foreach (var record in bill.Details)
                 {
-                    var invtory = db.GetInventory(record.CInvCode,record.CBatch);
+                    var invtory = db.GetInventory(record.CInvCode, record.CBatch);
                     results.Add(new DtoOutRecord
                     {
                         AutoId = record.AutoId,
@@ -631,6 +631,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 }
             }
             return results;
+        }
+
+        public void VerifyDispatchBill(string billNo, string makerName)
+        {
+            db.VerifyDispatchBill(billNo, makerName);
         }
         #endregion
 
