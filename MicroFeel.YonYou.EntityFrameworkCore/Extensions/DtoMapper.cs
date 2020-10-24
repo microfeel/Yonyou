@@ -215,7 +215,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Id = omMomaterialsbody.Momaterialsid,
                 ProductName = omMomaterialsbody.Cinvname,
                 ProductNumbers = omMomaterialsbody.Cinvcode,
-                ProductBatch = omMomaterialsbody.Cbatch??"",
+                ProductBatch = omMomaterialsbody.Cbatch ?? "",
                 ProductModel = omMomaterialsbody.Cinvstd,
                 Numbers = omMomaterialsbody.Iquantity.Value - (omMomaterialsbody.Isendqty ?? 0),
                 StoreCode = omMomaterialsbody.Cwhcode,
@@ -246,7 +246,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 InventoryClassCode = product.CInvCcode,
                 InventoryClassName = product.InvClassName,
                 UnitName = product.UnitName,
-                InventoryStocks = product.Stock.Select(s => s.GetDtoInventoryStock()).ToList(),
+                InventoryStocks = product.Stock?.Select(s => s.GetDtoInventoryStock()).ToList() ?? new List<DtoInventoryStock>(),
                 MaxStoreNumbers = product.ITopSum,
                 MinStoreNumbers = product.ILowSum
             };

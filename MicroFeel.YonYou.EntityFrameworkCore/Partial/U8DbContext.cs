@@ -5,6 +5,7 @@ using MicroFeel.YonYou.EntityFrameworkCore.Data;
 using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Sugar.Utils;
 using System;
 using System.Collections.Generic;
@@ -559,6 +560,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             item.CInvCode,
                             item.CBatch,
                             item.IQuantity,
+                            0,
                             true
                         );
                         //UpdateCurrentStock(
@@ -580,7 +582,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             }
         }
 
-        //无主键目前不能用此方法更新
         /// <summary>
         /// 更新现存量
         /// </summary>
@@ -588,6 +589,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <param name="invCode"></param>
         /// <param name="batch"></param>
         /// <param name="action"></param>
+        [Obsolete("无主键表目前不能用此方法更新")]
         private void UpdateCurrentStock(string whcode, string invCode, string batch, Action<CurrentStock> action)
         {
             var cs = CurrentStock.AsNoTracking().FirstOrDefault(c => c.CWhCode == whcode && c.CInvCode == invCode && c.CBatch == batch);
@@ -670,6 +672,52 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 ScmItem.Update(item);
             }
             return item;
+        }
+
+        /// <summary>
+        /// 更新单条现存量
+        /// </summary>
+        /// <param name="whcode">仓库编号</param>
+        /// <param name="invCode">存货编码</param>
+        /// <param name="batch">批号</param>
+        /// <param name="quantity">数量</param>
+        /// <param name="isPrepare">是待入库</param>
+        private void UpdateCurrentStock(string whcode, string invCode, string batch, decimal inQuantity, decimal outQuantity = 0, bool isPrepare = false)
+        {
+            if (inQuantity == 0 && outQuantity == 0)
+            {
+                throw new Exception("入库和出库数不能同时为零!");
+            }
+
+            var scmItem = ScmItem.FirstOrDefault(t => t.CInvCode == invCode);
+            if (scmItem == null)
+            {
+                scmItem = new ScmItem(invCode);
+                ScmItem.Add(scmItem);
+                SaveChanges();
+            }
+            //?? throw new FinancialException($"scmitem(库存管理)中无法找到编码为{item.ProductNumbers}的存货");
+
+            var itemid = scmItem.Id;
+            var stock = CurrentStock.FirstOrDefault(t => t.CInvCode == invCode
+                && t.CBatch == batch
+                && t.CWhCode == whcode);
+
+            if (stock != null)
+            {
+                stock.IQuantity = isPrepare ? (stock.IQuantity ?? 0) : (stock.IQuantity ?? 0) + inQuantity - outQuantity;
+                stock.FInQuantity = isPrepare ? ((stock.FInQuantity ?? 0) + inQuantity) : ((stock.FInQuantity ?? 0) - inQuantity);
+                stock.FOutQuantity = isPrepare ? ((stock.FOutQuantity ?? 0) + outQuantity) : ((stock.FOutQuantity ?? 0) - outQuantity);
+                //if (stock.FInQuantity < 0)
+                //{
+                //    stock.FInQuantity = 0;
+                //}
+                Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity},finQuantity={stock.FInQuantity},foutQuantity = {stock.FOutQuantity} where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
+            }
+            else
+                //新增
+                Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{(isPrepare ? 0 : inQuantity)},0,{(isPrepare ? outQuantity : 0)},0,{(isPrepare ? inQuantity : 0)},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
+            //Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{quantity},{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
         }
 
         internal PagedResult<DispatchList> GetDispatchBills(string brand, int pageIndex, int pageSize, DispatchBillState billState)
@@ -1550,7 +1598,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         //更新销售订单发货数量
                         var sodetail = SoSodetails.FirstOrDefault(t => t.ISosId == disDetail.ISosId);
                         if (sodetail == null)
+                        {
+                            //TODO Log warning...
                             continue;
+                        }
                         var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductBatch == disDetail.CBatch && t.ProductNumbers == disDetail.CInvCode);
                         sodetail.IFhquantity = (sodetail.IFhquantity ?? 0) + (orderdetail?.Numbers ?? 0);
                         //更新已出库数量
@@ -1569,6 +1620,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         tran.Commit();
                     else
                         tran.Rollback();
+
+                    //更新现存量待入库数量
+                    foreach (var rdrecord32 in results)
+                    {
+                        foreach (var rdrecordDetail in rdrecord32.Details)
+                        {
+                            UpdateCurrentStock(rdrecord32.CWhCode, rdrecordDetail.CInvCode, rdrecordDetail.CBatch, 0, rdrecordDetail.IQuantity.Value, true);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1577,9 +1637,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 }
             }
         }
+        /// <summary>
+        /// 创建销售出库单
+        /// </summary>
+        /// <param name="dispatch">发货单</param>
+        /// <param name="order">库存单据对象</param>
+        /// <returns></returns>
         private List<Rdrecord32> CreateRdrecord32s(DispatchList dispatch, DtoStockOrder order)
         {
-            List<Rdrecord32> list = new List<Rdrecord32>();
+            var list = new List<Rdrecord32>();
             var dic = dispatch.Details.GroupBy(t => t.CWhCode).ToDictionary(t => t.Key, t => t.ToList());
             foreach (var key in dic.Keys)
             {
@@ -1588,6 +1654,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             }
             return list;
         }
+        /// <summary>
+        /// 生成一张销售出库单
+        /// </summary>
+        /// <param name="cwhcode">仓库编码</param>
+        /// <param name="dispatch">发货单</param>
+        /// <param name="order">库存单据</param>
+        /// <returns></returns>
         private Rdrecord32 CreateRdrecord32(string cwhcode, DispatchList dispatch, DtoStockOrder order)
         {
             var id = Rdrecord32.AsNoTracking().Max(t => t.Id) + 1;
@@ -1661,6 +1734,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 }
             }
             var rowNumber = 0;
+            var lastAutoId = Rdrecords32.AsNoTracking().Max(t => t.AutoId);
             foreach (var item in dispatch.Details)
             {
                 rowNumber++;
@@ -1673,7 +1747,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 }
                 rdrecord.Details.Add(new Rdrecords32
                 {
-                    AutoId = Rdrecords32.AsNoTracking().Max(t => t.AutoId) + 1,
+                    AutoId = lastAutoId + rowNumber,
                     Id = rdrecord.Id,
                     CInvCode = orderitem.ProductNumbers,
                     //INum = item.INum,
@@ -2609,48 +2683,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             ///currentStock没有主键,无法跟踪
             foreach (var item in order.StoreStockDetail)
             {
-                UpdateCurrentStock(item.StoreId, item.ProductNumbers, item.ProductBatch, item.Numbers ?? 0, isPrepare);
+                UpdateCurrentStock(item.StoreId, item.ProductNumbers, item.ProductBatch, item.Numbers ?? 0, 0, isPrepare);
             }
-        }
-
-        /// <summary>
-        /// 更新单条现存量
-        /// </summary>
-        /// <param name="whcode">仓库编号</param>
-        /// <param name="invCode">存货编码</param>
-        /// <param name="batch">批号</param>
-        /// <param name="quantity">数量</param>
-        /// <param name="isPrepare">是待入库</param>
-        private void UpdateCurrentStock(string whcode, string invCode, string batch, decimal quantity, bool isPrepare = false)
-        {
-            var scmItem = ScmItem.FirstOrDefault(t => t.CInvCode == invCode);
-            if (scmItem == null)
-            {
-                scmItem = new ScmItem(invCode);
-                ScmItem.Add(scmItem);
-                SaveChanges();
-            }
-            //?? throw new FinancialException($"scmitem(库存管理)中无法找到编码为{item.ProductNumbers}的存货");
-
-            var itemid = scmItem.Id;
-            var stock = CurrentStock.FirstOrDefault(t => t.CInvCode == invCode
-                && t.CBatch == batch
-                && t.CWhCode == whcode);
-
-            if (stock != null)
-            {
-                stock.IQuantity = isPrepare ? (stock.IQuantity ?? 0) : (stock.IQuantity ?? 0) + quantity;
-                stock.FInQuantity = isPrepare ? ((stock.FInQuantity ?? 0) + quantity) : ((stock.FInQuantity ?? 0) - quantity);
-                if (stock.FInQuantity < 0)
-                {
-                    stock.FInQuantity = 0;
-                }
-                Database.ExecuteSqlRaw($"update currentstock set iQuantity ={stock.IQuantity},finQuantity={stock.FInQuantity} where cInvCode = '{invCode}' and cBatch = '{batch}' and cWhCode = '{whcode}'");
-            }
-            else
-                //新增
-                Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{(isPrepare ? 0 : quantity)},0,0,0,{(isPrepare ? quantity : 0)},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
-            //Database.ExecuteSqlRaw($"insert into currentStock (cWhCode,cInvCode,ItemId,cBatch,cVMIVenCode,iSoType,iSodid,iQuantity,iNum,fOutQuantity,fOutNum,fInQuantity,fInNum,bStopFlag,fTransInQuantity,fTransInNum,fTransOutQuantity,fTransOutNum,fPlanQuantity,fPlanNum,fDisableQuantity,fDisableNum,fAvaQuantity,fAvaNum,BGSPSTOP,cCheckState,ipeqty,ipenum)  values ('{whcode}','{invCode}',{itemid},'{batch}','',0,'',{quantity},{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);");
         }
 
         /// <summary>
