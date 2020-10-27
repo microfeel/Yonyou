@@ -746,7 +746,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 default:
                     break;
             }
-            var total = dispatchbills.Count();
+            //TODO Dispatchbill没有索引,导致查询超时,暂时去掉合计
+            var total = 100;//dispatchbills.Count();
             var result = dispatchbills.OrderByDescending(dl => dl.DDate)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
