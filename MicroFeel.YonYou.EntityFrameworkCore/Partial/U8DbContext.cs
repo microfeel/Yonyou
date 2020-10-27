@@ -2,14 +2,9 @@
 using MicroFeel.Finance.Models;
 using MicroFeel.Finance.Models.DbDto;
 using MicroFeel.YonYou.EntityFrameworkCore.Data;
-using MicroFeel.YonYou.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using Sugar.Utils;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -767,7 +762,16 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 throw new FinancialException("发货单号不能为空。");
             }
             var id = GetDispatchBillByCode(billNo).Dlid;
-            return DispatchLists.Where(dls => dls.Dlid == id).OrderBy(dls => dls.AutoId).ToList();
+            return GetDispatchBillDetail(id);
+        }
+        /// <summary>
+        /// 获取发货单明细
+        /// </summary>
+        /// <param name="dlid">发货单ID</param>
+        /// <returns></returns>
+        internal IList<DispatchLists> GetDispatchBillDetail(int dlid)
+        {
+            return DispatchLists.Where(dls => dls.Dlid == dlid).OrderBy(dls => dls.AutoId).ToList();
         }
 
         internal DispatchList GetDispatchBillByCode(string billNo)
@@ -1584,8 +1588,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         return;
                     }
 
-                    //UpdateStore(order, (s, t) => s - t);
+                    //整理发货单明细
+                    ReBuildDispatchDetail(order.SourceOrderNo);
+
                     dispatch.Details = DispatchLists.Where(t => t.Dlid == dispatch.Dlid).ToList();
+                    //生成收发记录
                     var results = CreateRdrecord32s(dispatch, order);
                     results.ForEach(result =>
                     {
@@ -1603,7 +1610,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                             //TODO Log warning...
                             continue;
                         }
-                        var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductBatch == disDetail.CBatch && t.ProductNumbers == disDetail.CInvCode);
+                        var orderdetail = order.StoreStockDetail.FirstOrDefault(t => t.ProductNumbers == disDetail.CInvCode && t.ProductBatch == disDetail.CBatch);
                         sodetail.IFhquantity = (sodetail.IFhquantity ?? 0) + (orderdetail?.Numbers ?? 0);
                         //更新已出库数量
                         disDetail.FOutQuantity = (disDetail.FOutQuantity ?? 0) + (orderdetail?.Numbers ?? 0);
@@ -1638,6 +1645,51 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 }
             }
         }
+
+        /// <summary>
+        /// 整理发货单明细
+        /// </summary>
+        /// <remarks>
+        /// 需要将不同批次的发货单明细内容进行合并,以扫码结果为准生成出库单
+        /// </remarks>
+        /// <param name="dlid">发货单ID</param>
+        private void ReBuildDispatchDetail(string billno)
+        {
+            var details = GetDispatchBillDetail(billno).OrderBy(v => v.Iorderrowno).ToList();
+            var dlid = details.First().Dlid;
+            //分组后忽略掉批号
+            var newdetails = details.GroupBy(v => (v.CWhCode, v.CInvCode));
+            ///更新所有有重复的明细
+            foreach (var nd in newdetails.Where(n => n.Count() > 1))
+            {
+                //找到原来的第一条
+                var detail = DispatchLists.First(v => v.Dlid == dlid && v.CWhCode == nd.Key.CWhCode && v.CInvCode == nd.Key.CInvCode);
+                //更新为合计
+                detail.IQuantity = nd.Sum(n => n.IQuantity);
+                detail.IMoney = nd.Sum(n => n.IMoney);
+                detail.ISum = nd.Sum(n => n.ISum);
+                detail.IDisCount = nd.Sum(n => n.IDisCount);
+                detail.INatMoney = nd.Sum(n => n.INatMoney);
+                detail.INatSum = nd.Sum(n => n.INatSum);
+                detail.INatDisCount = nd.Sum(n => n.INatDisCount);
+                detail.CBatch = null;
+                DispatchLists.Update(detail);
+                //删除其他的记录
+                var willRemoved = DispatchLists.Where(d => d.Dlid == dlid && d.CWhCode == nd.Key.CWhCode && d.CInvCode == nd.Key.CInvCode && d.AutoId != detail.AutoId);
+                DispatchLists.RemoveRange(willRemoved);
+            }
+            SaveChanges();
+            //整理rownumber
+            var rowNo = 0;
+            details = DispatchLists.Where(v => v.Dlid == dlid).ToList();
+            foreach (var item in details)
+            {
+                item.Iorderrowno = ++rowNo;
+                item.CbSysBarCode = $"||SA01|{billno}|{rowNo}";
+                DispatchLists.Update(item);
+            }
+        }
+
         /// <summary>
         /// 创建销售出库单
         /// </summary>
@@ -1648,6 +1700,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             var list = new List<Rdrecord32>();
             var dic = dispatch.Details.GroupBy(t => t.CWhCode).ToDictionary(t => t.Key, t => t.ToList());
+            //按仓库分组生成收发记录
             foreach (var key in dic.Keys)
             {
                 dispatch.Details = dic[key];
@@ -1689,7 +1742,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 CDlcode = dispatch.Dlid,
                 //CHandler = dispatch.CMaker,      //不做自动审核
                 // DVeriDate=dispatch.Dverifydate
-                CMemo = dispatch.CMemo,
+                CMemo = $"(自动)从发货单:{order.SourceOrderNo}生成.{dispatch.CMemo}",
                 CAccounter = dispatch.CAccounter,
                 CMaker = order.Maker,
                 CDefine1 = dispatch.CDefine1,
@@ -1736,10 +1789,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             }
             var rowNumber = 0;
             var lastAutoId = Rdrecords32.AsNoTracking().Max(t => t.AutoId);
-            foreach (var item in dispatch.Details)
+            foreach (var orderitem in order.StoreStockDetail)
             {
                 rowNumber++;
-                var orderitem = order.StoreStockDetail.First(t => t.ProductNumbers == item.CInvCode);
+                var item = dispatch.Details.First(v => v.CInvCode == orderitem.ProductNumbers);
                 SoSodetails soDetailrow = null;
                 if (item.ISosId.HasValue)
                 {
@@ -1751,31 +1804,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     AutoId = lastAutoId + rowNumber,
                     Id = rdrecord.Id,
                     CInvCode = orderitem.ProductNumbers,
-                    //INum = item.INum,
                     IQuantity = orderitem.Numbers,
                     Cbdlcode = rdrecord.CBusCode,
-                    CDefine22 = item.CDefine22,
-                    CDefine23 = item.CDefine23,
-                    CDefine24 = item.CDefine24,
-                    CDefine25 = item.CDefine25,
-                    CDefine26 = item.CDefine26,
-                    CDefine27 = item.CDefine27,
-                    CDefine28 = item.CDefine28,
-                    CDefine29 = item.CDefine29,
-                    CDefine30 = item.CDefine30,
-                    CDefine31 = item.CDefine31,
-                    CDefine32 = item.CDefine32,
-                    CDefine33 = item.CDefine33,
-                    CDefine34 = item.CDefine34,
-                    CDefine35 = item.CDefine35,
-                    CDefine36 = item.CDefine36,
-                    CDefine37 = item.CDefine37,
                     CBatch = orderitem.ProductBatch,
-                    IDlsId = item.IDlsId,
+                    CDefine27 = 0,
+                    CItemClass = "97",
                     CItemCode = item.CItemCode,
+                    IDlsId = item.IDlsId,
                     CName = order.Brand,
-                    CItemCname = item.CItemCname,
-                    CItemClass = item.CItemClass,
+                    CItemCname = "项目管理",
                     INquantity = item.IQuantity,
                     //IUnitCost = item.IUnitPrice,
                     //IPrice = item.IUnitPrice,
