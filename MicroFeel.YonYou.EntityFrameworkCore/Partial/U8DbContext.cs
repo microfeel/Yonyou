@@ -1588,8 +1588,8 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         return;
                     }
 
-                    //整理发货单明细
-                    ReBuildDispatchDetail(order.SourceOrderNo);
+                    //整理发货单明细 2020.10.29 暂停发货单合并
+                    //ReBuildDispatchDetail(order.SourceOrderNo);
 
                     dispatch.Details = DispatchLists.Where(t => t.Dlid == dispatch.Dlid).ToList();
                     //生成收发记录
