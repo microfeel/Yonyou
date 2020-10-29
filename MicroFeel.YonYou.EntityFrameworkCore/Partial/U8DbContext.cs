@@ -1789,10 +1789,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
             }
             var rowNumber = 0;
             var lastAutoId = Rdrecords32.AsNoTracking().Max(t => t.AutoId);
-            foreach (var orderitem in order.StoreStockDetail)
+            //foreach (var orderitem in order.StoreStockDetail)
+            //TODO 暂时使用发货单数据
+            foreach (var item in dispatch.Details)
             {
                 rowNumber++;
-                var item = dispatch.Details.First(v => v.CInvCode == orderitem.ProductNumbers);
+                //var v_本次已发料数量 = rdrecord.Details
+                //    .Where(v => v.CInvCode == orderitem.ProductNumbers)
+                //    .Sum(d => d.IQuantity ?? 0);
+                //var item = dispatch.Details.First(v => v.CInvCode == orderitem.ProductNumbers);
                 SoSodetails soDetailrow = null;
                 if (item.ISosId.HasValue)
                 {
@@ -1803,15 +1808,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 {
                     AutoId = lastAutoId + rowNumber,
                     Id = rdrecord.Id,
-                    CInvCode = orderitem.ProductNumbers,
-                    IQuantity = orderitem.Numbers,
+                    CInvCode = item.CInvCode,
+                    IQuantity = item.IQuantity,
                     Cbdlcode = rdrecord.CBusCode,
-                    CBatch = orderitem.ProductBatch,
+                    CBatch = item.CBatch,
                     CDefine27 = 0,
                     CItemClass = "97",
                     CItemCode = item.CItemCode,
                     IDlsId = item.IDlsId,
-                    CName = order.Brand,
+                    CName = item.CItemName,
                     CItemCname = "项目管理",
                     INquantity = item.IQuantity,
                     //IUnitCost = item.IUnitPrice,
