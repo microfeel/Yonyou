@@ -1573,9 +1573,10 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <summary>
         /// 销售出库单
         /// </summary>
-        /// <param name="order"></param>
+        /// <param name="order">订单</param>
+        /// <param name="AddAccount">添加待记账数据</param>
         /// <returns></returns>
-        public void AddSellOrder(DtoStockOrder order)
+        public void AddSellOrder(DtoStockOrder order, bool AddAccount = false)
         {
             using (var tran = Database.BeginTransaction())
             {
@@ -1616,12 +1617,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         disDetail.FOutQuantity = (disDetail.FOutQuantity ?? 0) + (orderdetail?.Numbers ?? 0);
                     }
                     //添加未记账数据
-                    results.ForEach(t =>
+                    if (AddAccount)
                     {
-                        if (!AddUnAccountRdrecord(t.Id, t.Details.Select(d => d.AutoId).ToList(), "32", t.CBusType))
-                            throw new FinancialException($"添加未记账数据时发生异常");
+                        results.ForEach(t =>
+                        {
+                            if (!AddUnAccountRdrecord(t.Id, t.Details.Select(d => d.AutoId).ToList(), "32", t.CBusType))
+                                throw new FinancialException($"添加未记账数据时发生异常");
 
-                    });
+                        });
+                    }
                     DispatchLists.UpdateRange(dispatch.Details);
                     var commitResult = SaveChanges() > 0;
                     if (commitResult)
