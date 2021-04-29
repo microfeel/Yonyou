@@ -1,5 +1,6 @@
 ﻿using MicroFeel.Finance.Models;
 using MicroFeel.Finance.Models.DbDto;
+using MicroFeel.YonYou.EntityFrameworkCore.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -438,6 +439,15 @@ namespace MicroFeel.YonYou.EntityFrameworkCore.Extensions
                 Receiver = dispatchList.CDefine13,
                 ReceiverTel = dispatchList.CDefine14,
                 Station = dispatchList.CDefine10
+            };
+        }
+
+        public static OmModetailDto toMoDetailDto(this OmModetails detail)
+        {
+            return new OmModetailDto
+            {
+                Qty = detail.IQuantity,
+                ArrQty = detail.IArrQty
             };
         }
 

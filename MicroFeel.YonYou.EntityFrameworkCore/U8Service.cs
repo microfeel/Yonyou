@@ -637,6 +637,12 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         {
             db.VerifyDispatchBill(billNo, makerName);
         }
+
+        public List<OmModetailDto> GetOmMomainDetails(string mainNo)
+        {
+            var details = db.GetOmMomain(mainNo).Details;
+            return details.Select(d => d.toMoDetailDto()).ToList();
+        }
         #endregion
 
     }

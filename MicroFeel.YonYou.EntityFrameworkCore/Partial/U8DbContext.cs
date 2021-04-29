@@ -2091,9 +2091,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     CPsPcode = originalRecord.CPsPcode,
                     CMpoCode = originalRecord.CPsPcode,
                     Csysbarcode = $"||st11|{originalRecord.CCode}",
+                    //对OA工作流支持
+                    Iswfcontrolled = 1,
+                    Iverifystate = 1,
+
                     Details = new List<Rdrecords11>()
                 };
                 Rdrecord11.Add(currentRdrecord);
+                var detailid = Rdrecords11.Max(t => t.AutoId);
                 foreach (var backDetail in storeGroup)
                 {
                     //查找领出单据
@@ -2102,8 +2107,6 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         ?? throw new Exception($"无法找到需要退料的数据:invCode :{backDetail.InvCode},batch:{backDetail.BatchCode},whcode:{backDetail.StoreCode}");
                     //源出库单
                     originalRecord = Rdrecord11.First(rd => rd.Id == originalRecordDetail.Id);
-
-                    var detailid = Rdrecords11.Max(t => t.AutoId);
 
                     var orderitem = order.Details.First(t => t.InvCode == originalRecordDetail.CInvCode && originalRecordDetail.CBatch == t.BatchCode);
                     //源投料单
@@ -2388,6 +2391,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
         /// <returns></returns>
         private double ConvertTimestamp(DateTime time)
         {
+            //return new DateTimeOffset(time).ToUnixTimeMilliseconds();
             return (time - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
 
