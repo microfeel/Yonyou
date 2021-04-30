@@ -2162,14 +2162,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         IOmoMid = originalRecordDetail.IOmoMid,
                         IOmoDid = originalRecordDetail.IOmoDid,
                         Cmocode = originalRecordDetail.Cmocode,
+                        //Ipesodid = originalRecordDetail.Ipesodid,
+                        //Cpesocode = originalRecordDetail.Cpesocode,
+                        //Ipesotype = originalRecordDetail.Ipesotype,
                         //创建时下面三个必须是空,不能有值
                         //Ipesodid = null,
                         //Cpesocode = null,
                         //Ipesotype = null,
                         BOutMaterials = 0,
-                        //Ipesodid = originalRecordDetail.Ipesodid,
-                        //Cpesocode = originalRecordDetail.Cpesocode,
-                        //Ipesotype = originalRecordDetail.Ipesotype,
                         Ipesoseq = originalRecordDetail.Ipesoseq,
                         //Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
                         CbMemo = originalRecordDetail.CbMemo,
@@ -2179,10 +2179,13 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         newrds.INum = decimal.Divide(-orderitem.Qty, (decimal)originalRecordDetail.CDefine26.GetValueOrDefault(1));
                     }
                     Rdrecords11.Add(newrds);
+                    ///更新现存量
+                    UpdateCurrentStock(backDetail.StoreCode, backDetail.InvCode, backDetail.BatchCode, 0, -backDetail.Qty, true)
                 }// foreach backorder.detail
                 //保存出库单
                 SaveChanges();
             }// foreach storeGroup
+
         }
 
         #endregion
