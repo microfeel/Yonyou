@@ -2085,15 +2085,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                     IMquantity = (double)(momainBill.Details.First().IQuantity ?? 0),
                     VtId = 65,
                     BIsStqc = false,
-
                     Iproorderid = originalRecord.Iproorderid,
                     CArvcode = originalRecord.CCode,
                     CPsPcode = originalRecord.CPsPcode,
-                    CMpoCode = originalRecord.CPsPcode,
+                    CMpoCode = order.SourceOrderNo,
                     Csysbarcode = $"||st11|{originalRecord.CCode}",
                     //对OA工作流支持
-                    Iswfcontrolled = 1,
-                    Iverifystate = 1,
+                    Iswfcontrolled = 0,
+                    Iverifystate = 0,
 
                     Details = new List<Rdrecords11>()
                 };
@@ -2163,9 +2162,14 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         IOmoMid = originalRecordDetail.IOmoMid,
                         IOmoDid = originalRecordDetail.IOmoDid,
                         Cmocode = originalRecordDetail.Cmocode,
-                        Ipesodid = originalRecordDetail.Ipesodid,
-                        Cpesocode = originalRecordDetail.Cpesocode,
-                        Ipesotype = originalRecordDetail.Ipesotype,
+                        //创建时下面三个必须是空,不能有值
+                        //Ipesodid = null,
+                        //Cpesocode = null,
+                        //Ipesotype = null,
+                        BOutMaterials = 0,
+                        //Ipesodid = originalRecordDetail.Ipesodid,
+                        //Cpesocode = originalRecordDetail.Cpesocode,
+                        //Ipesotype = originalRecordDetail.Ipesotype,
                         Ipesoseq = originalRecordDetail.Ipesoseq,
                         //Rowufts = BitConverter.GetBytes(ConvertTimestamp(DateTime.Now)),
                         CbMemo = originalRecordDetail.CbMemo,
