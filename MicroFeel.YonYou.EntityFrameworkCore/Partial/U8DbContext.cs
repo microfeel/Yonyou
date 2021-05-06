@@ -1990,6 +1990,7 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                 {
                     AutoId = detailid,
                     Id = rdrecord.Id,
+                    IFlag = 1,
                     CInvCode = orderitem.ProductNumbers,
                     INum = mavItem.INum,
                     IQuantity = orderitem.Numbers,
@@ -2179,8 +2180,11 @@ namespace MicroFeel.YonYou.EntityFrameworkCore
                         newrds.INum = decimal.Divide(-orderitem.Qty, (decimal)originalRecordDetail.CDefine26.GetValueOrDefault(1));
                     }
                     Rdrecords11.Add(newrds);
+                    //更新已领量
+                    materialBill.ISendQty -= orderitem.Qty;
+
                     ///更新现存量
-                    UpdateCurrentStock(backDetail.StoreCode, backDetail.InvCode, backDetail.BatchCode, 0, -backDetail.Qty, true)
+                    UpdateCurrentStock(backDetail.StoreCode, backDetail.InvCode, backDetail.BatchCode, 0, -backDetail.Qty, true);
                 }// foreach backorder.detail
                 //保存出库单
                 SaveChanges();

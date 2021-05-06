@@ -7,7 +7,7 @@
     {
         public Rdrecords11()
         {
-            //IFlag = 0; 领料1,退料0
+            IFlag = 1; //领料1,退料0
             BLpuseFree = false;
             IRsrowNo = 0;
             IOriTrackId = 0;
